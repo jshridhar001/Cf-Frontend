@@ -1,0 +1,73 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build
+dist
+dist-ssr
+build
+*.local
+
+# Vite
+.vite
+
+# TypeScript
+*.tsbuildinfo
+
+# Environment (keep .env.example tracked)
+.env
+.env.*
+!.env.example
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Test / coverage
+coverage
+.nyc_output
+*.lcov
+
+# Biome
+.biome
+
+# Caches
+.cache
+.turbo
+.eslintcache
+.stylelintcache
+
+# Netlify
+.netlify
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Optional tooling / misc
+*.pem
+*.tgz
+.vercel
+.parcel-cache
