@@ -1,5 +1,15 @@
 import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { getHttpStatusFromError } from '@/lib/http-error';
+
+declare module '@tanstack/react-query' {
+  interface Register {
+    mutationMeta: {
+      successMessage?: string;
+      suppressGlobalError?: boolean;
+    };
+  }
+}
 
 const isProduction = import.meta.env.MODE === 'production';
 
@@ -9,57 +19,53 @@ function shouldRetryRequest(failureCount: number, error: unknown, maxRetries: nu
   return failureCount < maxRetries;
 }
 
-function handleGlobalError(error: unknown, context?: string) {
-  // Replace with your logger / toast system (e.g. Sentry, react-hot-toast)
-  if (!isProduction) {
-    console.error(`[QueryClient${context ? ` – ${context}` : ''}]`, error);
+function getToastErrorMessage(error: unknown, fallback = 'Something went wrong'): string {
+  if (error && typeof error === 'object') {
+    const maybe = error as { message?: string; error?: { message?: string } };
+    const message = maybe.error?.message ?? maybe.message;
+    if (typeof message === 'string' && message.length > 0) return message;
   }
+
+  if (error instanceof Error && error.message) return error.message;
+
+  return fallback;
 }
 
 export const queryClient = new QueryClient({
-  // ─── Caches with global error handlers ────────────────────────────────────
   queryCache: new QueryCache({
     onError(error, query) {
-      // Only surface errors for queries that have stale data — first-load
-      // errors are handled locally by the component's `isError` state.
-      if (query.state.data !== undefined) {
-        handleGlobalError(error, String(query.queryKey));
-      }
+      // First-load errors are handled locally by the component's `isError` state.
+      if (query.state.data === undefined) return;
+
+      toast.error(getToastErrorMessage(error));
     },
   }),
 
   mutationCache: new MutationCache({
+    onSuccess(_data, _variables, _context, mutation) {
+      const successMessage = mutation.meta?.successMessage;
+      if (successMessage) {
+        toast.success(successMessage);
+      }
+    },
     onError(error, _variables, _context, mutation) {
       if (mutation.meta?.suppressGlobalError) return;
-      handleGlobalError(error, mutation.options.mutationKey?.toString());
+      toast.error(getToastErrorMessage(error));
     },
   }),
 
-  // ─── Default options ───────────────────────────────────────────────────────
   defaultOptions: {
     queries: {
-      // Data is fresh for 1 minute; after that it's eligible for a background refetch.
       staleTime: 1000 * 60,
-
-      // Keep unused data in cache for 5 minutes before GC.
       gcTime: 1000 * 60 * 5,
-
-      // Don't refetch while the tab is hidden; do it when the user comes back.
       refetchOnWindowFocus: true,
       refetchOnReconnect: true,
       refetchOnMount: true,
-
-      // Exponential back-off: 1 s → 2 s → 4 s (capped at 30 s). Skip 4xx.
       retry: (failureCount, error) => shouldRetryRequest(failureCount, error, isProduction ? 3 : 1),
       retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30_000),
-
-      // Prevents the query from being treated as failed while retrying.
-      // networkMode: 'offlineFirst' // ← uncomment for PWA / offline-first apps
     },
 
     mutations: {
-      // Mutations are fire-and-forget by default — add at least 1 retry
-      // for transient network blips, but don't retry on 4xx errors.
       retry: (failureCount, error) => shouldRetryRequest(failureCount, error, 2),
       retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10_000),
     },

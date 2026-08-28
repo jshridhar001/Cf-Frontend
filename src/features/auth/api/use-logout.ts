@@ -16,7 +16,10 @@ export function useLogout() {
       }
     },
     retry: false,
-    meta: { suppressGlobalError: true },
+    meta: {
+      successMessage: 'Signed out successfully.',
+      suppressGlobalError: true,
+    },
     onSuccess: () => {
       clearAuthToken();
       queryClient.clear();
@@ -26,9 +29,7 @@ export function useLogout() {
       clearAuthToken();
       queryClient.clear();
       void router.navigate({ to: '/', replace: true });
-      toast.error('Signed out locally. Server sign-out may have failed.', {
-        position: 'bottom-right',
-      });
+      toast.error('Signed out locally. Server sign-out may have failed.');
     },
   });
 }

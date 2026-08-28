@@ -3,7 +3,6 @@ import { authKeys } from '@/features/auth/api/query-keys';
 import { clearAuthToken, getAuthToken } from '@/features/auth/lib/auth-token-store';
 import { queryClient } from '@/lib/queryClient';
 import { router } from '@/router';
-import { beginRequest, endRequest } from './api-pending-store';
 import { env } from './env';
 
 export { getHttpStatusFromError } from './http-error';
@@ -17,29 +16,17 @@ export const apiClient = axios.create({
   },
 });
 
-apiClient.interceptors.request.use(
-  (config) => {
-    beginRequest();
-    const token = getAuthToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    endRequest();
-    return Promise.reject(error);
-  },
-);
+apiClient.interceptors.request.use((config) => {
+  const token = getAuthToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 apiClient.interceptors.response.use(
-  (response) => {
-    endRequest();
-    return response;
-  },
+  (response) => response,
   (error) => {
-    endRequest();
-
     if (!error.response) {
       return Promise.reject(error);
     }

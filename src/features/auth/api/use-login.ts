@@ -50,11 +50,6 @@ export function useLogin() {
         throw result.error;
       }
 
-      return result.data;
-    },
-    retry: false,
-    meta: { suppressGlobalError: true },
-    onSuccess: async (_data, variables) => {
       // Login page beforeLoad caches `me: null` within staleTime; force a
       // network refetch so the session is visible before navigating.
       await queryClient.fetchQuery({
@@ -62,6 +57,14 @@ export function useLogin() {
         staleTime: 0,
       });
 
+      return result.data;
+    },
+    retry: false,
+    meta: {
+      successMessage: 'Signed in successfully.',
+      suppressGlobalError: true,
+    },
+    onSuccess: async (_data, variables) => {
       if (variables.redirectTo) {
         await navigate({ href: variables.redirectTo, replace: true });
         return;
@@ -70,7 +73,7 @@ export function useLogin() {
       await navigate({ to: '/dashboard', replace: true });
     },
     onError: (error) => {
-      toast.error(getSignInErrorMessage(error), { position: 'bottom-right' });
+      toast.error(getSignInErrorMessage(error));
     },
   });
 }

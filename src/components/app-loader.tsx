@@ -1,22 +1,26 @@
+import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Marker, MarkerContent } from '@/components/ui/marker';
 import { Spinner } from '@/components/ui/spinner';
-import { useApiPendingStore } from '@/lib/api-pending-store';
 
 const SHOW_DELAY_MS = 200;
 
 export function AppLoader() {
-  const pendingCount = useApiPendingStore((state) => state.pendingCount);
+  const pendingQueries = useIsFetching({
+    predicate: (query) => query.state.status === 'pending',
+  });
+  const pendingMutations = useIsMutating();
+  const isBusy = pendingQueries + pendingMutations > 0;
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (pendingCount > 0) {
+    if (isBusy) {
       const timeoutId = window.setTimeout(() => setVisible(true), SHOW_DELAY_MS);
       return () => window.clearTimeout(timeoutId);
     }
 
     setVisible(false);
-  }, [pendingCount]);
+  }, [isBusy]);
 
   if (!visible) return null;
 
