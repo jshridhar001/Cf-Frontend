@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { router } from '@/router';
 import { authClient } from '../lib/auth-client';
+import { clearAuthToken } from '../lib/auth-token-store';
 
 export function useLogout() {
   const queryClient = useQueryClient();
@@ -17,10 +18,12 @@ export function useLogout() {
     retry: false,
     meta: { suppressGlobalError: true },
     onSuccess: () => {
+      clearAuthToken();
       queryClient.clear();
       void router.navigate({ to: '/', replace: true });
     },
     onError: () => {
+      clearAuthToken();
       queryClient.clear();
       void router.navigate({ to: '/', replace: true });
       toast.error('Signed out locally. Server sign-out may have failed.', {

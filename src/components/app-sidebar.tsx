@@ -230,7 +230,11 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link to="/dashboard">
-                <img src="/favicon.svg" alt={env.appName} className="size-8 shrink-0 rounded-md" />
+                <img
+                  src="https://res.cloudinary.com/dakh64xhy/image/upload/v1759410800/Bhatti-Agritech_gwqywg.jpg"
+                  alt={env.appName}
+                  className="size-8 shrink-0 rounded-md"
+                />
                 <div className="grid min-w-0 flex-1 text-left leading-tight">
                   <span className="truncate font-heading text-sm tracking-tight">
                     <span className="font-semibold text-sidebar-foreground">{env.appName}</span>

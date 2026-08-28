@@ -1,7 +1,9 @@
 import axios, { isAxiosError } from 'axios';
 import { authKeys } from '@/features/auth/api/query-keys';
+import { clearAuthToken, getAuthToken } from '@/features/auth/lib/auth-token-store';
 import { queryClient } from '@/lib/queryClient';
 import { router } from '@/router';
+import { beginRequest, endRequest } from './api-pending-store';
 import { env } from './env';
 
 export { getHttpStatusFromError } from './http-error';
@@ -9,15 +11,35 @@ export { getHttpStatusFromError } from './http-error';
 export const apiClient = axios.create({
   baseURL: `${env.apiBaseUrl}/api`,
   timeout: 15000,
-  withCredentials: true,
+  withCredentials: false,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-apiClient.interceptors.response.use(
-  (response) => response,
+apiClient.interceptors.request.use(
+  (config) => {
+    beginRequest();
+    const token = getAuthToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
   (error) => {
+    endRequest();
+    return Promise.reject(error);
+  },
+);
+
+apiClient.interceptors.response.use(
+  (response) => {
+    endRequest();
+    return response;
+  },
+  (error) => {
+    endRequest();
+
     if (!error.response) {
       return Promise.reject(error);
     }
@@ -27,11 +49,15 @@ apiClient.interceptors.response.use(
     const isMeRequest = requestUrl === '/me' || requestUrl.endsWith('/me');
 
     if (status === 401) {
+      clearAuthToken();
       queryClient.setQueryData(authKeys.me(), null);
 
       // Let route guards handle /me 401s so redirect search params are preserved.
-      if (!isMeRequest && window.location.pathname !== '/') {
-        void router.navigate({ to: '/', replace: true });
+      const pathname = window.location.pathname;
+      const isPublicAuthPath = pathname === '/' || pathname === '/login';
+
+      if (!isMeRequest && !isPublicAuthPath) {
+        void router.navigate({ to: '/login', replace: true });
       }
     }
 

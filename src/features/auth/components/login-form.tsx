@@ -18,7 +18,7 @@ const formSchema = z.object({
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const { mutateAsync: login, isPending } = useLogin();
-  const search = useSearch({ from: '/' });
+  const search = useSearch({ from: '/login' });
 
   const form = useForm({
     defaultValues: {
