@@ -22,6 +22,12 @@ import { Route as AuthenticatedTransferStockRouteImport } from './routes/_authen
 import { Route as AuthenticatedAccessControlPermissionsRouteImport } from './routes/_authenticated/access-control.permissions'
 import { Route as AuthenticatedAccessControlSessionsRouteImport } from './routes/_authenticated/access-control.sessions'
 import { Route as AuthenticatedAccessControlUsersRouteImport } from './routes/_authenticated/access-control.users'
+import { Route as AuthenticatedMasterFacilitiesRouteImport } from './routes/_authenticated/master.facilities'
+import { Route as AuthenticatedMasterGenerationsRouteImport } from './routes/_authenticated/master.generations'
+import { Route as AuthenticatedMasterSeedSizesRouteImport } from './routes/_authenticated/master.seed-sizes'
+import { Route as AuthenticatedMasterStationsRouteImport } from './routes/_authenticated/master.stations'
+import { Route as AuthenticatedMasterTuberSizesRouteImport } from './routes/_authenticated/master.tuber-sizes'
+import { Route as AuthenticatedMasterVarietiesRouteImport } from './routes/_authenticated/master.varieties'
 import { Route as AuthenticatedSeedDispatchesAnalyticsRouteImport } from './routes/_authenticated/seed-dispatches.analytics'
 import { Route as AuthenticatedSeedDispatchesOverviewRouteImport } from './routes/_authenticated/seed-dispatches.overview'
 import { Route as AuthenticatedSeedDispatchesSettingsRouteImport } from './routes/_authenticated/seed-dispatches.settings'
@@ -99,6 +105,42 @@ const AuthenticatedAccessControlUsersRoute =
     path: '/users',
     getParentRoute: () => AuthenticatedAccessControlRoute,
   } as any)
+const AuthenticatedMasterFacilitiesRoute =
+  AuthenticatedMasterFacilitiesRouteImport.update({
+    id: '/facilities',
+    path: '/facilities',
+    getParentRoute: () => AuthenticatedMasterRoute,
+  } as any)
+const AuthenticatedMasterGenerationsRoute =
+  AuthenticatedMasterGenerationsRouteImport.update({
+    id: '/generations',
+    path: '/generations',
+    getParentRoute: () => AuthenticatedMasterRoute,
+  } as any)
+const AuthenticatedMasterSeedSizesRoute =
+  AuthenticatedMasterSeedSizesRouteImport.update({
+    id: '/seed-sizes',
+    path: '/seed-sizes',
+    getParentRoute: () => AuthenticatedMasterRoute,
+  } as any)
+const AuthenticatedMasterStationsRoute =
+  AuthenticatedMasterStationsRouteImport.update({
+    id: '/stations',
+    path: '/stations',
+    getParentRoute: () => AuthenticatedMasterRoute,
+  } as any)
+const AuthenticatedMasterTuberSizesRoute =
+  AuthenticatedMasterTuberSizesRouteImport.update({
+    id: '/tuber-sizes',
+    path: '/tuber-sizes',
+    getParentRoute: () => AuthenticatedMasterRoute,
+  } as any)
+const AuthenticatedMasterVarietiesRoute =
+  AuthenticatedMasterVarietiesRouteImport.update({
+    id: '/varieties',
+    path: '/varieties',
+    getParentRoute: () => AuthenticatedMasterRoute,
+  } as any)
 const AuthenticatedSeedDispatchesAnalyticsRoute =
   AuthenticatedSeedDispatchesAnalyticsRouteImport.update({
     id: '/seed-dispatches/analytics',
@@ -142,13 +184,19 @@ export interface FileRoutesByFullPath {
   '/access-control': typeof AuthenticatedAccessControlRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/farmers': typeof AuthenticatedFarmersRoute
-  '/master': typeof AuthenticatedMasterRoute
+  '/master': typeof AuthenticatedMasterRouteWithChildren
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/transfer-stock': typeof AuthenticatedTransferStockRoute
   '/access-control/permissions': typeof AuthenticatedAccessControlPermissionsRoute
   '/access-control/sessions': typeof AuthenticatedAccessControlSessionsRoute
   '/access-control/users': typeof AuthenticatedAccessControlUsersRoute
+  '/master/facilities': typeof AuthenticatedMasterFacilitiesRoute
+  '/master/generations': typeof AuthenticatedMasterGenerationsRoute
+  '/master/seed-sizes': typeof AuthenticatedMasterSeedSizesRoute
+  '/master/stations': typeof AuthenticatedMasterStationsRoute
+  '/master/tuber-sizes': typeof AuthenticatedMasterTuberSizesRoute
+  '/master/varieties': typeof AuthenticatedMasterVarietiesRoute
   '/seed-dispatches/analytics': typeof AuthenticatedSeedDispatchesAnalyticsRoute
   '/seed-dispatches/overview': typeof AuthenticatedSeedDispatchesOverviewRoute
   '/seed-dispatches/settings': typeof AuthenticatedSeedDispatchesSettingsRoute
@@ -162,13 +210,19 @@ export interface FileRoutesByTo {
   '/access-control': typeof AuthenticatedAccessControlRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/farmers': typeof AuthenticatedFarmersRoute
-  '/master': typeof AuthenticatedMasterRoute
+  '/master': typeof AuthenticatedMasterRouteWithChildren
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/transfer-stock': typeof AuthenticatedTransferStockRoute
   '/access-control/permissions': typeof AuthenticatedAccessControlPermissionsRoute
   '/access-control/sessions': typeof AuthenticatedAccessControlSessionsRoute
   '/access-control/users': typeof AuthenticatedAccessControlUsersRoute
+  '/master/facilities': typeof AuthenticatedMasterFacilitiesRoute
+  '/master/generations': typeof AuthenticatedMasterGenerationsRoute
+  '/master/seed-sizes': typeof AuthenticatedMasterSeedSizesRoute
+  '/master/stations': typeof AuthenticatedMasterStationsRoute
+  '/master/tuber-sizes': typeof AuthenticatedMasterTuberSizesRoute
+  '/master/varieties': typeof AuthenticatedMasterVarietiesRoute
   '/seed-dispatches/analytics': typeof AuthenticatedSeedDispatchesAnalyticsRoute
   '/seed-dispatches/overview': typeof AuthenticatedSeedDispatchesOverviewRoute
   '/seed-dispatches/settings': typeof AuthenticatedSeedDispatchesSettingsRoute
@@ -184,13 +238,19 @@ export interface FileRoutesById {
   '/_authenticated/access-control': typeof AuthenticatedAccessControlRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/farmers': typeof AuthenticatedFarmersRoute
-  '/_authenticated/master': typeof AuthenticatedMasterRoute
+  '/_authenticated/master': typeof AuthenticatedMasterRouteWithChildren
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/transfer-stock': typeof AuthenticatedTransferStockRoute
   '/_authenticated/access-control/permissions': typeof AuthenticatedAccessControlPermissionsRoute
   '/_authenticated/access-control/sessions': typeof AuthenticatedAccessControlSessionsRoute
   '/_authenticated/access-control/users': typeof AuthenticatedAccessControlUsersRoute
+  '/_authenticated/master/facilities': typeof AuthenticatedMasterFacilitiesRoute
+  '/_authenticated/master/generations': typeof AuthenticatedMasterGenerationsRoute
+  '/_authenticated/master/seed-sizes': typeof AuthenticatedMasterSeedSizesRoute
+  '/_authenticated/master/stations': typeof AuthenticatedMasterStationsRoute
+  '/_authenticated/master/tuber-sizes': typeof AuthenticatedMasterTuberSizesRoute
+  '/_authenticated/master/varieties': typeof AuthenticatedMasterVarietiesRoute
   '/_authenticated/seed-dispatches/analytics': typeof AuthenticatedSeedDispatchesAnalyticsRoute
   '/_authenticated/seed-dispatches/overview': typeof AuthenticatedSeedDispatchesOverviewRoute
   '/_authenticated/seed-dispatches/settings': typeof AuthenticatedSeedDispatchesSettingsRoute
@@ -213,6 +273,12 @@ export interface FileRouteTypes {
     | '/access-control/permissions'
     | '/access-control/sessions'
     | '/access-control/users'
+    | '/master/facilities'
+    | '/master/generations'
+    | '/master/seed-sizes'
+    | '/master/stations'
+    | '/master/tuber-sizes'
+    | '/master/varieties'
     | '/seed-dispatches/analytics'
     | '/seed-dispatches/overview'
     | '/seed-dispatches/settings'
@@ -233,6 +299,12 @@ export interface FileRouteTypes {
     | '/access-control/permissions'
     | '/access-control/sessions'
     | '/access-control/users'
+    | '/master/facilities'
+    | '/master/generations'
+    | '/master/seed-sizes'
+    | '/master/stations'
+    | '/master/tuber-sizes'
+    | '/master/varieties'
     | '/seed-dispatches/analytics'
     | '/seed-dispatches/overview'
     | '/seed-dispatches/settings'
@@ -254,6 +326,12 @@ export interface FileRouteTypes {
     | '/_authenticated/access-control/permissions'
     | '/_authenticated/access-control/sessions'
     | '/_authenticated/access-control/users'
+    | '/_authenticated/master/facilities'
+    | '/_authenticated/master/generations'
+    | '/_authenticated/master/seed-sizes'
+    | '/_authenticated/master/stations'
+    | '/_authenticated/master/tuber-sizes'
+    | '/_authenticated/master/varieties'
     | '/_authenticated/seed-dispatches/analytics'
     | '/_authenticated/seed-dispatches/overview'
     | '/_authenticated/seed-dispatches/settings'
@@ -361,6 +439,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAccessControlUsersRouteImport
       parentRoute: typeof AuthenticatedAccessControlRoute
     }
+    '/_authenticated/master/facilities': {
+      id: '/_authenticated/master/facilities'
+      path: '/facilities'
+      fullPath: '/master/facilities'
+      preLoaderRoute: typeof AuthenticatedMasterFacilitiesRouteImport
+      parentRoute: typeof AuthenticatedMasterRoute
+    }
+    '/_authenticated/master/generations': {
+      id: '/_authenticated/master/generations'
+      path: '/generations'
+      fullPath: '/master/generations'
+      preLoaderRoute: typeof AuthenticatedMasterGenerationsRouteImport
+      parentRoute: typeof AuthenticatedMasterRoute
+    }
+    '/_authenticated/master/seed-sizes': {
+      id: '/_authenticated/master/seed-sizes'
+      path: '/seed-sizes'
+      fullPath: '/master/seed-sizes'
+      preLoaderRoute: typeof AuthenticatedMasterSeedSizesRouteImport
+      parentRoute: typeof AuthenticatedMasterRoute
+    }
+    '/_authenticated/master/stations': {
+      id: '/_authenticated/master/stations'
+      path: '/stations'
+      fullPath: '/master/stations'
+      preLoaderRoute: typeof AuthenticatedMasterStationsRouteImport
+      parentRoute: typeof AuthenticatedMasterRoute
+    }
+    '/_authenticated/master/tuber-sizes': {
+      id: '/_authenticated/master/tuber-sizes'
+      path: '/tuber-sizes'
+      fullPath: '/master/tuber-sizes'
+      preLoaderRoute: typeof AuthenticatedMasterTuberSizesRouteImport
+      parentRoute: typeof AuthenticatedMasterRoute
+    }
+    '/_authenticated/master/varieties': {
+      id: '/_authenticated/master/varieties'
+      path: '/varieties'
+      fullPath: '/master/varieties'
+      preLoaderRoute: typeof AuthenticatedMasterVarietiesRouteImport
+      parentRoute: typeof AuthenticatedMasterRoute
+    }
     '/_authenticated/seed-dispatches/analytics': {
       id: '/_authenticated/seed-dispatches/analytics'
       path: '/seed-dispatches/analytics'
@@ -426,11 +546,32 @@ const AuthenticatedAccessControlRouteWithChildren =
     AuthenticatedAccessControlRouteChildren,
   )
 
+interface AuthenticatedMasterRouteChildren {
+  AuthenticatedMasterFacilitiesRoute: typeof AuthenticatedMasterFacilitiesRoute
+  AuthenticatedMasterGenerationsRoute: typeof AuthenticatedMasterGenerationsRoute
+  AuthenticatedMasterSeedSizesRoute: typeof AuthenticatedMasterSeedSizesRoute
+  AuthenticatedMasterStationsRoute: typeof AuthenticatedMasterStationsRoute
+  AuthenticatedMasterTuberSizesRoute: typeof AuthenticatedMasterTuberSizesRoute
+  AuthenticatedMasterVarietiesRoute: typeof AuthenticatedMasterVarietiesRoute
+}
+
+const AuthenticatedMasterRouteChildren: AuthenticatedMasterRouteChildren = {
+  AuthenticatedMasterFacilitiesRoute: AuthenticatedMasterFacilitiesRoute,
+  AuthenticatedMasterGenerationsRoute: AuthenticatedMasterGenerationsRoute,
+  AuthenticatedMasterSeedSizesRoute: AuthenticatedMasterSeedSizesRoute,
+  AuthenticatedMasterStationsRoute: AuthenticatedMasterStationsRoute,
+  AuthenticatedMasterTuberSizesRoute: AuthenticatedMasterTuberSizesRoute,
+  AuthenticatedMasterVarietiesRoute: AuthenticatedMasterVarietiesRoute,
+}
+
+const AuthenticatedMasterRouteWithChildren =
+  AuthenticatedMasterRoute._addFileChildren(AuthenticatedMasterRouteChildren)
+
 interface AuthenticatedRouteChildren {
   AuthenticatedAccessControlRoute: typeof AuthenticatedAccessControlRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedFarmersRoute: typeof AuthenticatedFarmersRoute
-  AuthenticatedMasterRoute: typeof AuthenticatedMasterRoute
+  AuthenticatedMasterRoute: typeof AuthenticatedMasterRouteWithChildren
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedTransferStockRoute: typeof AuthenticatedTransferStockRoute
@@ -446,7 +587,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAccessControlRoute: AuthenticatedAccessControlRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedFarmersRoute: AuthenticatedFarmersRoute,
-  AuthenticatedMasterRoute: AuthenticatedMasterRoute,
+  AuthenticatedMasterRoute: AuthenticatedMasterRouteWithChildren,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedTransferStockRoute: AuthenticatedTransferStockRoute,
