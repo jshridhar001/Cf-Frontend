@@ -7,8 +7,19 @@ import {
 } from '@tanstack/react-table';
 import { SearchIcon, Trash2Icon, UserPlusIcon } from 'lucide-react';
 import * as React from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemFooter,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from '@/components/ui/item';
 import {
   Select,
   SelectContent,
@@ -27,9 +38,9 @@ import {
 import {
   formatCreatedAt,
   formatRoleLabel,
+  getUserInitials,
   RoleBadge,
   USER_ROLES,
-  UserIdentity,
   UserRowActions,
   type UsersTableRow,
 } from './columns';
@@ -60,8 +71,8 @@ export function UsersTable<TData extends RowData>({ columns, data }: UsersTableP
   const nameFilter = (table.getColumn('name')?.getFilterValue() as string | undefined) ?? '';
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+    <div className="flex flex-col gap-3 sm:gap-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
         <InputGroup className="w-full sm:max-w-xs">
           <InputGroupAddon>
             <SearchIcon />
@@ -78,7 +89,7 @@ export function UsersTable<TData extends RowData>({ columns, data }: UsersTableP
             table.getColumn('role')?.setFilterValue(value === 'all' ? undefined : value)
           }
         >
-          <SelectTrigger size="sm" className="w-full sm:w-48">
+          <SelectTrigger size="default" className="h-9 w-full sm:h-8 sm:w-48">
             <SelectValue placeholder="All roles" />
           </SelectTrigger>
           <SelectContent>
@@ -90,7 +101,7 @@ export function UsersTable<TData extends RowData>({ columns, data }: UsersTableP
             ))}
           </SelectContent>
         </Select>
-        <div className="flex items-center gap-2 sm:ml-auto">
+        <div className="hidden items-center gap-2 sm:ml-auto md:flex">
           <Button type="button" variant="destructive" size="sm">
             <Trash2Icon data-icon="inline-start" />
             Delete All
@@ -137,32 +148,40 @@ export function UsersTable<TData extends RowData>({ columns, data }: UsersTableP
         </Table>
       </div>
 
-      <div className="flex flex-col gap-2 md:hidden">
+      <ItemGroup className="md:hidden">
         {table.getRowModel().rows.length ? (
           table.getRowModel().rows.map((row) => {
             const user = row.original as UsersTableRow;
             return (
-              <div key={row.id} className="flex items-start gap-3 rounded-2xl border p-3">
-                <div className="min-w-0 flex-1">
-                  <UserIdentity user={user} />
-                  <p className="mt-1 truncate text-sm text-muted-foreground">{user.email}</p>
-                  <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                    <RoleBadge role={user.role} />
-                    <span className="text-sm text-muted-foreground">
-                      {formatCreatedAt(user.createdAt)}
-                    </span>
-                  </div>
-                </div>
-                <UserRowActions user={user} />
-              </div>
+              <Item key={row.id} variant="outline" size="sm">
+                <ItemMedia>
+                  <Avatar size="sm">
+                    {user.image ? <AvatarImage alt="" src={user.image} /> : null}
+                    <AvatarFallback>{getUserInitials(user.name)}</AvatarFallback>
+                  </Avatar>
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>{user.name}</ItemTitle>
+                  <ItemDescription className="line-clamp-1">{user.email}</ItemDescription>
+                </ItemContent>
+                <ItemActions>
+                  <UserRowActions user={user} />
+                </ItemActions>
+                <ItemFooter>
+                  <RoleBadge role={user.role} />
+                  <span className="text-sm text-muted-foreground">
+                    {formatCreatedAt(user.createdAt)}
+                  </span>
+                </ItemFooter>
+              </Item>
             );
           })
         ) : (
-          <div className="rounded-2xl border px-3 py-10 text-center text-sm text-muted-foreground">
+          <div className="rounded-2xl border px-3 py-8 text-center text-sm text-muted-foreground">
             No results.
           </div>
         )}
-      </div>
+      </ItemGroup>
     </div>
   );
 }

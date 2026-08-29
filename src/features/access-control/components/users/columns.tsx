@@ -72,7 +72,11 @@ export function UserRowActions({ user }: { user: UsersTableRow }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon-sm" className="size-8">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="size-8 min-h-11 min-w-11 md:min-h-8 md:min-w-8"
+        >
           <span className="sr-only">Open menu</span>
           <MoreHorizontalIcon />
         </Button>

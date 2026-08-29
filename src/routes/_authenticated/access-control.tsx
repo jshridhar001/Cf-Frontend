@@ -50,7 +50,7 @@ function AccessControlLayout() {
       }}
       className="w-full"
     >
-      <TabsList>
+      <TabsList className="w-full sm:w-fit">
         {tabs.map((tab) => (
           <TabsTrigger key={tab.value} value={tab.value}>
             {tab.label}
