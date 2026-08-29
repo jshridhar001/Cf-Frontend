@@ -35,7 +35,9 @@ import { env } from '@/lib/env';
 
 type AppPath =
   | '/dashboard'
-  | '/farmers'
+  | '/farmers/overview'
+  | '/farmers/analytics'
+  | '/farmers/report'
   | '/messages'
   | '/notifications'
   | '/seed-requisition/overview'
@@ -68,8 +70,13 @@ const platformNavItems: NavItem[] = [
   },
   {
     title: 'Farmers',
-    url: '/farmers',
+    url: '/farmers/overview',
     icon: User,
+    items: [
+      { title: 'Overview', url: '/farmers/overview' },
+      { title: 'Analytics', url: '/farmers/analytics' },
+      { title: 'Report', url: '/farmers/report' },
+    ],
   },
   {
     title: 'Messages',
@@ -131,6 +138,13 @@ function isPathActive(pathname: string, url?: string) {
 }
 
 function isItemActive(pathname: string, item: NavItem) {
+  const current = normalizePath(pathname);
+  if (
+    item.url?.startsWith('/farmers') &&
+    (current === '/farmers' || current.startsWith('/farmers/'))
+  ) {
+    return true;
+  }
   if (item.items?.length) {
     return item.items.some((subItem) => isPathActive(pathname, subItem.url));
   }

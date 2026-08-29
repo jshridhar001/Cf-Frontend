@@ -25,6 +25,9 @@ import { cn } from '@/lib/utils';
 const routeTitles: Record<string, string> = {
   '/dashboard': 'Dashboard',
   '/farmers': 'Farmers',
+  '/farmers/overview': 'Farmers',
+  '/farmers/analytics': 'Farmers',
+  '/farmers/report': 'Farmers',
   '/messages': 'Messages',
   '/notifications': 'Notifications',
   '/seed-requisition/overview': 'Seed Requisition',
@@ -131,13 +134,20 @@ function ThemeToggle() {
   );
 }
 
+function getRouteTitle(pathname: string) {
+  const exact = routeTitles[pathname];
+  if (exact) return exact;
+  if (pathname === '/farmers' || pathname.startsWith('/farmers/')) return 'Farmers';
+  return 'Dashboard';
+}
+
 export function AppTopbar() {
   const { data: me } = useMe();
   const user = me?.user;
   const { mutate: logout, isPending: isLoggingOut } = useLogout();
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const pageTitle = routeTitles[pathname] ?? 'Dashboard';
+  const pageTitle = getRouteTitle(pathname);
 
   return (
     <header className={cn('flex h-14 shrink-0 items-center border-b bg-background px-4')}>

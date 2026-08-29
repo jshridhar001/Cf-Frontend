@@ -1,9 +1,14 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_authenticated/farmers')({
-  component: RouteComponent,
-})
+  beforeLoad: ({ location }) => {
+    if (location.pathname === '/farmers' || location.pathname === '/farmers/') {
+      throw redirect({ to: '/farmers/overview' });
+    }
+  },
+  component: FarmersLayout,
+});
 
-function RouteComponent() {
-  return <div>Hello "/_authenticated/farmers"!</div>
+function FarmersLayout() {
+  return <Outlet />;
 }
