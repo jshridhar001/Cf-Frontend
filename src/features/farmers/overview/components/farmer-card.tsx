@@ -1,7 +1,6 @@
 import { Link } from '@tanstack/react-router';
-import { MapPin, Phone, SquarePenIcon, Trash2Icon } from 'lucide-react';
+import { MapPin, Phone, SquarePenIcon, Trash2Icon, User } from 'lucide-react';
 import type { ComponentProps } from 'react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,15 +20,6 @@ import {
 } from '@/features/farmers/types';
 import type { Station } from '@/features/master/types';
 import { cn } from '@/lib/utils';
-
-function getInitials(name: string) {
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join('');
-}
 
 function FarmerRow({
   icon: Icon,
@@ -99,11 +89,9 @@ export function FarmerCard({
             <span className="font-normal text-muted-foreground">(#{farmer.accountNumber})</span>
           </CardTitle>
           <CardAction>
-            <Avatar className="size-9">
-              <AvatarFallback className="bg-primary/10 text-primary">
-                {getInitials(farmer.name)}
-              </AvatarFallback>
-            </Avatar>
+            <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
+              <User className="size-5 text-primary" aria-hidden />
+            </div>
           </CardAction>
         </CardHeader>
         <CardContent className="flex flex-col gap-3 px-5 sm:px-6">
