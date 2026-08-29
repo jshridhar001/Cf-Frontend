@@ -1,0 +1,39 @@
+---
+description: Responsive PWA density — compact mobile, unchanged desktop; CSS-first; reuse shadcn at usage
+alwaysApply: true
+---
+
+# Responsive mobile UI (one app, two densities)
+
+Treat this as a **responsive PWA**: same visual language, components, and hierarchy as desktop. Mobile is a **high-density** layout, not a separate UI and not a shrunk desktop page.
+
+Canonical reference: `src/features/access-control/components/users/UsersTabContent.tsx` and `users-table.tsx`. Use `PageCard` / `PageCardHeader` / `PageCardContent` for page Cards.
+
+## Do
+
+- Preserve desktop spacing. Use `sm:` / `md:` / `lg:` so mobile-only changes stay below the breakpoint (`p-3 sm:p-4 lg:p-6`).
+- Page Cards: `gap-4 py-4 sm:gap-6 sm:py-6`, header/content `px-4 sm:px-6` (via `PageCard*`). Do **not** set Card `size="sm"` if that would shrink desktop.
+- Hide long `CardDescription` below `sm` when it is secondary (`hidden sm:block`). Keep it when it explains a form (e.g. login).
+- Mobile primary actions: compact `CardAction` icon buttons with ~44px hit area (`min-h-11 min-w-11`), `md:hidden`. Labeled toolbar actions: `hidden md:flex`.
+- CRUD: **desktop table** (`hidden md:block`), **mobile Item list** (`md:hidden`). Same data and actions. Do not force wide tables to scroll unless they must stay tabular.
+- Tabs: `w-full sm:w-fit`. Prefer CSS (`hidden md:flex`) over JS viewport checks.
+- Touch: enlarge **hit area**, not every visual size. Reuse shadcn (`Item`, `CardAction`, `Button`); compose `className` — do not fork `src/components/ui/*` for density.
+
+## Don't
+
+```tsx
+// ❌ BAD — desktop padding applied on phones
+<Card className="p-8 gap-8">
+  <Button className="w-full">Add User</Button>
+</Card>
+
+// ✅ GOOD
+<PageCard>
+  <PageCardHeader className="has-data-[slot=card-action]:grid-cols-[1fr_auto] md:has-data-[slot=card-action]:grid-cols-1">
+    <CardTitle>Users</CardTitle>
+    <CardDescription className="hidden sm:block">…</CardDescription>
+    <CardAction className="flex gap-1 md:hidden">{/* icon buttons min-h-11 */}</CardAction>
+  </PageCardHeader>
+  <PageCardContent>{/* table md+ / Item list below md */}</PageCardContent>
+</PageCard>
+```

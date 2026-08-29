@@ -1,24 +1,19 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
+import { CardDescription, CardTitle } from '@/components/ui/card';
 
 export function PermissionsTabContent() {
   return (
-    <Card>
-      <CardHeader>
+    <PageCard>
+      <PageCardHeader>
         <CardTitle>Permissions</CardTitle>
-        <CardDescription>
-          Define and assign permissions across the platform. Control what each
-          role can view and modify.
+        <CardDescription className="hidden sm:block">
+          Define and assign permissions across the platform. Control what each role can view and
+          modify.
         </CardDescription>
-      </CardHeader>
-      <CardContent className="text-sm text-muted-foreground">
+      </PageCardHeader>
+      <PageCardContent className="text-sm text-muted-foreground">
         Permissions content will appear here.
-      </CardContent>
-    </Card>
+      </PageCardContent>
+    </PageCard>
   );
 }

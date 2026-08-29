@@ -3,8 +3,9 @@ import { useSearch } from '@tanstack/react-router';
 import { EyeIcon, EyeOffIcon, Lock } from 'lucide-react';
 import { useState } from 'react';
 import * as z from 'zod';
+import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardDescription, CardTitle } from '@/components/ui/card';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { useLogin } from '@/features/auth/api/use-login';
@@ -38,14 +39,14 @@ export function LoginForm() {
   });
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-background px-4 py-8">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
+    <div className="flex min-h-screen w-full items-center justify-center bg-background px-4 py-6 sm:py-8">
+      <PageCard className="w-full max-w-sm">
+        <PageCardHeader>
           <CardTitle className="text-2xl font-semibold tracking-tight">Account Access</CardTitle>
           <CardDescription>Sign in to {env.appName} with your email and password.</CardDescription>
-        </CardHeader>
+        </PageCardHeader>
 
-        <CardContent>
+        <PageCardContent>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -132,8 +133,8 @@ export function LoginForm() {
               </form.Subscribe>
             </div>
           </form>
-        </CardContent>
-      </Card>
+        </PageCardContent>
+      </PageCard>
     </div>
   );
 }

@@ -76,7 +76,13 @@ function ThemeToggle() {
 
   if (!isClient) {
     return (
-      <Button variant="ghost" size="icon" disabled aria-label="Theme">
+      <Button
+        variant="ghost"
+        size="icon"
+        disabled
+        aria-label="Theme"
+        className="min-h-11 min-w-11 md:min-h-9 md:min-w-9"
+      >
         <Sun className="h-4 w-4 text-muted-foreground" />
       </Button>
     );
@@ -92,7 +98,7 @@ function ThemeToggle() {
             <Button
               variant="ghost"
               size="icon"
-              className="text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              className="min-h-11 min-w-11 text-muted-foreground hover:bg-accent hover:text-accent-foreground md:min-h-9 md:min-w-9"
               aria-label="Change theme"
             >
               {isDark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
@@ -130,7 +136,7 @@ export function AppTopbar() {
   return (
     <header className={cn('flex h-14 shrink-0 items-center border-b bg-background px-4')}>
       <div className="flex min-w-0 flex-1 items-center gap-1">
-        <SidebarTrigger className="-ml-1" />
+        <SidebarTrigger className="-ml-1 min-h-11 min-w-11 md:min-h-8 md:min-w-8" />
         <div
           aria-hidden="true"
           className="mx-2 h-6 w-px shrink-0 rounded-full bg-muted-foreground/25"
@@ -147,7 +153,7 @@ export function AppTopbar() {
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="h-9 gap-2 rounded-md px-2 hover:bg-accent hover:text-accent-foreground"
+              className="h-9 min-h-11 gap-2 rounded-md px-2 hover:bg-accent hover:text-accent-foreground md:min-h-9"
             >
               <Avatar className="h-7 w-7">
                 <AvatarFallback className="bg-primary text-primary-foreground text-xs">
