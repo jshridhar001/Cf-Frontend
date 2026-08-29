@@ -2,10 +2,14 @@ import { Trash2Icon, UserPlusIcon } from 'lucide-react';
 import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
 import { Button } from '@/components/ui/button';
 import { CardAction, CardDescription, CardTitle } from '@/components/ui/card';
-import { columns, users } from './columns';
+import { useUsers } from '@/features/access-control/api/use-users';
+import { getApiErrorMessage } from '@/lib/api-client';
+import { columns } from './columns';
 import { UsersTable } from './users-table';
 
 export function UsersTabContent() {
+  const { data: users, isPending, isError, error } = useUsers();
+
   return (
     <PageCard>
       <PageCardHeader className="has-data-[slot=card-action]:grid-cols-[1fr_auto] md:has-data-[slot=card-action]:grid-cols-1">
@@ -29,7 +33,15 @@ export function UsersTabContent() {
         </CardAction>
       </PageCardHeader>
       <PageCardContent>
-        <UsersTable columns={columns} data={users} />
+        {isPending && users === undefined ? (
+          <p className="text-sm text-muted-foreground">Loading users…</p>
+        ) : null}
+
+        {isError && users === undefined ? (
+          <p className="text-sm text-destructive">{getApiErrorMessage(error)}</p>
+        ) : null}
+
+        {users !== undefined ? <UsersTable columns={columns} data={users} /> : null}
       </PageCardContent>
     </PageCard>
   );
