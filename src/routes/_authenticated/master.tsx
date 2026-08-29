@@ -54,9 +54,9 @@ function MasterLayout() {
       }}
       className="w-full"
     >
-      <TabsList className="w-full justify-start overflow-x-auto sm:w-fit">
+      <TabsList className="w-full justify-start overflow-x-auto md:overflow-visible">
         {tabs.map((tab) => (
-          <TabsTrigger key={tab.value} value={tab.value} className="shrink-0">
+          <TabsTrigger key={tab.value} value={tab.value} className="shrink-0 md:flex-1">
             {tab.label}
           </TabsTrigger>
         ))}
