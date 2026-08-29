@@ -5,7 +5,14 @@ import {
   type SortingState,
   useTable,
 } from '@tanstack/react-table';
-import { SearchIcon, Trash2Icon, UserPlusIcon } from 'lucide-react';
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  ChevronsUpDownIcon,
+  SearchIcon,
+  Trash2Icon,
+  UserPlusIcon,
+} from 'lucide-react';
 import * as React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -47,6 +54,51 @@ import {
   type UsersTableRow,
 } from './columns';
 import { type UsersTableFeatures, usersTableFeatures } from './users-table-features';
+
+function ariaSortValue(sorted: false | 'asc' | 'desc') {
+  if (sorted === 'asc') return 'ascending';
+  if (sorted === 'desc') return 'descending';
+  return 'none';
+}
+
+function UsersTableSortHeader({
+  canSort,
+  sorted,
+  onToggle,
+  children,
+}: {
+  canSort: boolean;
+  sorted: false | 'asc' | 'desc';
+  onToggle?: (event: unknown) => void;
+  children: React.ReactNode;
+}) {
+  if (!canSort) {
+    return children;
+  }
+
+  const SortIcon =
+    sorted === 'asc' ? ArrowUpIcon : sorted === 'desc' ? ArrowDownIcon : ChevronsUpDownIcon;
+
+  return (
+    <button
+      type="button"
+      className="group inline-flex cursor-pointer items-center gap-1.5 rounded-md text-left font-semibold outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
+      onClick={onToggle}
+    >
+      {children}
+      <span className="inline-flex size-4 shrink-0 items-center justify-center">
+        <SortIcon
+          aria-hidden
+          className={
+            sorted
+              ? 'size-3.5 text-foreground'
+              : 'size-3.5 text-muted-foreground/50 group-hover:text-muted-foreground'
+          }
+        />
+      </span>
+    </button>
+  );
+}
 
 interface UsersTableProps<TData extends RowData> {
   columns: ColumnDef<UsersTableFeatures, TData>[];
@@ -143,11 +195,28 @@ export function UsersTable<TData extends RowData>({
           <TableHeader className="bg-muted">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent">
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="font-semibold">
-                    {header.isPlaceholder ? null : <table.FlexRender header={header} />}
-                  </TableHead>
-                ))}
+                {headerGroup.headers.map((header) => {
+                  const canSort = header.column.getCanSort();
+                  const sorted = header.column.getIsSorted();
+
+                  return (
+                    <TableHead
+                      key={header.id}
+                      className="font-semibold"
+                      aria-sort={canSort ? ariaSortValue(sorted) : undefined}
+                    >
+                      {header.isPlaceholder ? null : (
+                        <UsersTableSortHeader
+                          canSort={canSort}
+                          sorted={sorted}
+                          onToggle={header.column.getToggleSortingHandler()}
+                        >
+                          <table.FlexRender header={header} />
+                        </UsersTableSortHeader>
+                      )}
+                    </TableHead>
+                  );
+                })}
               </TableRow>
             ))}
           </TableHeader>

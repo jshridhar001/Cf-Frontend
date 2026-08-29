@@ -1,4 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table';
+import { format } from 'date-fns';
 import { MoreHorizontalIcon, SquarePenIcon, Trash2Icon } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -22,7 +23,6 @@ export type UsersTableMeta = {
 };
 
 export const USER_ROLES = [
-  'SUPER_DEVELOPER',
   'MANAGING_DIRECTOR',
   'PROGRAMME_MANAGER',
   'ACCOUNTS_SETTLEMENTS_MANAGER',
@@ -121,11 +121,7 @@ export function UserRowActions({
 export function formatCreatedAt(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat('en-IN', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  }).format(date);
+  return format(date, 'd MMM yyyy, h:mm a').replace(/AM|PM/g, (period) => period.toLowerCase());
 }
 
 const columnHelper = createColumnHelper<UsersTableFeatures, UsersTableRow>();
