@@ -255,9 +255,9 @@ export function UsersTable<TData extends RowData>({
                       <AvatarFallback>{getUserInitials(user.name)}</AvatarFallback>
                     </Avatar>
                   </ItemMedia>
-                  <ItemContent className="min-w-0">
+                  <ItemContent className="min-w-0 pr-1">
                     <ItemTitle>{user.name}</ItemTitle>
-                    <ItemDescription className="line-clamp-1 break-all">
+                    <ItemDescription className="line-clamp-2 break-all">
                       {user.email}
                     </ItemDescription>
                   </ItemContent>
@@ -265,15 +265,12 @@ export function UsersTable<TData extends RowData>({
                     <UserRowActions user={user} onEdit={onEditUser} onDelete={onDeleteUser} />
                   </ItemActions>
                 </ItemHeader>
-                <ItemFooter className="mt-1 items-start border-t border-border/60 pt-2.5">
+                <ItemFooter className="mt-1 flex-col items-start gap-1.5 border-t border-border/60 pt-2.5">
                   <RoleBadge
                     role={user.role}
-                    className="h-auto max-w-[min(100%,12.5rem)] whitespace-normal text-left leading-snug"
+                    className="h-auto max-w-full whitespace-normal text-left leading-snug"
                   />
-                  <time
-                    dateTime={user.createdAt}
-                    className="shrink-0 whitespace-nowrap text-xs text-muted-foreground"
-                  >
+                  <time dateTime={user.createdAt} className="px-2 text-xs text-muted-foreground">
                     {formatCreatedAt(user.createdAt)}
                   </time>
                 </ItemFooter>
