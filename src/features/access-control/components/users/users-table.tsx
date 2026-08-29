@@ -17,6 +17,7 @@ import {
   ItemDescription,
   ItemFooter,
   ItemGroup,
+  ItemHeader,
   ItemMedia,
   ItemTitle,
 } from '@/components/ui/item';
@@ -42,6 +43,7 @@ import {
   RoleBadge,
   USER_ROLES,
   UserRowActions,
+  type UsersTableMeta,
   type UsersTableRow,
 } from './columns';
 import { type UsersTableFeatures, usersTableFeatures } from './users-table-features';
@@ -49,9 +51,22 @@ import { type UsersTableFeatures, usersTableFeatures } from './users-table-featu
 interface UsersTableProps<TData extends RowData> {
   columns: ColumnDef<UsersTableFeatures, TData>[];
   data: TData[];
+  onAddUser?: () => void;
+  onDeleteAll?: () => void;
+  deleteAllDisabled?: boolean;
+  onEditUser?: (user: UsersTableRow) => void;
+  onDeleteUser?: (user: UsersTableRow) => void;
 }
 
-export function UsersTable<TData extends RowData>({ columns, data }: UsersTableProps<TData>) {
+export function UsersTable<TData extends RowData>({
+  columns,
+  data,
+  onAddUser,
+  onDeleteAll,
+  deleteAllDisabled,
+  onEditUser,
+  onDeleteUser,
+}: UsersTableProps<TData>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
 
@@ -61,6 +76,10 @@ export function UsersTable<TData extends RowData>({ columns, data }: UsersTableP
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    meta: {
+      onEditUser,
+      onDeleteUser,
+    } satisfies UsersTableMeta,
     state: {
       sorting,
       columnFilters,
@@ -102,11 +121,17 @@ export function UsersTable<TData extends RowData>({ columns, data }: UsersTableP
           </SelectContent>
         </Select>
         <div className="hidden items-center gap-2 sm:ml-auto md:flex">
-          <Button type="button" variant="destructive" size="sm">
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
+            disabled={deleteAllDisabled}
+            onClick={onDeleteAll}
+          >
             <Trash2Icon data-icon="inline-start" />
             Delete All
           </Button>
-          <Button type="button" size="sm">
+          <Button type="button" size="sm" onClick={onAddUser}>
             <UserPlusIcon data-icon="inline-start" />
             Add User
           </Button>
@@ -153,25 +178,35 @@ export function UsersTable<TData extends RowData>({ columns, data }: UsersTableP
           table.getRowModel().rows.map((row) => {
             const user = row.original as UsersTableRow;
             return (
-              <Item key={row.id} variant="outline" size="sm">
-                <ItemMedia>
-                  <Avatar size="sm">
-                    {user.image ? <AvatarImage alt="" src={user.image} /> : null}
-                    <AvatarFallback>{getUserInitials(user.name)}</AvatarFallback>
-                  </Avatar>
-                </ItemMedia>
-                <ItemContent>
-                  <ItemTitle>{user.name}</ItemTitle>
-                  <ItemDescription className="line-clamp-1">{user.email}</ItemDescription>
-                </ItemContent>
-                <ItemActions>
-                  <UserRowActions user={user} />
-                </ItemActions>
-                <ItemFooter>
-                  <RoleBadge role={user.role} />
-                  <span className="text-sm text-muted-foreground">
+              <Item key={row.id} variant="outline" size="sm" className="items-start">
+                <ItemHeader className="gap-3">
+                  <ItemMedia>
+                    <Avatar size="sm">
+                      {user.image ? <AvatarImage alt="" src={user.image} /> : null}
+                      <AvatarFallback>{getUserInitials(user.name)}</AvatarFallback>
+                    </Avatar>
+                  </ItemMedia>
+                  <ItemContent className="min-w-0">
+                    <ItemTitle>{user.name}</ItemTitle>
+                    <ItemDescription className="line-clamp-1 break-all">
+                      {user.email}
+                    </ItemDescription>
+                  </ItemContent>
+                  <ItemActions className="shrink-0 self-start">
+                    <UserRowActions user={user} onEdit={onEditUser} onDelete={onDeleteUser} />
+                  </ItemActions>
+                </ItemHeader>
+                <ItemFooter className="mt-1 items-start border-t border-border/60 pt-2.5">
+                  <RoleBadge
+                    role={user.role}
+                    className="h-auto max-w-[min(100%,12.5rem)] whitespace-normal text-left leading-snug"
+                  />
+                  <time
+                    dateTime={user.createdAt}
+                    className="shrink-0 whitespace-nowrap text-xs text-muted-foreground"
+                  >
                     {formatCreatedAt(user.createdAt)}
-                  </span>
+                  </time>
                 </ItemFooter>
               </Item>
             );

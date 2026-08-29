@@ -1,14 +1,10 @@
-import type { Role } from '../types';
-
-export const ADMIN_ALLOWED_ROLES = [
-  'MANAGING_DIRECTOR',
+const HEAD_OFFICE_ROLES = [
   'SUPER_DEVELOPER',
+  'MANAGING_DIRECTOR',
   'PROGRAMME_MANAGER',
-] as const satisfies readonly Role[];
-
-export type AdminAllowedRole = (typeof ADMIN_ALLOWED_ROLES)[number];
+] as const;
 
 export function canAccessAdminRoutes(role?: string | null): boolean {
   if (!role) return false;
-  return (ADMIN_ALLOWED_ROLES as readonly string[]).includes(role);
+  return (HEAD_OFFICE_ROLES as readonly string[]).includes(role);
 }

@@ -1,6 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table';
 import { MoreHorizontalIcon, SquarePenIcon, Trash2Icon } from 'lucide-react';
-import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,18 +11,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { Role } from '@/features/auth/types';
 import type { AccessControlUser } from '@/features/types';
 import type { UsersTableFeatures } from './users-table-features';
 
 export type UsersTableRow = AccessControlUser;
 
+export type UsersTableMeta = {
+  onEditUser?: (user: UsersTableRow) => void;
+  onDeleteUser?: (user: UsersTableRow) => void;
+};
+
 export const USER_ROLES = [
-  'MANAGING_DIRECTOR',
   'SUPER_DEVELOPER',
+  'MANAGING_DIRECTOR',
   'PROGRAMME_MANAGER',
+  'ACCOUNTS_SETTLEMENTS_MANAGER',
+  'FIELD_OPERATIONS_MANAGER',
+  'ACCOUNTS_SEEDS_SUPPLY_MANAGER',
   'FIELD_OFFICER',
-] as const satisfies readonly Role[];
+] as const;
 
 export function formatRoleLabel(role: string) {
   return role
@@ -53,8 +59,12 @@ function roleBadgeVariant(role: string) {
   }
 }
 
-export function RoleBadge({ role }: { role: string }) {
-  return <Badge variant={roleBadgeVariant(role)}>{formatRoleLabel(role)}</Badge>;
+export function RoleBadge({ role, className }: { role: string; className?: string }) {
+  return (
+    <Badge variant={roleBadgeVariant(role)} className={className}>
+      {formatRoleLabel(role)}
+    </Badge>
+  );
 }
 
 export function UserIdentity({ user }: { user: UsersTableRow }) {
@@ -69,7 +79,15 @@ export function UserIdentity({ user }: { user: UsersTableRow }) {
   );
 }
 
-export function UserRowActions({ user }: { user: UsersTableRow }) {
+export function UserRowActions({
+  user,
+  onEdit,
+  onDelete,
+}: {
+  user: UsersTableRow;
+  onEdit?: (user: UsersTableRow) => void;
+  onDelete?: (user: UsersTableRow) => void;
+}) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -87,14 +105,11 @@ export function UserRowActions({ user }: { user: UsersTableRow }) {
           Actions
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => toast.info(`Edit ${user.name} coming soon.`)}>
+        <DropdownMenuItem onClick={() => onEdit?.(user)}>
           <SquarePenIcon />
           Edit
         </DropdownMenuItem>
-        <DropdownMenuItem
-          variant="destructive"
-          onClick={() => toast.info(`Delete ${user.name} coming soon.`)}
-        >
+        <DropdownMenuItem variant="destructive" onClick={() => onDelete?.(user)}>
           <Trash2Icon />
           Delete
         </DropdownMenuItem>
@@ -146,11 +161,18 @@ export const columns = columnHelper.columns([
   columnHelper.display({
     id: 'actions',
     header: () => <div className="text-right">Actions</div>,
-    cell: ({ row }) => (
-      <div className="flex justify-end">
-        <UserRowActions user={row.original} />
-      </div>
-    ),
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as UsersTableMeta | undefined;
+      return (
+        <div className="flex justify-end">
+          <UserRowActions
+            user={row.original}
+            onEdit={meta?.onEditUser}
+            onDelete={meta?.onDeleteUser}
+          />
+        </div>
+      );
+    },
     enableSorting: false,
   }),
 ]);
