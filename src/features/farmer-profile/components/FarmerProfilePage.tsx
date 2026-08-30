@@ -1,11 +1,32 @@
-import { Link } from '@tanstack/react-router';
-import { ArrowLeft, FileText, User } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { useCanGoBack, useRouter } from '@tanstack/react-router';
+import {
+  ArrowLeft,
+  FileText,
+  LandPlot,
+  MapPin,
+  MoreHorizontalIcon,
+  Package,
+  Phone,
+  SquarePenIcon,
+  Trash2Icon,
+  Truck,
+  User,
+  Users,
+} from 'lucide-react';
+import { type ReactNode, useState } from 'react';
 import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CardDescription, CardTitle } from '@/components/ui/card';
+import { CardAction, CardTitle } from '@/components/ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Empty,
   EmptyContent,
@@ -14,38 +35,36 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty';
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemFooter,
-  ItemGroup,
-  ItemHeader,
-  ItemTitle,
-} from '@/components/ui/item';
 import { Separator } from '@/components/ui/separator';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useFarmer } from '@/features/farmers/api/use-farmer';
-import {
-  type Farmer,
-  type FarmerContract,
-  formatContractAcres,
-  formatContractDate,
-  formatFarmerAccountType,
-  formatFarmerStatus,
-} from '@/features/farmers/types';
+import { DeleteFarmerDialog } from '@/features/farmers/overview/components/delete-farmer-dialog';
+import { FarmerDrawer } from '@/features/farmers/overview/components/farmer-drawer';
+import { type Farmer, formatFarmerAccountType, formatFarmerStatus } from '@/features/farmers/types';
 import { getApiErrorMessage, getHttpStatusFromError } from '@/lib/api-client';
+
+const PROFILE_TABS = [
+  { value: 'contract', label: 'Farmer Contract' },
+  { value: 'requisitions', label: 'Seed Requisitions' },
+  { value: 'dispatches', label: 'Seed Dispatches' },
+  { value: 'fields', label: 'Seed & fields' },
+] as const;
 
 function displayValue(value: string | null | undefined) {
   if (!value) return '—';
   return value;
+}
+
+function getInitials(name: string) {
+  return (
+    name
+      .split(/\s+/)
+      .map((part) => part[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase() || '?'
+  );
 }
 
 function ContractUrlLink({ href }: { href: string }) {
@@ -55,207 +74,311 @@ function ContractUrlLink({ href }: { href: string }) {
       href={href}
       target="_blank"
       rel="noreferrer"
-      className="font-medium break-all text-primary underline underline-offset-4"
+      className="font-semibold break-all text-primary underline underline-offset-4"
     >
       {href}
     </a>
   );
 }
 
-function ProfileField({ label, value }: { label: string; value: ReactNode }) {
+function useGoBack() {
+  const router = useRouter();
+  const canGoBack = useCanGoBack();
+
+  return () => {
+    if (canGoBack) {
+      router.history.back();
+      return;
+    }
+    void router.navigate({ to: '/farmers/overview' });
+  };
+}
+
+function BackButton({ onClick }: { onClick: () => void }) {
   return (
-    <div className="flex min-w-0 flex-col gap-1 sm:grid sm:grid-cols-[10rem_1fr] sm:items-baseline sm:gap-4">
+    <Button
+      type="button"
+      variant="ghost"
+      className="h-auto min-h-11 w-fit gap-2 px-2 text-muted-foreground md:min-h-8"
+      onClick={onClick}
+    >
+      <ArrowLeft />
+      Back
+    </Button>
+  );
+}
+
+function DetailField({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div className="flex min-w-0 flex-col gap-1">
       <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="text-sm font-medium break-words">{value}</dd>
+      <dd className="text-sm font-semibold wrap-break-word">{value}</dd>
     </div>
   );
 }
 
-function FarmerProfileFields({ farmer }: { farmer: Farmer }) {
+function StatTile({
+  icon: Icon,
+  label,
+  value,
+  hint,
+}: {
+  icon: typeof Package;
+  label: string;
+  value: string;
+  hint: string;
+}) {
   return (
-    <dl className="flex flex-col gap-4">
-      <ProfileField label="Name" value={farmer.name} />
-      <ProfileField label="Account" value={farmer.accountNumber} />
-      <ProfileField label="Mobile" value={farmer.mobileNumber} />
-      <ProfileField label="Account type" value={formatFarmerAccountType(farmer.accountType)} />
-      <ProfileField label="Family" value={displayValue(farmer.family?.name ?? farmer.familyName)} />
-      <ProfileField
-        label="Family account"
-        value={displayValue(farmer.family?.accountNumber ?? farmer.familyAccountNumber)}
-      />
-      <ProfileField label="Station" value={displayValue(farmer.station?.name)} />
-      <ProfileField label="Locality" value={displayValue(farmer.locality?.name)} />
-      <ProfileField label="Status" value={formatFarmerStatus(farmer.status)} />
-      <ProfileField label="Aadhaar" value={displayValue(farmer.aadharNumber)} />
-      <ProfileField label="PAN" value={displayValue(farmer.panNumber)} />
-      <ProfileField
-        label="Contract URL"
-        value={<ContractUrlLink href={farmer.contractUrl ?? ''} />}
-      />
-      <ProfileField label="Bank name" value={displayValue(farmer.bankName)} />
-      <ProfileField label="IFSC code" value={displayValue(farmer.ifscCode)} />
-      <ProfileField label="Bank account number" value={displayValue(farmer.bankAccountNumber)} />
-    </dl>
+    <div className="flex min-w-0 items-center gap-3 rounded-2xl bg-muted/50 px-3 py-3 sm:px-4">
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <Icon className="size-4" aria-hidden />
+      </div>
+      <div className="min-w-0">
+        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">{label}</p>
+        <p className="mt-0.5 truncate">
+          <span className="text-lg font-semibold tracking-tight">{value}</span>{' '}
+          <span className="text-sm text-muted-foreground">{hint}</span>
+        </p>
+      </div>
+    </div>
   );
 }
 
-function FarmerContractsSection({ contracts }: { contracts: FarmerContract[] }) {
-  if (contracts.length === 0) {
-    return (
-      <Empty className="rounded-xl border bg-muted/10">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <FileText />
-          </EmptyMedia>
-          <EmptyTitle>No contracts yet</EmptyTitle>
-          <EmptyDescription>This farmer does not have any contracts on file.</EmptyDescription>
-        </EmptyHeader>
-      </Empty>
-    );
-  }
+function ProfileSkeleton() {
+  return (
+    <div className="flex flex-col gap-4 sm:gap-6">
+      <Skeleton className="h-11 w-24 rounded-4xl md:h-8" />
+      <PageCard>
+        <PageCardHeader>
+          <div className="flex items-start gap-3 sm:gap-4">
+            <Skeleton className="size-14 shrink-0 rounded-2xl sm:size-16" />
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              <Skeleton className="h-7 w-48 max-w-full" />
+              <Skeleton className="h-4 w-40 max-w-full" />
+              <Skeleton className="h-5 w-64 max-w-full" />
+            </div>
+          </div>
+        </PageCardHeader>
+        <PageCardContent className="flex flex-col gap-6">
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+            <Skeleton className="h-12" />
+            <Skeleton className="h-12" />
+            <Skeleton className="h-12" />
+          </div>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <Skeleton className="h-16" />
+            <Skeleton className="h-16" />
+            <Skeleton className="h-16" />
+            <Skeleton className="h-16" />
+          </div>
+        </PageCardContent>
+      </PageCard>
+      <Skeleton className="h-11 w-full rounded-full" />
+    </div>
+  );
+}
+
+function FarmerIdentityCard({
+  farmer,
+  onEdit,
+  onDelete,
+}: {
+  farmer: Farmer;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const familyLabel = farmer.family?.name ?? farmer.familyName;
+  const station = farmer.station?.name;
+  const locality = farmer.locality?.name;
 
   return (
-    <>
-      <div className="hidden overflow-hidden rounded-2xl border md:block">
-        <Table>
-          <TableHeader className="bg-muted">
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="font-semibold">Variety</TableHead>
-              <TableHead className="font-semibold">Date</TableHead>
-              <TableHead className="font-semibold">Acres</TableHead>
-              <TableHead className="font-semibold">Contract URL</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {contracts.map((contract) => (
-              <TableRow key={contract.id || `${contract.variety}-${contract.date}`}>
-                <TableCell>{displayValue(contract.variety)}</TableCell>
-                <TableCell>{formatContractDate(contract.date)}</TableCell>
-                <TableCell>{formatContractAcres(contract.acres)}</TableCell>
-                <TableCell>
-                  <ContractUrlLink href={contract.contractUrl} />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-
-      <ItemGroup className="md:hidden">
-        {contracts.map((contract) => (
-          <Item
-            key={contract.id || `${contract.variety}-${contract.date}`}
+    <PageCard>
+      <PageCardHeader className="has-data-[slot=card-action]:grid-cols-[1fr_auto]">
+        <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+          <Avatar size="lg" className="size-14 rounded-2xl after:rounded-2xl sm:size-16">
+            <AvatarFallback className="rounded-2xl bg-primary/10 font-semibold text-primary">
+              {getInitials(farmer.name)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0 flex-1 pr-2">
+            <CardTitle className="scroll-m-20 text-2xl font-semibold tracking-tight">
+              {farmer.name}
+            </CardTitle>
+            <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+              <span>Account #{farmer.accountNumber}</span>
+              <span aria-hidden>·</span>
+              <span className="inline-flex items-center gap-1.5">
+                <Phone className="size-3.5 shrink-0" aria-hidden />
+                {farmer.mobileNumber}
+              </span>
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              {station ? (
+                <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+                  <MapPin className="size-3.5 shrink-0" aria-hidden />
+                  {station}
+                </span>
+              ) : null}
+              {locality ? <span className="text-sm text-muted-foreground">{locality}</span> : null}
+              <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+                <Users className="size-3.5 shrink-0" aria-hidden />
+                {familyLabel || 'Independent'}
+              </span>
+              <Badge variant="secondary">{formatFarmerAccountType(farmer.accountType)}</Badge>
+              <Badge variant={farmer.status === 'ACTIVE' ? 'default' : 'outline'}>
+                {formatFarmerStatus(farmer.status)}
+              </Badge>
+            </div>
+          </div>
+        </div>
+        <CardAction className="flex items-center gap-1">
+          <Button
+            type="button"
             variant="outline"
-            size="sm"
-            className="items-start"
+            size="icon"
+            className="min-h-11 min-w-11 md:hidden"
+            aria-label={`Edit ${farmer.name}`}
+            onClick={onEdit}
           >
-            <ItemHeader className="gap-3">
-              <ItemContent className="min-w-0 pr-1">
-                <ItemTitle>{displayValue(contract.variety)}</ItemTitle>
-                <ItemDescription>
-                  {formatContractAcres(contract.acres)} acres · {formatContractDate(contract.date)}
-                </ItemDescription>
-              </ItemContent>
-            </ItemHeader>
-            <ItemFooter className="mt-1 flex-col items-start gap-1.5 border-t border-border/60 pt-2.5">
-              <ContractUrlLink href={contract.contractUrl} />
-            </ItemFooter>
-          </Item>
-        ))}
-      </ItemGroup>
-    </>
+            <SquarePenIcon />
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="hidden md:inline-flex"
+            onClick={onEdit}
+          >
+            <SquarePenIcon data-icon="inline-start" />
+            Edit
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="min-h-11 min-w-11 md:size-9 md:min-h-9 md:min-w-9"
+                aria-label="More actions"
+              >
+                <MoreHorizontalIcon />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-44">
+              <DropdownMenuLabel className="font-semibold tracking-wide text-muted-foreground uppercase">
+                Actions
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive" onClick={onDelete}>
+                <Trash2Icon />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </CardAction>
+      </PageCardHeader>
+      <PageCardContent className="flex flex-col gap-6">
+        <Separator />
+        <dl className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+          <DetailField label="Aadhaar number" value={displayValue(farmer.aadharNumber)} />
+          <DetailField label="PAN number" value={displayValue(farmer.panNumber)} />
+          <DetailField
+            label="Contract"
+            value={<ContractUrlLink href={farmer.contractUrl ?? ''} />}
+          />
+          <DetailField label="Bank name" value={displayValue(farmer.bankName)} />
+          <DetailField label="IFSC code" value={displayValue(farmer.ifscCode)} />
+          <DetailField label="Bank account number" value={displayValue(farmer.bankAccountNumber)} />
+        </dl>
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatTile icon={Package} label="Seed bags received" value="0" hint="0 approved" />
+          <StatTile icon={FileText} label="Seed requisitions" value="0" hint="0 approved" />
+          <StatTile icon={Truck} label="Seed dispatches" value="0" hint="0 delivered" />
+          <StatTile icon={LandPlot} label="Seed and Fields" value="0" hint="acres" />
+        </div>
+      </PageCardContent>
+    </PageCard>
   );
 }
 
 export default function FarmerProfilePage({ id }: { id: string }) {
   const { data: farmer, isPending, isError, error } = useFarmer(id);
+  const goBack = useGoBack();
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const notFound = isError && getHttpStatusFromError(error) === 404;
 
   if (isPending && farmer === undefined) {
-    return (
-      <PageCard>
-        <PageCardContent>
-          <p className="text-sm text-muted-foreground">Loading farmer…</p>
-        </PageCardContent>
-      </PageCard>
-    );
+    return <ProfileSkeleton />;
   }
 
   if (notFound || (!isPending && !farmer && !isError)) {
     return (
-      <PageCard>
-        <PageCardContent>
-          <Empty className="border-0 py-16">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <User />
-              </EmptyMedia>
-              <EmptyTitle>Farmer not found</EmptyTitle>
-              <EmptyDescription>No farmer exists for this id.</EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent>
-              <Button asChild>
-                <Link to="/farmers/overview">Back to overview</Link>
-              </Button>
-            </EmptyContent>
-          </Empty>
-        </PageCardContent>
-      </PageCard>
+      <div className="flex flex-col gap-4 sm:gap-6">
+        <BackButton onClick={goBack} />
+        <PageCard>
+          <PageCardContent>
+            <Empty className="border-0 py-16">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <User />
+                </EmptyMedia>
+                <EmptyTitle>Farmer not found</EmptyTitle>
+                <EmptyDescription>No farmer exists for this id.</EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent>
+                <Button type="button" onClick={goBack}>
+                  Back
+                </Button>
+              </EmptyContent>
+            </Empty>
+          </PageCardContent>
+        </PageCard>
+      </div>
     );
   }
 
   if (isError || !farmer) {
     return (
-      <PageCard>
-        <PageCardContent>
-          <p className="text-sm text-destructive">{getApiErrorMessage(error)}</p>
-        </PageCardContent>
-      </PageCard>
+      <div className="flex flex-col gap-4 sm:gap-6">
+        <BackButton onClick={goBack} />
+        <PageCard>
+          <PageCardContent>
+            <p className="text-sm text-destructive">{getApiErrorMessage(error)}</p>
+          </PageCardContent>
+        </PageCard>
+      </div>
     );
   }
 
-  const contracts = farmer.contracts ?? [];
-
   return (
-    <PageCard>
-      <PageCardHeader>
-        <div className="flex items-start gap-3">
-          <Button
-            asChild
-            variant="ghost"
-            size="icon"
-            className="size-8 min-h-11 min-w-11 shrink-0 md:min-h-8 md:min-w-8"
-          >
-            <Link to="/farmers/overview" aria-label="Back to overview">
-              <ArrowLeft />
-            </Link>
-          </Button>
-          <div className="min-w-0 flex-1">
-            <CardTitle>{farmer.name}</CardTitle>
-            <CardDescription>Account {farmer.accountNumber}</CardDescription>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <Badge variant={farmer.status === 'ACTIVE' ? 'default' : 'secondary'}>
-              {formatFarmerStatus(farmer.status)}
-            </Badge>
-            <Avatar>
-              <AvatarFallback className="bg-primary/10 text-primary">
-                <User className="size-4" />
-              </AvatarFallback>
-            </Avatar>
-          </div>
-        </div>
-      </PageCardHeader>
-      <PageCardContent>
-        <div className="flex flex-col gap-6">
-          <FarmerProfileFields farmer={farmer} />
-          <Separator />
-          <div className="flex flex-col gap-4">
-            <h2 className="scroll-m-20 text-xl font-semibold tracking-tight">Contracts</h2>
-            <FarmerContractsSection contracts={contracts} />
-          </div>
-        </div>
-      </PageCardContent>
-    </PageCard>
+    <div className="flex flex-col gap-4 sm:gap-6">
+      <BackButton onClick={goBack} />
+      <FarmerIdentityCard
+        farmer={farmer}
+        onEdit={() => setEditOpen(true)}
+        onDelete={() => setDeleteOpen(true)}
+      />
+      <Tabs defaultValue="contract" className="w-full gap-4">
+        <TabsList className="h-11 w-full justify-start overflow-x-auto md:h-10 md:overflow-visible">
+          {PROFILE_TABS.map((tab) => (
+            <TabsTrigger key={tab.value} value={tab.value} className="shrink-0 md:flex-1">
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        {PROFILE_TABS.map((tab) => (
+          <TabsContent key={tab.value} value={tab.value} className="pt-2">
+            <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">{tab.label}</h4>
+          </TabsContent>
+        ))}
+      </Tabs>
+      <FarmerDrawer farmer={farmer} open={editOpen} onOpenChange={setEditOpen} />
+      <DeleteFarmerDialog
+        farmer={deleteOpen ? farmer : null}
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        onDeleted={goBack}
+      />
+    </div>
   );
 }

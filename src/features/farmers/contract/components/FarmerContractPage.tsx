@@ -1,4 +1,4 @@
-import { FileText, PlusIcon, Search } from 'lucide-react';
+import { FileText, PlusIcon, Search, UserPlus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,7 @@ import {
 import { useFarmers } from '@/features/farmers/api/use-farmers';
 import { ContractDrawer } from '@/features/farmers/contract/components/contract-drawer';
 import { DeleteContractDialog } from '@/features/farmers/contract/components/delete-contract-dialog';
+import { FarmerDrawer } from '@/features/farmers/overview/components/farmer-drawer';
 import {
   type FarmerContractRow,
   flattenFarmerContracts,
@@ -73,6 +74,7 @@ export default function FarmerContractPage() {
   const { data: farmers, isPending, isError, error } = useFarmers();
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
+  const [createFarmerOpen, setCreateFarmerOpen] = useState(false);
   const [editingContract, setEditingContract] = useState<FarmerContractRow | null>(null);
   const [deletingContract, setDeletingContract] = useState<FarmerContractRow | null>(null);
 
@@ -113,6 +115,16 @@ export default function FarmerContractPage() {
         <CardAction className="flex items-center gap-1 md:hidden">
           <Button
             type="button"
+            variant="outline"
+            size="icon"
+            className="min-h-11 min-w-11"
+            aria-label="Add farmer"
+            onClick={() => setCreateFarmerOpen(true)}
+          >
+            <UserPlus />
+          </Button>
+          <Button
+            type="button"
             size="icon"
             className="min-h-11 min-w-11"
             aria-label="Add contract"
@@ -147,6 +159,15 @@ export default function FarmerContractPage() {
                 />
               </div>
               <div className="hidden items-center gap-2 sm:ml-auto md:flex">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCreateFarmerOpen(true)}
+                >
+                  <UserPlus data-icon="inline-start" />
+                  Add farmer
+                </Button>
                 <Button type="button" size="sm" onClick={() => setCreateOpen(true)}>
                   <PlusIcon data-icon="inline-start" />
                   Add contract
@@ -243,6 +264,7 @@ export default function FarmerContractPage() {
         )}
       </PageCardContent>
 
+      <FarmerDrawer farmer={null} open={createFarmerOpen} onOpenChange={setCreateFarmerOpen} />
       <ContractDrawer
         farmers={farmerList}
         contract={editingContract}

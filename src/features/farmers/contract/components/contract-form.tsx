@@ -107,6 +107,7 @@ export function ContractForm({ farmers, contract, onSuccess, onCancel }: Contrac
   return (
     <form
       id={isEdit ? 'edit-contract-form' : 'create-contract-form'}
+      className="min-w-0 max-w-full overflow-x-hidden"
       onSubmit={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -137,7 +138,11 @@ export function ContractForm({ farmers, contract, onSuccess, onCancel }: Contrac
                       if (value) field.handleChange(value);
                     }}
                   >
-                    <SelectTrigger id={field.name} aria-invalid={isInvalid} className="w-full">
+                    <SelectTrigger
+                      id={field.name}
+                      aria-invalid={isInvalid}
+                      className="w-full min-w-0"
+                    >
                       <SelectValue placeholder="Select farmer" />
                     </SelectTrigger>
                     <SelectContent>
@@ -169,7 +174,11 @@ export function ContractForm({ farmers, contract, onSuccess, onCancel }: Contrac
                     if (value) field.handleChange(value);
                   }}
                 >
-                  <SelectTrigger id={field.name} aria-invalid={isInvalid} className="w-full">
+                  <SelectTrigger
+                    id={field.name}
+                    aria-invalid={isInvalid}
+                    className="w-full min-w-0"
+                  >
                     <SelectValue placeholder="Select variety" />
                   </SelectTrigger>
                   <SelectContent>
@@ -196,6 +205,7 @@ export function ContractForm({ farmers, contract, onSuccess, onCancel }: Contrac
                   id={field.name}
                   name={field.name}
                   type="date"
+                  className="max-w-full [&::-webkit-calendar-picker-indicator]:shrink-0 [&::-webkit-datetime-edit]:min-w-0"
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
