@@ -31,7 +31,7 @@ function FarmerRow({
   muted?: boolean;
 }) {
   return (
-    <div className="flex min-w-0 items-center gap-3">
+    <div className="flex min-w-0 items-center gap-2">
       <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
       <p
         className={cn(
@@ -77,32 +77,34 @@ export function FarmerCard({
   const isActive = farmer.status === 'ACTIVE';
 
   return (
-    <Card className="gap-6 py-6">
+    <Card size="sm">
       <Link
         to="/farmers/$id"
         params={{ id: farmer.id }}
-        className="flex flex-col gap-5 rounded-t-4xl outline-none hover:bg-muted/20 focus-visible:ring-3 focus-visible:ring-ring/50 sm:gap-6"
+        className="flex flex-col gap-3 rounded-t-4xl outline-none hover:bg-muted/20 focus-visible:ring-3 focus-visible:ring-ring/50"
       >
-        <CardHeader className="px-5 sm:px-6">
-          <CardTitle className="pr-3 font-heading text-lg font-semibold tracking-tight">
+        <CardHeader>
+          <CardTitle className="pr-3">
             {farmer.name}{' '}
-            <span className="font-normal text-muted-foreground">(#{farmer.accountNumber})</span>
+            <span className="text-sm font-normal text-muted-foreground">
+              (#{farmer.accountNumber})
+            </span>
           </CardTitle>
           <CardAction>
-            <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
-              <User className="size-5 text-primary" aria-hidden />
+            <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
+              <User className="size-4 text-primary" aria-hidden />
             </div>
           </CardAction>
         </CardHeader>
-        <CardContent className="flex flex-col gap-3 px-5 sm:px-6">
+        <CardContent className="flex flex-col gap-2">
           <FarmerRow icon={Phone} value={farmer.mobileNumber} />
           <FarmerRow icon={MapPin} value={placeLabel} muted />
         </CardContent>
       </Link>
 
-      <Separator className="mx-5 sm:mx-6" />
+      <Separator className="mx-4" />
 
-      <CardFooter className="justify-between gap-3 px-5 sm:px-6">
+      <CardFooter className="justify-between gap-3">
         <Badge
           variant="outline"
           className={

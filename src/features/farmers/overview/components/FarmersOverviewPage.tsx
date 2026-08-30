@@ -44,9 +44,9 @@ function FarmersOverviewSkeleton() {
       <Skeleton className="h-16 w-full rounded-2xl" />
       <Skeleton className="h-36 w-full rounded-xl" />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <Skeleton className="h-48 rounded-4xl" />
-        <Skeleton className="h-48 rounded-4xl" />
-        <Skeleton className="hidden h-48 rounded-4xl sm:block" />
+        <Skeleton className="h-36 rounded-2xl" />
+        <Skeleton className="h-36 rounded-2xl" />
+        <Skeleton className="hidden h-36 rounded-2xl sm:block" />
       </div>
     </div>
   );
@@ -88,8 +88,8 @@ export default function FarmersOverviewPage() {
     <div className="flex min-w-0 flex-1 flex-col gap-4 sm:gap-6">
       <Item variant="outline" size="sm">
         <ItemMedia variant="icon">
-          <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
-            <Users className="size-5 text-primary" />
+          <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
+            <Users className="size-4 text-primary" />
           </div>
         </ItemMedia>
         <ItemContent>

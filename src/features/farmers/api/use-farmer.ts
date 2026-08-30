@@ -1,11 +1,19 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
-import type { Farmer, FarmerResponse } from '@/features/farmers/types';
+import {
+  type Farmer,
+  type FarmerResponse,
+  normalizeFarmerContracts,
+} from '@/features/farmers/types';
 import apiClient from '@/lib/api-client';
 import { farmersKeys } from './query-keys';
 
 async function fetchFarmer(id: string): Promise<Farmer> {
   const { data } = await apiClient.get<FarmerResponse>(`/v1/farmers/${id}`);
-  return data.data;
+  const farmer = data.data;
+  return {
+    ...farmer,
+    contracts: normalizeFarmerContracts(farmer.contracts),
+  };
 }
 
 export function farmerQueryOptions(id: string) {

@@ -14,7 +14,7 @@ export const Route = createFileRoute('/_authenticated/access-control')({
     const me = await context.queryClient.ensureQueryData(meQueryOptions());
 
     if (!canAccessAdminRoutes(me?.user.role)) {
-      throw redirect({ to: '/dashboard' });
+      throw redirect({ to: '/403' });
     }
 
     if (location.pathname === '/access-control' || location.pathname === '/access-control/') {

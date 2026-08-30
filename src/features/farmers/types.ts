@@ -115,14 +115,22 @@ export function formatContractAcresPayload(acres: string) {
   return n.toFixed(2);
 }
 
+export function normalizeFarmerContracts(
+  contracts: FarmerContract[] | undefined,
+): FarmerContract[] {
+  return (contracts ?? []).map((contract) => ({
+    id: String(contract.id ?? ''),
+    variety: String(contract.variety ?? ''),
+    date: String(contract.date ?? '').slice(0, 10),
+    acres: contract.acres,
+    contractUrl: String(contract.contractUrl ?? ''),
+  }));
+}
+
 export function flattenFarmerContracts(farmers: Farmer[]): FarmerContractRow[] {
   return farmers.flatMap((farmer) =>
-    (farmer.contracts ?? []).map((contract) => ({
-      id: String(contract.id ?? ''),
-      variety: String(contract.variety ?? ''),
-      date: String(contract.date ?? '').slice(0, 10),
-      acres: contract.acres,
-      contractUrl: String(contract.contractUrl ?? ''),
+    normalizeFarmerContracts(farmer.contracts).map((contract) => ({
+      ...contract,
       farmerId: farmer.id,
       farmerName: farmer.name,
     })),
