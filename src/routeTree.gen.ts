@@ -24,6 +24,7 @@ import { Route as AuthenticatedAccessControlSessionsRouteImport } from './routes
 import { Route as AuthenticatedAccessControlUsersRouteImport } from './routes/_authenticated/access-control.users'
 import { Route as AuthenticatedFarmersIdRouteImport } from './routes/_authenticated/farmers.$id'
 import { Route as AuthenticatedFarmersAnalyticsRouteImport } from './routes/_authenticated/farmers.analytics'
+import { Route as AuthenticatedFarmersContractRouteImport } from './routes/_authenticated/farmers.contract'
 import { Route as AuthenticatedFarmersOverviewRouteImport } from './routes/_authenticated/farmers.overview'
 import { Route as AuthenticatedFarmersReportRouteImport } from './routes/_authenticated/farmers.report'
 import { Route as AuthenticatedMasterFacilitiesRouteImport } from './routes/_authenticated/master.facilities'
@@ -118,6 +119,12 @@ const AuthenticatedFarmersAnalyticsRoute =
   AuthenticatedFarmersAnalyticsRouteImport.update({
     id: '/analytics',
     path: '/analytics',
+    getParentRoute: () => AuthenticatedFarmersRoute,
+  } as any)
+const AuthenticatedFarmersContractRoute =
+  AuthenticatedFarmersContractRouteImport.update({
+    id: '/contract',
+    path: '/contract',
     getParentRoute: () => AuthenticatedFarmersRoute,
   } as any)
 const AuthenticatedFarmersOverviewRoute =
@@ -220,6 +227,7 @@ export interface FileRoutesByFullPath {
   '/access-control/users': typeof AuthenticatedAccessControlUsersRoute
   '/farmers/$id': typeof AuthenticatedFarmersIdRoute
   '/farmers/analytics': typeof AuthenticatedFarmersAnalyticsRoute
+  '/farmers/contract': typeof AuthenticatedFarmersContractRoute
   '/farmers/overview': typeof AuthenticatedFarmersOverviewRoute
   '/farmers/report': typeof AuthenticatedFarmersReportRoute
   '/master/facilities': typeof AuthenticatedMasterFacilitiesRoute
@@ -250,6 +258,7 @@ export interface FileRoutesByTo {
   '/access-control/users': typeof AuthenticatedAccessControlUsersRoute
   '/farmers/$id': typeof AuthenticatedFarmersIdRoute
   '/farmers/analytics': typeof AuthenticatedFarmersAnalyticsRoute
+  '/farmers/contract': typeof AuthenticatedFarmersContractRoute
   '/farmers/overview': typeof AuthenticatedFarmersOverviewRoute
   '/farmers/report': typeof AuthenticatedFarmersReportRoute
   '/master/facilities': typeof AuthenticatedMasterFacilitiesRoute
@@ -282,6 +291,7 @@ export interface FileRoutesById {
   '/_authenticated/access-control/users': typeof AuthenticatedAccessControlUsersRoute
   '/_authenticated/farmers/$id': typeof AuthenticatedFarmersIdRoute
   '/_authenticated/farmers/analytics': typeof AuthenticatedFarmersAnalyticsRoute
+  '/_authenticated/farmers/contract': typeof AuthenticatedFarmersContractRoute
   '/_authenticated/farmers/overview': typeof AuthenticatedFarmersOverviewRoute
   '/_authenticated/farmers/report': typeof AuthenticatedFarmersReportRoute
   '/_authenticated/master/facilities': typeof AuthenticatedMasterFacilitiesRoute
@@ -314,6 +324,7 @@ export interface FileRouteTypes {
     | '/access-control/users'
     | '/farmers/$id'
     | '/farmers/analytics'
+    | '/farmers/contract'
     | '/farmers/overview'
     | '/farmers/report'
     | '/master/facilities'
@@ -344,6 +355,7 @@ export interface FileRouteTypes {
     | '/access-control/users'
     | '/farmers/$id'
     | '/farmers/analytics'
+    | '/farmers/contract'
     | '/farmers/overview'
     | '/farmers/report'
     | '/master/facilities'
@@ -375,6 +387,7 @@ export interface FileRouteTypes {
     | '/_authenticated/access-control/users'
     | '/_authenticated/farmers/$id'
     | '/_authenticated/farmers/analytics'
+    | '/_authenticated/farmers/contract'
     | '/_authenticated/farmers/overview'
     | '/_authenticated/farmers/report'
     | '/_authenticated/master/facilities'
@@ -504,6 +517,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFarmersAnalyticsRouteImport
       parentRoute: typeof AuthenticatedFarmersRoute
     }
+    '/_authenticated/farmers/contract': {
+      id: '/_authenticated/farmers/contract'
+      path: '/contract'
+      fullPath: '/farmers/contract'
+      preLoaderRoute: typeof AuthenticatedFarmersContractRouteImport
+      parentRoute: typeof AuthenticatedFarmersRoute
+    }
     '/_authenticated/farmers/overview': {
       id: '/_authenticated/farmers/overview'
       path: '/overview'
@@ -628,6 +648,7 @@ const AuthenticatedAccessControlRouteWithChildren =
 interface AuthenticatedFarmersRouteChildren {
   AuthenticatedFarmersIdRoute: typeof AuthenticatedFarmersIdRoute
   AuthenticatedFarmersAnalyticsRoute: typeof AuthenticatedFarmersAnalyticsRoute
+  AuthenticatedFarmersContractRoute: typeof AuthenticatedFarmersContractRoute
   AuthenticatedFarmersOverviewRoute: typeof AuthenticatedFarmersOverviewRoute
   AuthenticatedFarmersReportRoute: typeof AuthenticatedFarmersReportRoute
 }
@@ -635,6 +656,7 @@ interface AuthenticatedFarmersRouteChildren {
 const AuthenticatedFarmersRouteChildren: AuthenticatedFarmersRouteChildren = {
   AuthenticatedFarmersIdRoute: AuthenticatedFarmersIdRoute,
   AuthenticatedFarmersAnalyticsRoute: AuthenticatedFarmersAnalyticsRoute,
+  AuthenticatedFarmersContractRoute: AuthenticatedFarmersContractRoute,
   AuthenticatedFarmersOverviewRoute: AuthenticatedFarmersOverviewRoute,
   AuthenticatedFarmersReportRoute: AuthenticatedFarmersReportRoute,
 }
