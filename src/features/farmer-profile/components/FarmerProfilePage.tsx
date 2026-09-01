@@ -38,19 +38,17 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  type FarmerProfileTab,
+  isFarmerProfileTab,
+  PROFILE_TABS,
+} from '@/features/farmer-profile/profile-tabs';
 import { useFarmer } from '@/features/farmers/api/use-farmer';
 import { DeleteFarmerDialog } from '@/features/farmers/overview/components/delete-farmer-dialog';
 import { FarmerDrawer } from '@/features/farmers/overview/components/farmer-drawer';
 import { type Farmer, formatFarmerAccountType, formatFarmerStatus } from '@/features/farmers/types';
 import { getApiErrorMessage, getHttpStatusFromError } from '@/lib/api-client';
 import { FarmerProfileContracts } from './farmer-profile-contracts';
-
-const PROFILE_TABS = [
-  { value: 'contract', label: 'Farmer Contract' },
-  { value: 'requisitions', label: 'Seed Requisitions' },
-  { value: 'dispatches', label: 'Seed Dispatches' },
-  { value: 'fields', label: 'Seed & fields' },
-] as const;
 
 function displayValue(value: string | null | undefined) {
   if (!value) return '—';
@@ -283,7 +281,15 @@ function FarmerIdentityCard({
   );
 }
 
-export default function FarmerProfilePage({ id }: { id: string }) {
+export default function FarmerProfilePage({
+  id,
+  tab,
+  onTabChange,
+}: {
+  id: string;
+  tab: FarmerProfileTab;
+  onTabChange: (tab: FarmerProfileTab) => void;
+}) {
   const { data: farmer, isPending, isError, error } = useFarmer(id);
   const goBack = useGoBack();
   const [editOpen, setEditOpen] = useState(false);
@@ -341,20 +347,32 @@ export default function FarmerProfilePage({ id }: { id: string }) {
         onEdit={() => setEditOpen(true)}
         onDelete={() => setDeleteOpen(true)}
       />
-      <Tabs defaultValue="contract" className="w-full gap-4">
+      <Tabs
+        value={tab}
+        onValueChange={(value) => {
+          if (isFarmerProfileTab(value)) onTabChange(value);
+        }}
+        className="w-full gap-4"
+      >
         <TabsList className="h-11 w-full justify-start overflow-x-auto md:h-10 md:overflow-visible">
-          {PROFILE_TABS.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value} className="shrink-0 md:flex-1">
-              {tab.label}
+          {PROFILE_TABS.map((profileTab) => (
+            <TabsTrigger
+              key={profileTab.value}
+              value={profileTab.value}
+              className="shrink-0 md:flex-1"
+            >
+              {profileTab.label}
             </TabsTrigger>
           ))}
         </TabsList>
-        {PROFILE_TABS.map((tab) => (
-          <TabsContent key={tab.value} value={tab.value} className="pt-2">
-            {tab.value === 'contract' ? (
+        {PROFILE_TABS.map((profileTab) => (
+          <TabsContent key={profileTab.value} value={profileTab.value} className="pt-2">
+            {profileTab.value === 'contract' ? (
               <FarmerProfileContracts farmer={farmer} />
             ) : (
-              <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">{tab.label}</h4>
+              <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+                {profileTab.label}
+              </h4>
             )}
           </TabsContent>
         ))}

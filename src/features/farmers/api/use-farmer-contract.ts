@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { farmerContractsQueryOptions } from '@/features/farmers/api/use-farmer-contracts';
+import { farmerQueryOptions } from '@/features/farmers/api/use-farmer';
 
 export function useFarmerContract(farmerId: string, contractId: string) {
   return useQuery({
-    ...farmerContractsQueryOptions(farmerId),
+    ...farmerQueryOptions(farmerId),
     enabled: farmerId.length > 0 && contractId.length > 0,
-    select: (contracts) => contracts.find((contract) => contract.id === contractId) ?? null,
+    select: (farmer) => farmer.contracts?.find((contract) => contract.id === contractId) ?? null,
   });
 }

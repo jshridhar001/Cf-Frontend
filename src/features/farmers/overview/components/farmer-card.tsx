@@ -18,7 +18,6 @@ import {
   getFarmerLocalityName,
   getFarmerStationName,
 } from '@/features/farmers/types';
-import type { Station } from '@/features/master/types';
 import { cn } from '@/lib/utils';
 
 function FarmerRow({
@@ -62,17 +61,15 @@ function CardIconButton({ className, ...props }: ComponentProps<typeof Button>) 
 
 export function FarmerCard({
   farmer,
-  stations,
   onEdit,
   onDelete,
 }: {
   farmer: Farmer;
-  stations?: Station[];
   onEdit: (farmer: Farmer) => void;
   onDelete: (farmer: Farmer) => void;
 }) {
-  const locality = getFarmerLocalityName(farmer, stations);
-  const station = getFarmerStationName(farmer, stations);
+  const locality = getFarmerLocalityName(farmer);
+  const station = getFarmerStationName(farmer);
   const placeLabel = [locality, station].filter(Boolean).join(' · ');
   const isActive = farmer.status === 'ACTIVE';
 

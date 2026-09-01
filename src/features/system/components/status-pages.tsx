@@ -1,4 +1,4 @@
-import type { ErrorComponentProps } from '@tanstack/react-router';
+import { type ErrorComponentProps } from '@tanstack/react-router';
 import {
   StatusBackButton,
   StatusDashboardButton,
@@ -60,20 +60,19 @@ export function UnauthorizedPage() {
   );
 }
 
-export function ErrorPage({ onRetry }: { onRetry?: () => void }) {
+export function ErrorPage() {
   return (
     <StatusPage
       title="Something went wrong"
-      description="An unexpected error occurred. You can try again or return home."
+      description="An unexpected error occurred. Return to the homepage to continue."
     >
-      <StatusRetryButton onRetry={onRetry} />
-      <StatusHomeButton variant="outline" />
+      <StatusHomeButton label="Return to Homepage" />
     </StatusPage>
   );
 }
 
-export function RouterErrorComponent({ reset }: ErrorComponentProps) {
-  return <ErrorPage onRetry={reset} />;
+export function RouterErrorComponent(_props: ErrorComponentProps) {
+  return <ErrorPage />;
 }
 
 export function MaintenancePage() {
