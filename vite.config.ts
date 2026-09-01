@@ -30,6 +30,8 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     rolldownOptions: {
       output: {
+        // Prevents CJS vendor chunks from initializing out of order in production.
+        strictExecutionOrder: true,
         codeSplitting: {
           groups: [
             {
@@ -39,7 +41,7 @@ export default defineConfig({
             },
             {
               name: 'chart-vendor',
-              test: /[\\/]node_modules[\\/]recharts[\\/]/,
+              test: /[\\/]node_modules[\\/](recharts|es-toolkit)[\\/]/,
               priority: 35,
             },
             {
@@ -61,12 +63,6 @@ export default defineConfig({
               name: 'date-vendor',
               test: /[\\/]node_modules[\\/]date-fns[\\/]/,
               priority: 20,
-            },
-            {
-              name: 'vendor',
-              test: /[\\/]node_modules[\\/]/,
-              priority: 0,
-              maxSize: 400_000,
             },
           ],
         },
