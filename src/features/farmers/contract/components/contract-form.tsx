@@ -46,11 +46,18 @@ function todayIsoDate() {
 interface ContractFormProps {
   farmers: Farmer[];
   contract?: FarmerContractRow | null;
+  defaultFarmerId?: string;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
-export function ContractForm({ farmers, contract, onSuccess, onCancel }: ContractFormProps) {
+export function ContractForm({
+  farmers,
+  contract,
+  defaultFarmerId,
+  onSuccess,
+  onCancel,
+}: ContractFormProps) {
   const isEdit = contract != null;
   const { mutateAsync: createContract, isPending: isCreating } = useCreateFarmerContract();
   const { mutateAsync: updateContract, isPending: isUpdating } = useUpdateFarmerContract();
@@ -70,7 +77,7 @@ export function ContractForm({ farmers, contract, onSuccess, onCancel }: Contrac
 
   const form = useForm({
     defaultValues: {
-      farmerId: contract?.farmerId ?? '',
+      farmerId: contract?.farmerId ?? defaultFarmerId ?? '',
       variety: contract?.variety ?? '',
       date: contract?.date ? contract.date.slice(0, 10) : todayIsoDate(),
       acres: contract ? String(contract.acres) : '',

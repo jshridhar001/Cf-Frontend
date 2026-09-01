@@ -24,9 +24,16 @@ interface ContractDrawerProps {
   contract: FarmerContractRow | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  defaultFarmerId?: string;
 }
 
-export function ContractDrawer({ farmers, contract, open, onOpenChange }: ContractDrawerProps) {
+export function ContractDrawer({
+  farmers,
+  contract,
+  open,
+  onOpenChange,
+  defaultFarmerId,
+}: ContractDrawerProps) {
   const isMobile = useIsMobile();
   const isEdit = contract !== null;
   const isSaving =
@@ -49,6 +56,7 @@ export function ContractDrawer({ farmers, contract, open, onOpenChange }: Contra
       key={contract?.id ?? 'create'}
       farmers={farmers}
       contract={contract}
+      defaultFarmerId={defaultFarmerId}
       onSuccess={() => onOpenChange(false)}
       onCancel={() => onOpenChange(false)}
     />

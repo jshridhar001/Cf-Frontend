@@ -43,6 +43,7 @@ import { DeleteFarmerDialog } from '@/features/farmers/overview/components/delet
 import { FarmerDrawer } from '@/features/farmers/overview/components/farmer-drawer';
 import { type Farmer, formatFarmerAccountType, formatFarmerStatus } from '@/features/farmers/types';
 import { getApiErrorMessage, getHttpStatusFromError } from '@/lib/api-client';
+import { FarmerProfileContracts } from './farmer-profile-contracts';
 
 const PROFILE_TABS = [
   { value: 'contract', label: 'Farmer Contract' },
@@ -64,20 +65,6 @@ function getInitials(name: string) {
       .join('')
       .slice(0, 2)
       .toUpperCase() || '?'
-  );
-}
-
-function ContractUrlLink({ href }: { href: string }) {
-  if (!href) return <span className="text-muted-foreground">—</span>;
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noreferrer"
-      className="font-semibold break-all text-primary underline underline-offset-4"
-    >
-      {href}
-    </a>
   );
 }
 
@@ -281,10 +268,6 @@ function FarmerIdentityCard({
         <dl className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           <DetailField label="Aadhaar number" value={displayValue(farmer.aadharNumber)} />
           <DetailField label="PAN number" value={displayValue(farmer.panNumber)} />
-          <DetailField
-            label="Contract"
-            value={<ContractUrlLink href={farmer.contractUrl ?? ''} />}
-          />
           <DetailField label="Bank name" value={displayValue(farmer.bankName)} />
           <DetailField label="IFSC code" value={displayValue(farmer.ifscCode)} />
           <DetailField label="Bank account number" value={displayValue(farmer.bankAccountNumber)} />
@@ -368,7 +351,11 @@ export default function FarmerProfilePage({ id }: { id: string }) {
         </TabsList>
         {PROFILE_TABS.map((tab) => (
           <TabsContent key={tab.value} value={tab.value} className="pt-2">
-            <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">{tab.label}</h4>
+            {tab.value === 'contract' ? (
+              <FarmerProfileContracts farmer={farmer} />
+            ) : (
+              <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">{tab.label}</h4>
+            )}
           </TabsContent>
         ))}
       </Tabs>

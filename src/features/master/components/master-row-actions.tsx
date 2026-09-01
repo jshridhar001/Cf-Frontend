@@ -1,4 +1,4 @@
-import { MoreHorizontalIcon, SquarePenIcon, Trash2Icon } from 'lucide-react';
+import { Eye, MoreHorizontalIcon, SquarePenIcon, Trash2Icon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -10,9 +10,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export function MasterRowActions({
+  onView,
   onEdit,
   onDelete,
 }: {
+  onView?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
 }) {
@@ -33,6 +35,12 @@ export function MasterRowActions({
           Actions
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        {onView ? (
+          <DropdownMenuItem onClick={onView}>
+            <Eye />
+            View
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuItem onClick={onEdit}>
           <SquarePenIcon />
           Edit

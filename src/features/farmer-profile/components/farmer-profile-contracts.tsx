@@ -1,5 +1,5 @@
 import { useNavigate } from '@tanstack/react-router';
-import { FileText, PlusIcon, Search, UserPlus } from 'lucide-react';
+import { FileText, PlusIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty';
-import { Input } from '@/components/ui/input';
 import {
   Item,
   ItemActions,
@@ -31,13 +30,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useFarmers } from '@/features/farmers/api/use-farmers';
+import { useFarmerContracts } from '@/features/farmers/api/use-farmer-contracts';
 import { ContractDrawer } from '@/features/farmers/contract/components/contract-drawer';
 import { DeleteContractDialog } from '@/features/farmers/contract/components/delete-contract-dialog';
-import { FarmerDrawer } from '@/features/farmers/overview/components/farmer-drawer';
 import {
+  type Farmer,
   type FarmerContractRow,
-  flattenFarmerContracts,
   formatContractAcres,
   formatContractDate,
 } from '@/features/farmers/types';
@@ -61,7 +59,6 @@ function ContractUrlLink({ href }: { href: string }) {
 function ContractsSkeleton() {
   return (
     <div className="flex flex-col gap-3 sm:gap-4">
-      <Skeleton className="h-11 w-full rounded-lg sm:max-w-xs" />
       <Skeleton className="hidden h-48 w-full rounded-2xl md:block" />
       <div className="flex flex-col gap-2 md:hidden">
         <Skeleton className="h-28 rounded-xl" />
@@ -71,60 +68,31 @@ function ContractsSkeleton() {
   );
 }
 
-export default function FarmerContractPage() {
+export function FarmerProfileContracts({ farmer }: { farmer: Farmer }) {
   const navigate = useNavigate();
-  const { data: farmers, isPending, isError, error } = useFarmers();
-  const [search, setSearch] = useState('');
+  const { data, isPending, isError, error } = useFarmerContracts(farmer.id);
   const [createOpen, setCreateOpen] = useState(false);
-  const [createFarmerOpen, setCreateFarmerOpen] = useState(false);
   const [editingContract, setEditingContract] = useState<FarmerContractRow | null>(null);
   const [deletingContract, setDeletingContract] = useState<FarmerContractRow | null>(null);
 
-  const farmerList = farmers ?? [];
-  const hasSearch = search.trim().length > 0;
-
-  const contracts = useMemo(() => flattenFarmerContracts(farmerList), [farmerList]);
-
-  const visibleContracts = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    if (!query) return contracts;
-    return contracts.filter((contract) => contract.farmerName.toLowerCase().includes(query));
-  }, [contracts, search]);
-
-  if (isPending && farmers === undefined) {
-    return (
-      <PageCard>
-        <PageCardHeader>
-          <CardTitle>Contract</CardTitle>
-          <CardDescription className="hidden sm:block">
-            Create, update, and delete farmer contracts. Contracts load with the farmers list.
-          </CardDescription>
-        </PageCardHeader>
-        <PageCardContent>
-          <ContractsSkeleton />
-        </PageCardContent>
-      </PageCard>
-    );
-  }
+  const contracts = useMemo<FarmerContractRow[]>(
+    () =>
+      (data ?? []).map((contract) => ({
+        ...contract,
+        farmerId: farmer.id,
+        farmerName: farmer.name,
+      })),
+    [data, farmer.id, farmer.name],
+  );
 
   return (
     <PageCard>
       <PageCardHeader className="has-data-[slot=card-action]:grid-cols-[1fr_auto] md:has-data-[slot=card-action]:grid-cols-1">
-        <CardTitle>Contract</CardTitle>
+        <CardTitle>Farmer Contract</CardTitle>
         <CardDescription className="hidden sm:block">
-          Create, update, and delete farmer contracts. Contracts load with the farmers list.
+          Contracts for {farmer.name}. Add or update variety, date, acres, and the contract URL.
         </CardDescription>
         <CardAction className="flex items-center gap-1 md:hidden">
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            className="min-h-11 min-w-11"
-            aria-label="Add farmer"
-            onClick={() => setCreateFarmerOpen(true)}
-          >
-            <UserPlus />
-          </Button>
           <Button
             type="button"
             size="icon"
@@ -137,7 +105,9 @@ export default function FarmerContractPage() {
         </CardAction>
       </PageCardHeader>
       <PageCardContent>
-        {isError && farmers === undefined ? (
+        {isPending && data === undefined ? <ContractsSkeleton /> : null}
+
+        {isError && data === undefined ? (
           <Empty className="rounded-xl border bg-muted/10">
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -147,49 +117,26 @@ export default function FarmerContractPage() {
               <EmptyDescription>{getApiErrorMessage(error)}</EmptyDescription>
             </EmptyHeader>
           </Empty>
-        ) : (
+        ) : null}
+
+        {data !== undefined ? (
           <div className="flex flex-col gap-3 sm:gap-4">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-              <div className="relative w-full sm:max-w-xs">
-                <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Search by farmer name"
-                  className="w-full pl-10"
-                  inputMode="search"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                />
-              </div>
-              <div className="hidden items-center gap-2 sm:ml-auto md:flex">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCreateFarmerOpen(true)}
-                >
-                  <UserPlus data-icon="inline-start" />
-                  Add farmer
-                </Button>
-                <Button type="button" size="sm" onClick={() => setCreateOpen(true)}>
-                  <PlusIcon data-icon="inline-start" />
-                  Add contract
-                </Button>
-              </div>
+            <div className="hidden justify-end md:flex">
+              <Button type="button" size="sm" onClick={() => setCreateOpen(true)}>
+                <PlusIcon data-icon="inline-start" />
+                Add contract
+              </Button>
             </div>
 
-            {visibleContracts.length === 0 ? (
+            {contracts.length === 0 ? (
               <Empty className="rounded-xl border bg-muted/10">
                 <EmptyHeader>
                   <EmptyMedia variant="icon">
                     <FileText />
                   </EmptyMedia>
-                  <EmptyTitle>
-                    {hasSearch ? 'No matching contracts' : 'No contracts yet'}
-                  </EmptyTitle>
+                  <EmptyTitle>No contracts yet</EmptyTitle>
                   <EmptyDescription>
-                    {hasSearch
-                      ? 'Try a different farmer name or clear the search.'
-                      : 'Add a contract to a farmer to populate this list.'}
+                    Add a contract for this farmer to populate this list.
                   </EmptyDescription>
                 </EmptyHeader>
               </Empty>
@@ -199,7 +146,6 @@ export default function FarmerContractPage() {
                   <Table>
                     <TableHeader className="bg-muted">
                       <TableRow className="hover:bg-transparent">
-                        <TableHead className="font-semibold">Farmer name</TableHead>
                         <TableHead className="font-semibold">Variety</TableHead>
                         <TableHead className="font-semibold">Date</TableHead>
                         <TableHead className="font-semibold">Acres</TableHead>
@@ -208,9 +154,8 @@ export default function FarmerContractPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {visibleContracts.map((contract) => (
-                        <TableRow key={`${contract.farmerId}-${contract.id}`}>
-                          <TableCell>{contract.farmerName}</TableCell>
+                      {contracts.map((contract) => (
+                        <TableRow key={contract.id || `${contract.variety}-${contract.date}`}>
                           <TableCell>{contract.variety}</TableCell>
                           <TableCell>{formatContractDate(contract.date)}</TableCell>
                           <TableCell>{formatContractAcres(contract.acres)}</TableCell>
@@ -238,18 +183,18 @@ export default function FarmerContractPage() {
                 </div>
 
                 <ItemGroup className="md:hidden">
-                  {visibleContracts.map((contract) => (
+                  {contracts.map((contract) => (
                     <Item
-                      key={`${contract.farmerId}-${contract.id}`}
+                      key={contract.id || `${contract.variety}-${contract.date}`}
                       variant="outline"
                       size="sm"
                       className="items-start"
                     >
                       <ItemHeader className="gap-3">
                         <ItemContent className="min-w-0 pr-1">
-                          <ItemTitle>{contract.farmerName}</ItemTitle>
+                          <ItemTitle>{contract.variety}</ItemTitle>
                           <ItemDescription>
-                            {contract.variety} · {formatContractAcres(contract.acres)} acres ·{' '}
+                            {formatContractAcres(contract.acres)} acres ·{' '}
                             {formatContractDate(contract.date)}
                           </ItemDescription>
                         </ItemContent>
@@ -275,12 +220,12 @@ export default function FarmerContractPage() {
               </>
             )}
           </div>
-        )}
+        ) : null}
       </PageCardContent>
 
-      <FarmerDrawer farmer={null} open={createFarmerOpen} onOpenChange={setCreateFarmerOpen} />
       <ContractDrawer
-        farmers={farmerList}
+        farmers={[farmer]}
+        defaultFarmerId={farmer.id}
         contract={editingContract}
         open={createOpen || editingContract !== null}
         onOpenChange={(open) => {

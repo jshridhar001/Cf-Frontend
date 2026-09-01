@@ -91,6 +91,11 @@ export type FarmerContractResponse = {
   message?: string;
 };
 
+export type FarmerContractsResponse = {
+  success: boolean;
+  data: Array<FarmerContract & { farmerId?: string }>;
+};
+
 export function formatContractAcres(acres: string | number) {
   const n = typeof acres === 'number' ? acres : Number(acres);
   if (!Number.isFinite(n)) return String(acres ?? '');
