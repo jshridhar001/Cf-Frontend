@@ -33,7 +33,6 @@ import {
   isFarmerSortValue,
 } from '@/features/farmers/overview/types';
 import type { Farmer } from '@/features/farmers/types';
-import { useStations } from '@/features/master/api/use-stations';
 import { getApiErrorMessage } from '@/lib/api-client';
 
 const DEFAULT_SORT: FarmerSortValue = 'account-asc';
@@ -44,9 +43,9 @@ function FarmersOverviewSkeleton() {
       <Skeleton className="h-16 w-full rounded-2xl" />
       <Skeleton className="h-36 w-full rounded-xl" />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <Skeleton className="h-48 rounded-4xl" />
-        <Skeleton className="h-48 rounded-4xl" />
-        <Skeleton className="hidden h-48 rounded-4xl sm:block" />
+        <Skeleton className="h-40 rounded-4xl" />
+        <Skeleton className="h-40 rounded-4xl" />
+        <Skeleton className="hidden h-40 rounded-4xl sm:block" />
       </div>
     </div>
   );
@@ -55,7 +54,6 @@ function FarmersOverviewSkeleton() {
 export default function FarmersOverviewPage() {
   const queryClient = useQueryClient();
   const { data: farmers, isPending, isError, error, isFetching } = useFarmers();
-  const { data: stations } = useStations();
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<FarmerSortValue>(DEFAULT_SORT);
   const [createOpen, setCreateOpen] = useState(false);
@@ -217,7 +215,6 @@ export default function FarmersOverviewPage() {
             <FarmerCard
               key={farmer.id}
               farmer={farmer}
-              stations={stations}
               onEdit={setEditingFarmer}
               onDelete={setDeletingFarmer}
             />

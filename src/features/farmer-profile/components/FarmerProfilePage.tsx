@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CardDescription, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Empty,
   EmptyContent,
@@ -63,8 +64,39 @@ export default function FarmerProfilePage({ id }: { id: string }) {
   if (isPending && farmer === undefined) {
     return (
       <PageCard>
+        <PageCardHeader>
+          <div className="flex items-start gap-3">
+            <Skeleton className="size-8 min-h-11 min-w-11 shrink-0 rounded-lg md:min-h-8 md:min-w-8" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <Skeleton className="h-6 w-40 rounded-lg" />
+              <Skeleton className="h-4 w-32 rounded-lg" />
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <Skeleton className="h-6 w-16 rounded-full" />
+              <Skeleton className="size-8 rounded-full" />
+            </div>
+          </div>
+        </PageCardHeader>
         <PageCardContent>
-          <p className="text-sm text-muted-foreground">Loading farmer…</p>
+          <div
+            className="flex flex-col gap-4"
+            role="status"
+            aria-live="polite"
+            aria-busy="true"
+            aria-label="Loading farmer"
+          >
+            {['name', 'account', 'mobile', 'type', 'family', 'station', 'status', 'bank'].map(
+              (field) => (
+                <div
+                  key={field}
+                  className="flex min-w-0 flex-col gap-1 sm:grid sm:grid-cols-[10rem_1fr] sm:items-baseline sm:gap-4"
+                >
+                  <Skeleton className="h-4 w-24 rounded-lg" />
+                  <Skeleton className="h-4 w-full max-w-xs rounded-lg" />
+                </div>
+              ),
+            )}
+          </div>
         </PageCardContent>
       </PageCard>
     );

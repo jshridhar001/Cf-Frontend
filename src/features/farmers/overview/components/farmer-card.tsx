@@ -18,7 +18,6 @@ import {
   getFarmerLocalityName,
   getFarmerStationName,
 } from '@/features/farmers/types';
-import type { Station } from '@/features/master/types';
 import { cn } from '@/lib/utils';
 
 function FarmerRow({
@@ -31,8 +30,8 @@ function FarmerRow({
   muted?: boolean;
 }) {
   return (
-    <div className="flex min-w-0 items-center gap-3">
-      <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+    <div className="flex min-w-0 items-center gap-2">
+      <Icon className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
       <p
         className={cn(
           'truncate text-sm',
@@ -62,47 +61,47 @@ function CardIconButton({ className, ...props }: ComponentProps<typeof Button>) 
 
 export function FarmerCard({
   farmer,
-  stations,
   onEdit,
   onDelete,
 }: {
   farmer: Farmer;
-  stations?: Station[];
   onEdit: (farmer: Farmer) => void;
   onDelete: (farmer: Farmer) => void;
 }) {
-  const locality = getFarmerLocalityName(farmer, stations);
-  const station = getFarmerStationName(farmer, stations);
+  const locality = getFarmerLocalityName(farmer);
+  const station = getFarmerStationName(farmer);
   const placeLabel = [locality, station].filter(Boolean).join(' · ');
   const isActive = farmer.status === 'ACTIVE';
 
   return (
-    <Card className="gap-6 py-6">
+    <Card className="gap-3 py-4">
       <Link
         to="/farmers/$id"
         params={{ id: farmer.id }}
-        className="flex flex-col gap-5 rounded-t-4xl outline-none hover:bg-muted/20 focus-visible:ring-3 focus-visible:ring-ring/50 sm:gap-6"
+        className="flex flex-col gap-3 rounded-t-4xl outline-none hover:bg-muted/20 focus-visible:ring-3 focus-visible:ring-ring/50"
       >
-        <CardHeader className="px-5 sm:px-6">
-          <CardTitle className="pr-3 font-heading text-lg font-semibold tracking-tight">
+        <CardHeader className="px-4">
+          <CardTitle className="pr-2 font-heading text-base font-semibold tracking-tight">
             {farmer.name}{' '}
-            <span className="font-normal text-muted-foreground">(#{farmer.accountNumber})</span>
+            <span className="text-sm font-normal text-muted-foreground">
+              (#{farmer.accountNumber})
+            </span>
           </CardTitle>
           <CardAction>
-            <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
-              <User className="size-5 text-primary" aria-hidden />
+            <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
+              <User className="size-4 text-primary" aria-hidden />
             </div>
           </CardAction>
         </CardHeader>
-        <CardContent className="flex flex-col gap-3 px-5 sm:px-6">
+        <CardContent className="flex flex-col gap-1.5 px-4">
           <FarmerRow icon={Phone} value={farmer.mobileNumber} />
           <FarmerRow icon={MapPin} value={placeLabel} muted />
         </CardContent>
       </Link>
 
-      <Separator className="mx-5 sm:mx-6" />
+      <Separator className="mx-4" />
 
-      <CardFooter className="justify-between gap-3 px-5 sm:px-6">
+      <CardFooter className="justify-between gap-2 px-4">
         <Badge
           variant="outline"
           className={

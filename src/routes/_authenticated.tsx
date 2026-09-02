@@ -1,4 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
+import { ErrorPage } from '@/components/error-page';
+import { InsetNotFoundPage } from '@/components/not-found-page';
 import { meQueryOptions } from '@/features/auth/api/use-me';
 import { AuthenticatedLayout } from './_authenticated/-layout';
 
@@ -18,4 +20,6 @@ export const Route = createFileRoute('/_authenticated')({
     return { me };
   },
   component: AuthenticatedLayout,
+  errorComponent: ErrorPage,
+  notFoundComponent: InsetNotFoundPage,
 });

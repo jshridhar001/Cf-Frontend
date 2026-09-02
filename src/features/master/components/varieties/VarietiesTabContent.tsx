@@ -1,6 +1,7 @@
 import { PlusIcon, Trash2Icon } from 'lucide-react';
 import { useState } from 'react';
 import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
+import { PageListSkeleton } from '@/components/page-list-skeleton';
 import { Button } from '@/components/ui/button';
 import { CardAction, CardDescription, CardTitle } from '@/components/ui/card';
 import { useVarieties } from '@/features/master/api/use-varieties';
@@ -57,9 +58,7 @@ export function VarietiesTabContent({ createOpen, onCreateOpenChange }: Varietie
         </CardAction>
       </PageCardHeader>
       <PageCardContent>
-        {isPending && varieties === undefined ? (
-          <p className="text-sm text-muted-foreground">Loading varieties…</p>
-        ) : null}
+        {isPending && varieties === undefined ? <PageListSkeleton /> : null}
 
         {isError && varieties === undefined ? (
           <p className="text-sm text-destructive">{getApiErrorMessage(error)}</p>

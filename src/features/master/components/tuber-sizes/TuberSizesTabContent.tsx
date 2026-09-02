@@ -1,6 +1,7 @@
 import { PlusIcon, Trash2Icon } from 'lucide-react';
 import { useState } from 'react';
 import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
+import { PageListSkeleton } from '@/components/page-list-skeleton';
 import { Button } from '@/components/ui/button';
 import { CardAction, CardDescription, CardTitle } from '@/components/ui/card';
 import { useTuberSizes } from '@/features/master/api/use-tuber-sizes';
@@ -60,9 +61,7 @@ export function TuberSizesTabContent({
         </CardAction>
       </PageCardHeader>
       <PageCardContent>
-        {isPending && tuberSizes === undefined ? (
-          <p className="text-sm text-muted-foreground">Loading tuber sizes…</p>
-        ) : null}
+        {isPending && tuberSizes === undefined ? <PageListSkeleton /> : null}
 
         {isError && tuberSizes === undefined ? (
           <p className="text-sm text-destructive">{getApiErrorMessage(error)}</p>

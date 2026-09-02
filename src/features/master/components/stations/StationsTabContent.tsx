@@ -10,6 +10,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useStations } from '@/features/master/api/use-stations';
 import type { Locality, Station } from '@/features/master/types';
 import { getApiErrorMessage } from '@/lib/api-client';
@@ -27,6 +28,34 @@ import { StationsList } from './stations-list';
 interface StationsTabContentProps {
   createOpen: boolean;
   onCreateOpenChange: (open: boolean) => void;
+}
+
+function StationsSkeleton() {
+  return (
+    <div
+      className="flex flex-col gap-6 lg:grid lg:min-h-[32rem] lg:grid-cols-[minmax(16rem,20rem)_1fr] lg:gap-0 lg:overflow-hidden lg:rounded-2xl lg:border"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      aria-label="Loading stations"
+    >
+      <div className="flex min-w-0 flex-col gap-3 lg:border-r lg:px-4 lg:py-3">
+        <Skeleton className="h-5 w-24 rounded-lg" />
+        <Skeleton className="h-12 w-full rounded-xl" />
+        <Skeleton className="h-12 w-full rounded-xl" />
+        <Skeleton className="h-12 w-full rounded-xl" />
+        <Skeleton className="hidden h-12 w-full rounded-xl lg:block" />
+      </div>
+      <div className="flex min-w-0 flex-col gap-3 lg:px-4 lg:py-3">
+        <Skeleton className="h-5 w-32 rounded-lg" />
+        <Skeleton className="hidden h-48 w-full rounded-2xl md:block" />
+        <div className="flex flex-col gap-2 md:hidden">
+          <Skeleton className="h-24 rounded-xl" />
+          <Skeleton className="h-24 rounded-xl" />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function StationsTabContent({ createOpen, onCreateOpenChange }: StationsTabContentProps) {
@@ -89,9 +118,7 @@ export function StationsTabContent({ createOpen, onCreateOpenChange }: StationsT
         </CardAction>
       </PageCardHeader>
       <PageCardContent>
-        {isPending && stations === undefined ? (
-          <p className="text-sm text-muted-foreground">Loading stations…</p>
-        ) : null}
+        {isPending && stations === undefined ? <StationsSkeleton /> : null}
 
         {isError && stations === undefined ? (
           <p className="text-sm text-destructive">{getApiErrorMessage(error)}</p>

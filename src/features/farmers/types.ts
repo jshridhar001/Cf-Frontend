@@ -152,21 +152,12 @@ export function formatFarmerAccountType(accountType: FarmerAccountType) {
   }
 }
 
-export function getFarmerStationName(farmer: Farmer, stations?: { id: string; name: string }[]) {
-  if (farmer.station?.name) return farmer.station.name;
-  return stations?.find((station) => station.id === farmer.stationId)?.name ?? farmer.stationId;
+export function getFarmerStationName(farmer: Farmer) {
+  return farmer.station?.name ?? farmer.stationId;
 }
 
-export function getFarmerLocalityName(
-  farmer: Farmer,
-  stations?: { id: string; name: string; localities: { id: string; name: string }[] }[],
-) {
-  if (farmer.locality?.name) return farmer.locality.name;
-  for (const station of stations ?? []) {
-    const locality = station.localities.find((item) => item.id === farmer.localityId);
-    if (locality) return locality.name;
-  }
-  return farmer.localityId;
+export function getFarmerLocalityName(farmer: Farmer) {
+  return farmer.locality?.name ?? farmer.localityId;
 }
 
 export function normalizeFarmerFamily(raw: Record<string, unknown>): FarmerFamily {

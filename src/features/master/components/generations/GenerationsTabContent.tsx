@@ -1,6 +1,7 @@
 import { PlusIcon, Trash2Icon } from 'lucide-react';
 import { useState } from 'react';
 import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
+import { PageListSkeleton } from '@/components/page-list-skeleton';
 import { Button } from '@/components/ui/button';
 import { CardAction, CardDescription, CardTitle } from '@/components/ui/card';
 import { useGenerations } from '@/features/master/api/use-generations';
@@ -59,9 +60,7 @@ export function GenerationsTabContent({
         </CardAction>
       </PageCardHeader>
       <PageCardContent>
-        {isPending && generations === undefined ? (
-          <p className="text-sm text-muted-foreground">Loading generations…</p>
-        ) : null}
+        {isPending && generations === undefined ? <PageListSkeleton /> : null}
 
         {isError && generations === undefined ? (
           <p className="text-sm text-destructive">{getApiErrorMessage(error)}</p>

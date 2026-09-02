@@ -2,15 +2,18 @@ import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Marker, MarkerContent } from '@/components/ui/marker';
 import { Spinner } from '@/components/ui/spinner';
+import { useMe } from '@/features/auth/api/use-me';
 
 const SHOW_DELAY_MS = 200;
 
 export function AppLoader() {
+  const { data: me } = useMe();
   const pendingQueries = useIsFetching({
     predicate: (query) => query.state.status === 'pending',
   });
   const pendingMutations = useIsMutating();
-  const isBusy = pendingQueries + pendingMutations > 0;
+  const isAuthenticated = Boolean(me);
+  const isBusy = !isAuthenticated && pendingQueries + pendingMutations > 0;
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {

@@ -1,6 +1,7 @@
 import { PlusIcon, Trash2Icon } from 'lucide-react';
 import { useState } from 'react';
 import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
+import { PageListSkeleton } from '@/components/page-list-skeleton';
 import { Button } from '@/components/ui/button';
 import { CardAction, CardDescription, CardTitle } from '@/components/ui/card';
 import { useSeedSizes } from '@/features/master/api/use-seed-sizes';
@@ -57,9 +58,7 @@ export function SeedSizesTabContent({ createOpen, onCreateOpenChange }: SeedSize
         </CardAction>
       </PageCardHeader>
       <PageCardContent>
-        {isPending && seedSizes === undefined ? (
-          <p className="text-sm text-muted-foreground">Loading seed sizes…</p>
-        ) : null}
+        {isPending && seedSizes === undefined ? <PageListSkeleton /> : null}
 
         {isError && seedSizes === undefined ? (
           <p className="text-sm text-destructive">{getApiErrorMessage(error)}</p>

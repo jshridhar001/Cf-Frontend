@@ -1,6 +1,7 @@
 import { Trash2Icon, UserPlusIcon } from 'lucide-react';
 import { useState } from 'react';
 import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
+import { PageListSkeleton } from '@/components/page-list-skeleton';
 import { Button } from '@/components/ui/button';
 import { CardAction, CardDescription, CardTitle } from '@/components/ui/card';
 import { useUsers } from '@/features/access-control/api/use-users';
@@ -57,9 +58,7 @@ export function UsersTabContent({ createOpen, onCreateOpenChange }: UsersTabCont
         </CardAction>
       </PageCardHeader>
       <PageCardContent>
-        {isPending && users === undefined ? (
-          <p className="text-sm text-muted-foreground">Loading users…</p>
-        ) : null}
+        {isPending && users === undefined ? <PageListSkeleton /> : null}
 
         {isError && users === undefined ? (
           <p className="text-sm text-destructive">{getApiErrorMessage(error)}</p>
