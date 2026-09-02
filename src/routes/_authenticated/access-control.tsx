@@ -5,7 +5,8 @@ import {
   useNavigate,
   useRouterState,
 } from '@tanstack/react-router';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PageTabsList, PageTabsTrigger } from '@/components/page-tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { meQueryOptions } from '@/features/auth/api/use-me';
 import { canAccessAdminRoutes } from '@/features/auth/lib/authorization';
 
@@ -50,13 +51,13 @@ function AccessControlLayout() {
       }}
       className="w-full"
     >
-      <TabsList className="w-full sm:w-fit">
+      <PageTabsList>
         {tabs.map((tab) => (
-          <TabsTrigger key={tab.value} value={tab.value}>
+          <PageTabsTrigger key={tab.value} value={tab.value}>
             {tab.label}
-          </TabsTrigger>
+          </PageTabsTrigger>
         ))}
-      </TabsList>
+      </PageTabsList>
       <TabsContent value={activeTab}>
         <Outlet />
       </TabsContent>

@@ -17,9 +17,15 @@ interface DeleteFarmerDialogProps {
   farmer: Farmer | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onDeleted?: () => void;
 }
 
-export function DeleteFarmerDialog({ farmer, open, onOpenChange }: DeleteFarmerDialogProps) {
+export function DeleteFarmerDialog({
+  farmer,
+  open,
+  onOpenChange,
+  onDeleted,
+}: DeleteFarmerDialogProps) {
   const { mutateAsync: deleteFarmer, isPending } = useDeleteFarmer();
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -52,6 +58,7 @@ export function DeleteFarmerDialog({ farmer, open, onOpenChange }: DeleteFarmerD
               void deleteFarmer(farmer.id)
                 .then(() => {
                   onOpenChange(false);
+                  onDeleted?.();
                 })
                 .catch(() => undefined);
             }}

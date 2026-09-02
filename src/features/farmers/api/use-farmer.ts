@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from '@tanstack/react-query';
+import { queryOptions, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Farmer, FarmerResponse } from '@/features/farmers/types';
 import apiClient from '@/lib/api-client';
 import { farmersKeys } from './query-keys';
@@ -18,8 +18,14 @@ export function farmerQueryOptions(id: string) {
 }
 
 export function useFarmer(id: string) {
+  const queryClient = useQueryClient();
+
   return useQuery({
     ...farmerQueryOptions(id),
     enabled: id.length > 0,
+    initialData: () =>
+      queryClient.getQueryData<Farmer[]>(farmersKeys.list())?.find((farmer) => farmer.id === id),
+    initialDataUpdatedAt: () =>
+      queryClient.getQueryState(farmersKeys.list())?.dataUpdatedAt,
   });
 }
