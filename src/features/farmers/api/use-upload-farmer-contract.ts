@@ -4,25 +4,27 @@ import { farmersKeys } from '@/features/farmers/api/query-keys';
 import type { FarmerContractResponse } from '@/features/farmers/types';
 import apiClient, { getApiErrorMessage } from '@/lib/api-client';
 
-export const createFarmerContractMutationKey = [...farmersKeys.all, 'create-contract'] as const;
+export const uploadFarmerContractMutationKey = [...farmersKeys.all, 'upload-contract'] as const;
 
-export type CreateFarmerContractVariables = {
+export type UploadFarmerContractVariables = {
   farmerId: string;
-  variety: string;
-  date: string;
-  acres: string;
-  contractUrl?: string | null;
+  contractId: string;
+  file: File;
 };
 
-export function useCreateFarmerContract() {
+export function useUploadFarmerContract() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: createFarmerContractMutationKey,
-    mutationFn: async ({ farmerId, ...body }: CreateFarmerContractVariables) => {
+    mutationKey: uploadFarmerContractMutationKey,
+    mutationFn: async ({ farmerId, contractId, file }: UploadFarmerContractVariables) => {
+      const formData = new FormData();
+      formData.append('file', file);
+
       const { data } = await apiClient.post<FarmerContractResponse>(
-        `/v1/farmers/${farmerId}/contracts`,
-        body,
+        `/v1/farmers/${farmerId}/contracts/${contractId}/upload`,
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 60_000 },
       );
       return data;
     },
@@ -33,12 +35,12 @@ export function useCreateFarmerContract() {
         queryClient.invalidateQueries({ queryKey: farmersKeys.list() }),
         queryClient.invalidateQueries({ queryKey: farmersKeys.detail(farmerId) }),
       ]);
-      toast.success(data.message || 'Contract created successfully', {
+      toast.success(data.message || 'Contract uploaded successfully', {
         position: 'bottom-right',
       });
     },
     onError: (error) => {
-      toast.error(getApiErrorMessage(error, 'Failed to create contract. Please try again.'), {
+      toast.error(getApiErrorMessage(error, 'Failed to upload contract. Please try again.'), {
         position: 'bottom-right',
       });
     },

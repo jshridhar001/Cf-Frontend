@@ -12,7 +12,7 @@ export type UpdateFarmerContractVariables = {
   variety: string;
   date: string;
   acres: string;
-  contractUrl: string;
+  contractUrl?: string | null;
 };
 
 export function useUpdateFarmerContract() {

@@ -30,10 +30,9 @@ const formSchema = z.object({
       const n = Number(value);
       return Number.isFinite(n) && n > 0;
     }, 'Enter acres greater than 0.'),
-  contractUrl: z
-    .string()
-    .min(1, 'Contract URL is required.')
-    .refine((value) => URL.canParse(value), 'Enter a valid URL.'),
+  contractUrl: z.string().refine((value) => !value.trim() || URL.canParse(value.trim()), {
+    message: 'Enter a valid URL.',
+  }),
 });
 
 function todayIsoDate() {
@@ -84,7 +83,7 @@ export function ContractForm({ farmers, contract, onSuccess, onCancel }: Contrac
         variety: value.variety.trim(),
         date: value.date,
         acres: formatContractAcresPayload(value.acres),
-        contractUrl: value.contractUrl.trim(),
+        contractUrl: value.contractUrl.trim() || null,
       };
 
       if (isEdit) {
@@ -236,7 +235,7 @@ export function ContractForm({ farmers, contract, onSuccess, onCancel }: Contrac
             const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Contract URL</FieldLabel>
+                <FieldLabel htmlFor={field.name}>Contract URL (optional)</FieldLabel>
                 <Input
                   id={field.name}
                   name={field.name}
