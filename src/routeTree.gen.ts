@@ -40,6 +40,8 @@ import { Route as AuthenticatedSeedDispatchesSettingsRouteImport } from './route
 import { Route as AuthenticatedSeedRequisitionAnalyticsRouteImport } from './routes/_authenticated/seed-requisition.analytics'
 import { Route as AuthenticatedSeedRequisitionOverviewRouteImport } from './routes/_authenticated/seed-requisition.overview'
 import { Route as AuthenticatedSeedRequisitionSettingsRouteImport } from './routes/_authenticated/seed-requisition.settings'
+import { Route as AuthenticatedFarmersIdIndexRouteImport } from './routes/_authenticated/farmers.$id.index'
+import { Route as AuthenticatedFarmersIdContractContractIdRouteImport } from './routes/_authenticated/farmers.$id.contract.$contractId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -217,6 +219,18 @@ const AuthenticatedSeedRequisitionSettingsRoute =
     path: '/seed-requisition/settings',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedFarmersIdIndexRoute =
+  AuthenticatedFarmersIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedFarmersIdRoute,
+  } as any)
+const AuthenticatedFarmersIdContractContractIdRoute =
+  AuthenticatedFarmersIdContractContractIdRouteImport.update({
+    id: '/contract/$contractId',
+    path: '/contract/$contractId',
+    getParentRoute: () => AuthenticatedFarmersIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -232,7 +246,7 @@ export interface FileRoutesByFullPath {
   '/access-control/permissions': typeof AuthenticatedAccessControlPermissionsRoute
   '/access-control/sessions': typeof AuthenticatedAccessControlSessionsRoute
   '/access-control/users': typeof AuthenticatedAccessControlUsersRoute
-  '/farmers/$id': typeof AuthenticatedFarmersIdRoute
+  '/farmers/$id': typeof AuthenticatedFarmersIdRouteWithChildren
   '/farmers/analytics': typeof AuthenticatedFarmersAnalyticsRoute
   '/farmers/contract': typeof AuthenticatedFarmersContractRoute
   '/farmers/overview': typeof AuthenticatedFarmersOverviewRoute
@@ -249,6 +263,8 @@ export interface FileRoutesByFullPath {
   '/seed-requisition/analytics': typeof AuthenticatedSeedRequisitionAnalyticsRoute
   '/seed-requisition/overview': typeof AuthenticatedSeedRequisitionOverviewRoute
   '/seed-requisition/settings': typeof AuthenticatedSeedRequisitionSettingsRoute
+  '/farmers/$id/': typeof AuthenticatedFarmersIdIndexRoute
+  '/farmers/$id/contract/$contractId': typeof AuthenticatedFarmersIdContractContractIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -264,7 +280,6 @@ export interface FileRoutesByTo {
   '/access-control/permissions': typeof AuthenticatedAccessControlPermissionsRoute
   '/access-control/sessions': typeof AuthenticatedAccessControlSessionsRoute
   '/access-control/users': typeof AuthenticatedAccessControlUsersRoute
-  '/farmers/$id': typeof AuthenticatedFarmersIdRoute
   '/farmers/analytics': typeof AuthenticatedFarmersAnalyticsRoute
   '/farmers/contract': typeof AuthenticatedFarmersContractRoute
   '/farmers/overview': typeof AuthenticatedFarmersOverviewRoute
@@ -281,6 +296,8 @@ export interface FileRoutesByTo {
   '/seed-requisition/analytics': typeof AuthenticatedSeedRequisitionAnalyticsRoute
   '/seed-requisition/overview': typeof AuthenticatedSeedRequisitionOverviewRoute
   '/seed-requisition/settings': typeof AuthenticatedSeedRequisitionSettingsRoute
+  '/farmers/$id': typeof AuthenticatedFarmersIdIndexRoute
+  '/farmers/$id/contract/$contractId': typeof AuthenticatedFarmersIdContractContractIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -298,7 +315,7 @@ export interface FileRoutesById {
   '/_authenticated/access-control/permissions': typeof AuthenticatedAccessControlPermissionsRoute
   '/_authenticated/access-control/sessions': typeof AuthenticatedAccessControlSessionsRoute
   '/_authenticated/access-control/users': typeof AuthenticatedAccessControlUsersRoute
-  '/_authenticated/farmers/$id': typeof AuthenticatedFarmersIdRoute
+  '/_authenticated/farmers/$id': typeof AuthenticatedFarmersIdRouteWithChildren
   '/_authenticated/farmers/analytics': typeof AuthenticatedFarmersAnalyticsRoute
   '/_authenticated/farmers/contract': typeof AuthenticatedFarmersContractRoute
   '/_authenticated/farmers/overview': typeof AuthenticatedFarmersOverviewRoute
@@ -315,6 +332,8 @@ export interface FileRoutesById {
   '/_authenticated/seed-requisition/analytics': typeof AuthenticatedSeedRequisitionAnalyticsRoute
   '/_authenticated/seed-requisition/overview': typeof AuthenticatedSeedRequisitionOverviewRoute
   '/_authenticated/seed-requisition/settings': typeof AuthenticatedSeedRequisitionSettingsRoute
+  '/_authenticated/farmers/$id/': typeof AuthenticatedFarmersIdIndexRoute
+  '/_authenticated/farmers/$id/contract/$contractId': typeof AuthenticatedFarmersIdContractContractIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -349,6 +368,8 @@ export interface FileRouteTypes {
     | '/seed-requisition/analytics'
     | '/seed-requisition/overview'
     | '/seed-requisition/settings'
+    | '/farmers/$id/'
+    | '/farmers/$id/contract/$contractId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -364,7 +385,6 @@ export interface FileRouteTypes {
     | '/access-control/permissions'
     | '/access-control/sessions'
     | '/access-control/users'
-    | '/farmers/$id'
     | '/farmers/analytics'
     | '/farmers/contract'
     | '/farmers/overview'
@@ -381,6 +401,8 @@ export interface FileRouteTypes {
     | '/seed-requisition/analytics'
     | '/seed-requisition/overview'
     | '/seed-requisition/settings'
+    | '/farmers/$id'
+    | '/farmers/$id/contract/$contractId'
   id:
     | '__root__'
     | '/'
@@ -414,6 +436,8 @@ export interface FileRouteTypes {
     | '/_authenticated/seed-requisition/analytics'
     | '/_authenticated/seed-requisition/overview'
     | '/_authenticated/seed-requisition/settings'
+    | '/_authenticated/farmers/$id/'
+    | '/_authenticated/farmers/$id/contract/$contractId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -642,6 +666,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSeedRequisitionSettingsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/farmers/$id/': {
+      id: '/_authenticated/farmers/$id/'
+      path: '/'
+      fullPath: '/farmers/$id/'
+      preLoaderRoute: typeof AuthenticatedFarmersIdIndexRouteImport
+      parentRoute: typeof AuthenticatedFarmersIdRoute
+    }
+    '/_authenticated/farmers/$id/contract/$contractId': {
+      id: '/_authenticated/farmers/$id/contract/$contractId'
+      path: '/contract/$contractId'
+      fullPath: '/farmers/$id/contract/$contractId'
+      preLoaderRoute: typeof AuthenticatedFarmersIdContractContractIdRouteImport
+      parentRoute: typeof AuthenticatedFarmersIdRoute
+    }
   }
 }
 
@@ -665,8 +703,25 @@ const AuthenticatedAccessControlRouteWithChildren =
     AuthenticatedAccessControlRouteChildren,
   )
 
+interface AuthenticatedFarmersIdRouteChildren {
+  AuthenticatedFarmersIdIndexRoute: typeof AuthenticatedFarmersIdIndexRoute
+  AuthenticatedFarmersIdContractContractIdRoute: typeof AuthenticatedFarmersIdContractContractIdRoute
+}
+
+const AuthenticatedFarmersIdRouteChildren: AuthenticatedFarmersIdRouteChildren =
+  {
+    AuthenticatedFarmersIdIndexRoute: AuthenticatedFarmersIdIndexRoute,
+    AuthenticatedFarmersIdContractContractIdRoute:
+      AuthenticatedFarmersIdContractContractIdRoute,
+  }
+
+const AuthenticatedFarmersIdRouteWithChildren =
+  AuthenticatedFarmersIdRoute._addFileChildren(
+    AuthenticatedFarmersIdRouteChildren,
+  )
+
 interface AuthenticatedFarmersRouteChildren {
-  AuthenticatedFarmersIdRoute: typeof AuthenticatedFarmersIdRoute
+  AuthenticatedFarmersIdRoute: typeof AuthenticatedFarmersIdRouteWithChildren
   AuthenticatedFarmersAnalyticsRoute: typeof AuthenticatedFarmersAnalyticsRoute
   AuthenticatedFarmersContractRoute: typeof AuthenticatedFarmersContractRoute
   AuthenticatedFarmersOverviewRoute: typeof AuthenticatedFarmersOverviewRoute
@@ -674,7 +729,7 @@ interface AuthenticatedFarmersRouteChildren {
 }
 
 const AuthenticatedFarmersRouteChildren: AuthenticatedFarmersRouteChildren = {
-  AuthenticatedFarmersIdRoute: AuthenticatedFarmersIdRoute,
+  AuthenticatedFarmersIdRoute: AuthenticatedFarmersIdRouteWithChildren,
   AuthenticatedFarmersAnalyticsRoute: AuthenticatedFarmersAnalyticsRoute,
   AuthenticatedFarmersContractRoute: AuthenticatedFarmersContractRoute,
   AuthenticatedFarmersOverviewRoute: AuthenticatedFarmersOverviewRoute,

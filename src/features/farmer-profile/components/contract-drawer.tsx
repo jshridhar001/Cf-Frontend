@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/sheet';
 import { createFarmerContractMutationKey } from '@/features/farmers/api/use-create-farmer-contract';
 import { updateFarmerContractMutationKey } from '@/features/farmers/api/use-update-farmer-contract';
-import { ContractForm } from '@/features/farmers/contract/components/contract-form';
+import { ContractForm } from '@/features/farmer-profile/components/contract-form';
 import type { Farmer, FarmerContractRow } from '@/features/farmers/types';
 import { useIsMobile } from '@/hooks/use-mobile';
 

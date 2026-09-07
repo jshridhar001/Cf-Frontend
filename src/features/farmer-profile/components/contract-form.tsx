@@ -70,7 +70,7 @@ export function ContractForm({ farmers, contract, onSuccess, onCancel }: Contrac
 
   const form = useForm({
     defaultValues: {
-      farmerId: contract?.farmerId ?? '',
+      farmerId: contract?.farmerId ?? (farmers.length === 1 ? farmers[0].id : ''),
       variety: contract?.variety ?? '',
       date: contract?.date ? contract.date.slice(0, 10) : todayIsoDate(),
       acres: contract ? String(contract.acres) : '',
