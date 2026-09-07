@@ -12,16 +12,28 @@ import {
 } from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useFarmers } from '@/features/farmers/api/use-farmers';
+import { ContractAnalyticsDashboard } from '@/features/farmer-profile/components/contract-analytics-dashboard';
 import { ContractDrawer } from '@/features/farmer-profile/components/contract-drawer';
 import { DeleteContractDialog } from '@/features/farmer-profile/components/delete-contract-dialog';
 import { FarmerContractsList } from '@/features/farmer-profile/components/farmer-contracts-list';
+import { buildContractAnalytics } from '@/features/farmer-profile/lib/contract-analytics';
+import { useFarmers } from '@/features/farmers/api/use-farmers';
 import { type FarmerContractRow, flattenFarmerContracts } from '@/features/farmers/types';
 import { getApiErrorMessage } from '@/lib/api-client';
 
 function ContractsSkeleton() {
   return (
-    <div className="flex flex-col gap-3 sm:gap-4">
+    <div className="flex flex-col gap-4 sm:gap-6">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
+        {['kpi-1', 'kpi-2', 'kpi-3', 'kpi-4', 'kpi-5', 'kpi-6'].map((key) => (
+          <Skeleton key={key} className="h-20 rounded-2xl" />
+        ))}
+      </div>
+      <div className="grid gap-3 sm:gap-4 lg:grid-cols-2">
+        <Skeleton className="h-64 rounded-2xl" />
+        <Skeleton className="h-64 rounded-2xl" />
+      </div>
+      <Skeleton className="h-48 rounded-2xl" />
       <Skeleton className="h-11 w-full rounded-lg sm:max-w-xs" />
       <Skeleton className="hidden h-48 w-full rounded-2xl md:block" />
       <div className="flex flex-col gap-2 md:hidden">
@@ -43,6 +55,7 @@ export default function FarmerContractPage() {
   const hasSearch = search.trim().length > 0;
 
   const contracts = useMemo(() => flattenFarmerContracts(farmerList), [farmerList]);
+  const analytics = useMemo(() => buildContractAnalytics(farmerList), [farmerList]);
 
   const visibleContracts = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -56,7 +69,7 @@ export default function FarmerContractPage() {
         <PageCardHeader>
           <CardTitle>Contract</CardTitle>
           <CardDescription className="hidden sm:block">
-            Create, update, and delete farmer contracts. Contracts load with the farmers list.
+            Review contracted acreage by area and variety, then create or update farmer contracts.
           </CardDescription>
         </PageCardHeader>
         <PageCardContent>
@@ -71,7 +84,7 @@ export default function FarmerContractPage() {
       <PageCardHeader className="has-data-[slot=card-action]:grid-cols-[1fr_auto] md:has-data-[slot=card-action]:grid-cols-1">
         <CardTitle>Contract</CardTitle>
         <CardDescription className="hidden sm:block">
-          Create, update, and delete farmer contracts. Contracts load with the farmers list.
+          Review contracted acreage by area and variety, then create or update farmer contracts.
         </CardDescription>
         <CardAction className="flex items-center gap-1 md:hidden">
           <Button
@@ -97,7 +110,8 @@ export default function FarmerContractPage() {
             </EmptyHeader>
           </Empty>
         ) : (
-          <div className="flex flex-col gap-3 sm:gap-4">
+          <div className="flex min-w-0 flex-col gap-4 sm:gap-6">
+            <ContractAnalyticsDashboard analytics={analytics} />
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
               <div className="relative w-full sm:max-w-xs">
                 <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
