@@ -27,7 +27,7 @@ export default defineConfig({
     babel({ presets: [reactCompilerPreset()] }),
   ],
   build: {
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 1300,
     rolldownOptions: {
       output: {
         codeSplitting: {
@@ -36,6 +36,19 @@ export default defineConfig({
               name: 'react-vendor',
               test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
               priority: 40,
+            },
+            {
+              // Keep tslib out of pdf-vendor so Radix/UI does not load the PDF stack on every page.
+              name: 'tslib',
+              test: /[\\/]node_modules[\\/]tslib[\\/]/,
+              priority: 45,
+            },
+            {
+              // Keep @react-pdf's CJS graph (unicode-properties + base64-js) in one chunk.
+              // Splitting it with vendor maxSize caused "i is not a function" in production.
+              name: 'pdf-vendor',
+              test: /[\\/]node_modules[\\/](@react-pdf|pdfkit|fontkit|unicode-properties|unicode-trie|restructure|tiny-inflate|base64-js|queue|linebreak|brotli|pako|clone|dfa|jpeg-exif|png-js|svg-arc-to-cubic-bezier)[\\/]/,
+              priority: 38,
             },
             {
               name: 'chart-vendor',
@@ -54,7 +67,7 @@ export default defineConfig({
             },
             {
               name: 'ui-vendor',
-              test: /[\\/]node_modules[\\/](@radix-ui|radix-ui|lucide-react|@base-ui)[\\/]/,
+              test: /[\\/]node_modules[\\/](@radix-ui|radix-ui|lucide-react|@base-ui|sonner)[\\/]/,
               priority: 25,
             },
             {

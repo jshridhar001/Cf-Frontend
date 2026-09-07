@@ -1,3 +1,5 @@
+'use no memo';
+
 import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import type { AgreementContext } from '@/features/farmers/lib/farmer-contract';
 import {
