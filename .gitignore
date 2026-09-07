@@ -42,7 +42,8 @@ coverage
 .eslintcache
 .stylelintcache
 
-# Netlify
+# Vercel / leftover Netlify CLI cache
+.vercel
 .netlify
 
 # Editor
@@ -69,5 +70,4 @@ Desktop.ini
 # Optional tooling / misc
 *.pem
 *.tgz
-.vercel
 .parcel-cache
