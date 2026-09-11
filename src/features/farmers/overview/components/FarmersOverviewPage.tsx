@@ -20,8 +20,8 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { farmersKeys } from '@/features/farmers/api/query-keys';
-import { useFarmers } from '@/features/farmers/api/use-farmers';
+import { farmersKeys } from '@/features/farmers/overview/api/query-keys';
+import { useFarmers } from '@/features/farmers/overview/api/use-farmers';
 import { DeleteAllFarmersDialog } from '@/features/farmers/overview/components/delete-all-farmers-dialog';
 import { DeleteFarmerDialog } from '@/features/farmers/overview/components/delete-farmer-dialog';
 import { FarmerCard } from '@/features/farmers/overview/components/farmer-card';
@@ -31,8 +31,8 @@ import {
   type FarmerSortValue,
   filterAndSortFarmers,
   isFarmerSortValue,
-} from '@/features/farmers/overview/types';
-import type { Farmer } from '@/features/farmers/types';
+} from '@/features/farmers/overview/lib/filter-sort';
+import type { Farmer } from '@/features/farmers/overview/types';
 import { getApiErrorMessage } from '@/lib/api-client';
 
 const DEFAULT_SORT: FarmerSortValue = 'account-asc';

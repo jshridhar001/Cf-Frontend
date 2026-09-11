@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
-import FarmerProfilePage from '@/features/farmer-profile/components/FarmerProfilePage';
-import { FARMER_PROFILE_TABS } from '@/features/farmer-profile/farmer-profile-tabs';
+import FarmerProfilePage from '@/features/farmers/profile/components/FarmerProfilePage';
+import { FARMER_PROFILE_TABS } from '@/features/farmers/profile/lib/farmer-profile-tabs';
 
 const farmerProfileSearchSchema = z.object({
   tab: z.enum(FARMER_PROFILE_TABS).default('contract').catch('contract'),

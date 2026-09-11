@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
-import FarmerContractDetailPage from '@/features/farmer-profile/components/FarmerContractDetailPage';
-import { farmerQueryOptions } from '@/features/farmers/api/use-farmer';
-import { CONTRACT_LANGUAGES } from '@/features/farmers/lib/contract-language';
+import FarmerContractDetailPage from '@/features/farmers/contract/components/FarmerContractDetailPage';
+import { CONTRACT_LANGUAGES } from '@/features/farmers/contract/lib/contract-language';
+import { farmerQueryOptions } from '@/features/farmers/profile/api/use-farmer';
 
 const contractDetailSearchSchema = z.object({
   lang: z.enum(CONTRACT_LANGUAGES).default('english').catch('english'),

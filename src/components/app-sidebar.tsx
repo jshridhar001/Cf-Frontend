@@ -43,10 +43,10 @@ type AppPath =
   | '/notifications'
   | '/seed-requisition/overview'
   | '/seed-requisition/analytics'
-  | '/seed-requisition/settings'
+  | '/seed-requisition/report'
   | '/seed-dispatches/overview'
   | '/seed-dispatches/analytics'
-  | '/seed-dispatches/settings'
+  | '/seed-dispatches/report'
   | '/transfer-stock'
   | '/master'
   | '/access-control';
@@ -97,7 +97,7 @@ const platformNavItems: NavItem[] = [
     items: [
       { title: 'Overview', url: '/seed-requisition/overview' },
       { title: 'Analytics', url: '/seed-requisition/analytics' },
-      { title: 'Settings', url: '/seed-requisition/settings' },
+      { title: 'Report', url: '/seed-requisition/report' },
     ],
   },
   {
@@ -107,7 +107,7 @@ const platformNavItems: NavItem[] = [
     items: [
       { title: 'Overview', url: '/seed-dispatches/overview' },
       { title: 'Analytics', url: '/seed-dispatches/analytics' },
-      { title: 'Settings', url: '/seed-dispatches/settings' },
+      { title: 'Report', url: '/seed-dispatches/report' },
     ],
   },
   {

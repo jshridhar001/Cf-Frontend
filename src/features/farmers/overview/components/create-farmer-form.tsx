@@ -10,8 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useCreateFarmer } from '@/features/farmers/api/use-create-farmer';
-import { useFarmerFamilies } from '@/features/farmers/api/use-farmer-families';
+import { useCreateFarmer } from '@/features/farmers/overview/api/use-create-farmer';
+import { useFarmerFamilies } from '@/features/farmers/overview/api/use-farmer-families';
 import {
   FARMER_ACCOUNT_TYPES,
   FARMER_STATUSES,
@@ -21,7 +21,7 @@ import {
   formatFarmerStatus,
   isFarmerAccountType,
   isFarmerStatus,
-} from '@/features/farmers/types';
+} from '@/features/farmers/overview/types';
 import { useStations } from '@/features/master/api/use-stations';
 
 const optionalText = z.string();

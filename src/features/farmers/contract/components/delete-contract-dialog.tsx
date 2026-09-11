@@ -10,23 +10,17 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { useDeleteFarmer } from '@/features/farmers/overview/api/use-delete-farmer';
-import type { Farmer } from '@/features/farmers/overview/types';
+import { useDeleteFarmerContract } from '@/features/farmers/contract/api/use-delete-farmer-contract';
+import type { FarmerContractRow } from '@/features/farmers/contract/types';
 
-interface DeleteFarmerDialogProps {
-  farmer: Farmer | null;
+interface DeleteContractDialogProps {
+  contract: FarmerContractRow | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onDeleted?: () => void;
 }
 
-export function DeleteFarmerDialog({
-  farmer,
-  open,
-  onOpenChange,
-  onDeleted,
-}: DeleteFarmerDialogProps) {
-  const { mutateAsync: deleteFarmer, isPending } = useDeleteFarmer();
+export function DeleteContractDialog({ contract, open, onOpenChange }: DeleteContractDialogProps) {
+  const { mutateAsync: deleteContract, isPending } = useDeleteFarmerContract();
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen && isPending) return;
@@ -40,11 +34,11 @@ export function DeleteFarmerDialog({
           <AlertDialogMedia className="bg-destructive/10 text-destructive">
             <Trash2Icon />
           </AlertDialogMedia>
-          <AlertDialogTitle>Delete {farmer?.name ?? 'this farmer'}?</AlertDialogTitle>
+          <AlertDialogTitle>Delete this contract?</AlertDialogTitle>
           <AlertDialogDescription>
-            {farmer
-              ? `This will permanently delete ${farmer.name} (${farmer.accountNumber}). This cannot be undone.`
-              : 'This will permanently delete this farmer. This cannot be undone.'}
+            {contract
+              ? `This will permanently delete the ${contract.variety} contract for ${contract.farmerName}. This cannot be undone.`
+              : 'This will permanently delete this contract. This cannot be undone.'}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -52,13 +46,12 @@ export function DeleteFarmerDialog({
           <Button
             type="button"
             variant="destructive"
-            disabled={isPending || !farmer}
+            disabled={isPending || !contract}
             onClick={() => {
-              if (!farmer) return;
-              void deleteFarmer(farmer.id)
+              if (!contract) return;
+              void deleteContract({ farmerId: contract.farmerId, contractId: contract.id })
                 .then(() => {
                   onOpenChange(false);
-                  onDeleted?.();
                 })
                 .catch(() => undefined);
             }}

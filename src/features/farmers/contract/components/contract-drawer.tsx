@@ -13,25 +13,26 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { createFarmerMutationKey } from '@/features/farmers/overview/api/use-create-farmer';
-import { updateFarmerMutationKey } from '@/features/farmers/overview/api/use-update-farmer';
+import { createFarmerContractMutationKey } from '@/features/farmers/contract/api/use-create-farmer-contract';
+import { updateFarmerContractMutationKey } from '@/features/farmers/contract/api/use-update-farmer-contract';
+import { ContractForm } from '@/features/farmers/contract/components/contract-form';
+import type { FarmerContractRow } from '@/features/farmers/contract/types';
 import type { Farmer } from '@/features/farmers/overview/types';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { CreateFarmerForm } from './create-farmer-form';
-import { EditFarmerForm } from './edit-farmer-form';
 
-interface FarmerDrawerProps {
-  farmer: Farmer | null;
+interface ContractDrawerProps {
+  farmers: Farmer[];
+  contract: FarmerContractRow | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function FarmerDrawer({ farmer, open, onOpenChange }: FarmerDrawerProps) {
+export function ContractDrawer({ farmers, contract, open, onOpenChange }: ContractDrawerProps) {
   const isMobile = useIsMobile();
-  const isEdit = farmer !== null;
+  const isEdit = contract !== null;
   const isSaving =
     useIsMutating({
-      mutationKey: isEdit ? updateFarmerMutationKey : createFarmerMutationKey,
+      mutationKey: isEdit ? updateFarmerContractMutationKey : createFarmerContractMutationKey,
     }) > 0;
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -39,21 +40,16 @@ export function FarmerDrawer({ farmer, open, onOpenChange }: FarmerDrawerProps) 
     onOpenChange(nextOpen);
   };
 
-  const title = isEdit ? 'Edit farmer' : 'Add farmer';
+  const title = isEdit ? 'Edit contract' : 'Add contract';
   const description = isEdit
-    ? 'Update this farmer contact, status, and bank details.'
-    : 'Create a contracted farmer. Station and locality come from master data.';
+    ? 'Update variety, date, acres, and the contract file URL.'
+    : 'Create a contract for a farmer. Variety names come from master data.';
 
-  const form = isEdit ? (
-    <EditFarmerForm
-      key={farmer.id}
-      farmer={farmer}
-      onSuccess={() => onOpenChange(false)}
-      onCancel={() => onOpenChange(false)}
-    />
-  ) : (
-    <CreateFarmerForm
-      key="create"
+  const form = (
+    <ContractForm
+      key={contract?.id ?? 'create'}
+      farmers={farmers}
+      contract={contract}
       onSuccess={() => onOpenChange(false)}
       onCancel={() => onOpenChange(false)}
     />

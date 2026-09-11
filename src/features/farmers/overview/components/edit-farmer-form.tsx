@@ -10,14 +10,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useUpdateFarmer } from '@/features/farmers/api/use-update-farmer';
+import { useUpdateFarmer } from '@/features/farmers/overview/api/use-update-farmer';
 import {
   FARMER_STATUSES,
   type Farmer,
   formatFarmerAccountType,
   formatFarmerStatus,
   isFarmerStatus,
-} from '@/features/farmers/types';
+} from '@/features/farmers/overview/types';
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.').max(64),

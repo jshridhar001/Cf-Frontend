@@ -17,7 +17,7 @@ import {
   formatFarmerStatus,
   getFarmerLocalityName,
   getFarmerStationName,
-} from '@/features/farmers/types';
+} from '@/features/farmers/overview/types';
 import { cn } from '@/lib/utils';
 
 function FarmerRow({

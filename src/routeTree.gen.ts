@@ -36,10 +36,10 @@ import { Route as AuthenticatedMasterTuberSizesRouteImport } from './routes/_aut
 import { Route as AuthenticatedMasterVarietiesRouteImport } from './routes/_authenticated/master.varieties'
 import { Route as AuthenticatedSeedDispatchesAnalyticsRouteImport } from './routes/_authenticated/seed-dispatches.analytics'
 import { Route as AuthenticatedSeedDispatchesOverviewRouteImport } from './routes/_authenticated/seed-dispatches.overview'
-import { Route as AuthenticatedSeedDispatchesSettingsRouteImport } from './routes/_authenticated/seed-dispatches.settings'
+import { Route as AuthenticatedSeedDispatchesReportRouteImport } from './routes/_authenticated/seed-dispatches.report'
 import { Route as AuthenticatedSeedRequisitionAnalyticsRouteImport } from './routes/_authenticated/seed-requisition.analytics'
 import { Route as AuthenticatedSeedRequisitionOverviewRouteImport } from './routes/_authenticated/seed-requisition.overview'
-import { Route as AuthenticatedSeedRequisitionSettingsRouteImport } from './routes/_authenticated/seed-requisition.settings'
+import { Route as AuthenticatedSeedRequisitionReportRouteImport } from './routes/_authenticated/seed-requisition.report'
 import { Route as AuthenticatedFarmersIdIndexRouteImport } from './routes/_authenticated/farmers.$id.index'
 import { Route as AuthenticatedFarmersIdContractContractIdRouteImport } from './routes/_authenticated/farmers.$id.contract.$contractId'
 
@@ -195,10 +195,10 @@ const AuthenticatedSeedDispatchesOverviewRoute =
     path: '/seed-dispatches/overview',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedSeedDispatchesSettingsRoute =
-  AuthenticatedSeedDispatchesSettingsRouteImport.update({
-    id: '/seed-dispatches/settings',
-    path: '/seed-dispatches/settings',
+const AuthenticatedSeedDispatchesReportRoute =
+  AuthenticatedSeedDispatchesReportRouteImport.update({
+    id: '/seed-dispatches/report',
+    path: '/seed-dispatches/report',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedSeedRequisitionAnalyticsRoute =
@@ -213,10 +213,10 @@ const AuthenticatedSeedRequisitionOverviewRoute =
     path: '/seed-requisition/overview',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedSeedRequisitionSettingsRoute =
-  AuthenticatedSeedRequisitionSettingsRouteImport.update({
-    id: '/seed-requisition/settings',
-    path: '/seed-requisition/settings',
+const AuthenticatedSeedRequisitionReportRoute =
+  AuthenticatedSeedRequisitionReportRouteImport.update({
+    id: '/seed-requisition/report',
+    path: '/seed-requisition/report',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedFarmersIdIndexRoute =
@@ -259,10 +259,10 @@ export interface FileRoutesByFullPath {
   '/master/varieties': typeof AuthenticatedMasterVarietiesRoute
   '/seed-dispatches/analytics': typeof AuthenticatedSeedDispatchesAnalyticsRoute
   '/seed-dispatches/overview': typeof AuthenticatedSeedDispatchesOverviewRoute
-  '/seed-dispatches/settings': typeof AuthenticatedSeedDispatchesSettingsRoute
+  '/seed-dispatches/report': typeof AuthenticatedSeedDispatchesReportRoute
   '/seed-requisition/analytics': typeof AuthenticatedSeedRequisitionAnalyticsRoute
   '/seed-requisition/overview': typeof AuthenticatedSeedRequisitionOverviewRoute
-  '/seed-requisition/settings': typeof AuthenticatedSeedRequisitionSettingsRoute
+  '/seed-requisition/report': typeof AuthenticatedSeedRequisitionReportRoute
   '/farmers/$id/': typeof AuthenticatedFarmersIdIndexRoute
   '/farmers/$id/contract/$contractId': typeof AuthenticatedFarmersIdContractContractIdRoute
 }
@@ -292,10 +292,10 @@ export interface FileRoutesByTo {
   '/master/varieties': typeof AuthenticatedMasterVarietiesRoute
   '/seed-dispatches/analytics': typeof AuthenticatedSeedDispatchesAnalyticsRoute
   '/seed-dispatches/overview': typeof AuthenticatedSeedDispatchesOverviewRoute
-  '/seed-dispatches/settings': typeof AuthenticatedSeedDispatchesSettingsRoute
+  '/seed-dispatches/report': typeof AuthenticatedSeedDispatchesReportRoute
   '/seed-requisition/analytics': typeof AuthenticatedSeedRequisitionAnalyticsRoute
   '/seed-requisition/overview': typeof AuthenticatedSeedRequisitionOverviewRoute
-  '/seed-requisition/settings': typeof AuthenticatedSeedRequisitionSettingsRoute
+  '/seed-requisition/report': typeof AuthenticatedSeedRequisitionReportRoute
   '/farmers/$id': typeof AuthenticatedFarmersIdIndexRoute
   '/farmers/$id/contract/$contractId': typeof AuthenticatedFarmersIdContractContractIdRoute
 }
@@ -328,10 +328,10 @@ export interface FileRoutesById {
   '/_authenticated/master/varieties': typeof AuthenticatedMasterVarietiesRoute
   '/_authenticated/seed-dispatches/analytics': typeof AuthenticatedSeedDispatchesAnalyticsRoute
   '/_authenticated/seed-dispatches/overview': typeof AuthenticatedSeedDispatchesOverviewRoute
-  '/_authenticated/seed-dispatches/settings': typeof AuthenticatedSeedDispatchesSettingsRoute
+  '/_authenticated/seed-dispatches/report': typeof AuthenticatedSeedDispatchesReportRoute
   '/_authenticated/seed-requisition/analytics': typeof AuthenticatedSeedRequisitionAnalyticsRoute
   '/_authenticated/seed-requisition/overview': typeof AuthenticatedSeedRequisitionOverviewRoute
-  '/_authenticated/seed-requisition/settings': typeof AuthenticatedSeedRequisitionSettingsRoute
+  '/_authenticated/seed-requisition/report': typeof AuthenticatedSeedRequisitionReportRoute
   '/_authenticated/farmers/$id/': typeof AuthenticatedFarmersIdIndexRoute
   '/_authenticated/farmers/$id/contract/$contractId': typeof AuthenticatedFarmersIdContractContractIdRoute
 }
@@ -364,10 +364,10 @@ export interface FileRouteTypes {
     | '/master/varieties'
     | '/seed-dispatches/analytics'
     | '/seed-dispatches/overview'
-    | '/seed-dispatches/settings'
+    | '/seed-dispatches/report'
     | '/seed-requisition/analytics'
     | '/seed-requisition/overview'
-    | '/seed-requisition/settings'
+    | '/seed-requisition/report'
     | '/farmers/$id/'
     | '/farmers/$id/contract/$contractId'
   fileRoutesByTo: FileRoutesByTo
@@ -397,10 +397,10 @@ export interface FileRouteTypes {
     | '/master/varieties'
     | '/seed-dispatches/analytics'
     | '/seed-dispatches/overview'
-    | '/seed-dispatches/settings'
+    | '/seed-dispatches/report'
     | '/seed-requisition/analytics'
     | '/seed-requisition/overview'
-    | '/seed-requisition/settings'
+    | '/seed-requisition/report'
     | '/farmers/$id'
     | '/farmers/$id/contract/$contractId'
   id:
@@ -432,10 +432,10 @@ export interface FileRouteTypes {
     | '/_authenticated/master/varieties'
     | '/_authenticated/seed-dispatches/analytics'
     | '/_authenticated/seed-dispatches/overview'
-    | '/_authenticated/seed-dispatches/settings'
+    | '/_authenticated/seed-dispatches/report'
     | '/_authenticated/seed-requisition/analytics'
     | '/_authenticated/seed-requisition/overview'
-    | '/_authenticated/seed-requisition/settings'
+    | '/_authenticated/seed-requisition/report'
     | '/_authenticated/farmers/$id/'
     | '/_authenticated/farmers/$id/contract/$contractId'
   fileRoutesById: FileRoutesById
@@ -638,11 +638,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSeedDispatchesOverviewRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/seed-dispatches/settings': {
-      id: '/_authenticated/seed-dispatches/settings'
-      path: '/seed-dispatches/settings'
-      fullPath: '/seed-dispatches/settings'
-      preLoaderRoute: typeof AuthenticatedSeedDispatchesSettingsRouteImport
+    '/_authenticated/seed-dispatches/report': {
+      id: '/_authenticated/seed-dispatches/report'
+      path: '/seed-dispatches/report'
+      fullPath: '/seed-dispatches/report'
+      preLoaderRoute: typeof AuthenticatedSeedDispatchesReportRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/seed-requisition/analytics': {
@@ -659,11 +659,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSeedRequisitionOverviewRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/seed-requisition/settings': {
-      id: '/_authenticated/seed-requisition/settings'
-      path: '/seed-requisition/settings'
-      fullPath: '/seed-requisition/settings'
-      preLoaderRoute: typeof AuthenticatedSeedRequisitionSettingsRouteImport
+    '/_authenticated/seed-requisition/report': {
+      id: '/_authenticated/seed-requisition/report'
+      path: '/seed-requisition/report'
+      fullPath: '/seed-requisition/report'
+      preLoaderRoute: typeof AuthenticatedSeedRequisitionReportRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/farmers/$id/': {
@@ -770,10 +770,10 @@ interface AuthenticatedRouteChildren {
   AuthenticatedTransferStockRoute: typeof AuthenticatedTransferStockRoute
   AuthenticatedSeedDispatchesAnalyticsRoute: typeof AuthenticatedSeedDispatchesAnalyticsRoute
   AuthenticatedSeedDispatchesOverviewRoute: typeof AuthenticatedSeedDispatchesOverviewRoute
-  AuthenticatedSeedDispatchesSettingsRoute: typeof AuthenticatedSeedDispatchesSettingsRoute
+  AuthenticatedSeedDispatchesReportRoute: typeof AuthenticatedSeedDispatchesReportRoute
   AuthenticatedSeedRequisitionAnalyticsRoute: typeof AuthenticatedSeedRequisitionAnalyticsRoute
   AuthenticatedSeedRequisitionOverviewRoute: typeof AuthenticatedSeedRequisitionOverviewRoute
-  AuthenticatedSeedRequisitionSettingsRoute: typeof AuthenticatedSeedRequisitionSettingsRoute
+  AuthenticatedSeedRequisitionReportRoute: typeof AuthenticatedSeedRequisitionReportRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -788,14 +788,14 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
     AuthenticatedSeedDispatchesAnalyticsRoute,
   AuthenticatedSeedDispatchesOverviewRoute:
     AuthenticatedSeedDispatchesOverviewRoute,
-  AuthenticatedSeedDispatchesSettingsRoute:
-    AuthenticatedSeedDispatchesSettingsRoute,
+  AuthenticatedSeedDispatchesReportRoute:
+    AuthenticatedSeedDispatchesReportRoute,
   AuthenticatedSeedRequisitionAnalyticsRoute:
     AuthenticatedSeedRequisitionAnalyticsRoute,
   AuthenticatedSeedRequisitionOverviewRoute:
     AuthenticatedSeedRequisitionOverviewRoute,
-  AuthenticatedSeedRequisitionSettingsRoute:
-    AuthenticatedSeedRequisitionSettingsRoute,
+  AuthenticatedSeedRequisitionReportRoute:
+    AuthenticatedSeedRequisitionReportRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

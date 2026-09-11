@@ -1,4 +1,4 @@
-import { useDeleteAllFarmers } from '@/features/farmers/api/use-delete-all-farmers';
+import { useDeleteAllFarmers } from '@/features/farmers/overview/api/use-delete-all-farmers';
 import { MasterConfirmDialog } from '@/features/master/components/master-confirm-dialog';
 
 interface DeleteAllFarmersDialogProps {
