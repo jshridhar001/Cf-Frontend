@@ -140,6 +140,7 @@ function getRouteTitle(pathname: string) {
   const exact = routeTitles[pathname];
   if (exact) return exact;
   if (pathname === '/farmers' || pathname.startsWith('/farmers/')) return 'Farmers';
+  if (pathname.startsWith('/seed-requisition/')) return 'Seed Requisition';
   return 'Dashboard';
 }
 

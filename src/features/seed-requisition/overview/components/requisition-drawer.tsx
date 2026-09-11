@@ -41,10 +41,10 @@ export function RequisitionDrawer({ requisition, open, onOpenChange }: Requisiti
     onOpenChange(nextOpen);
   };
 
-  const title = isEdit ? 'Edit requisition' : 'Add requisition';
+  const title = isEdit ? 'Edit Seed Requisition' : 'Add Seed Requisition';
   const description = isEdit
     ? 'Update quantity, delivery date, or remarks. Farmer and variety cannot be changed.'
-    : 'Create a seed requisition. Provide either bags or acres, not both.';
+    : 'Create a new pending seed requisition.';
 
   const form = (
     <RequisitionForm
@@ -69,7 +69,7 @@ export function RequisitionDrawer({ requisition, open, onOpenChange }: Requisiti
             <DrawerTitle>{title}</DrawerTitle>
             <DrawerDescription>{description}</DrawerDescription>
           </DrawerHeader>
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">{form}</div>
+          <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5">{form}</div>
         </DrawerContent>
       </Drawer>
     );
@@ -77,12 +77,15 @@ export function RequisitionDrawer({ requisition, open, onOpenChange }: Requisiti
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent side="right" className="sm:max-w-md">
-        <SheetHeader>
+      <SheetContent
+        side="right"
+        className="flex w-full flex-col gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-lg"
+      >
+        <SheetHeader className="border-b border-border/40 py-4 pr-14 pl-5">
           <SheetTitle>{title}</SheetTitle>
           <SheetDescription>{description}</SheetDescription>
         </SheetHeader>
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6">{form}</div>
+        <div className="flex-1 overflow-y-auto px-5 py-5">{form}</div>
       </SheetContent>
     </Sheet>
   );

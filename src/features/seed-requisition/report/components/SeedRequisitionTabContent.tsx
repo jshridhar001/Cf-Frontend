@@ -1,22 +1,21 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { ClipboardList } from 'lucide-react';
 import { useCallback, useMemo } from 'react';
-
-import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
 import { PageListSkeleton } from '@/components/page-list-skeleton';
-import { CardDescription, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useFarmers } from '@/features/farmers/overview/api/use-farmers';
 import { useVarieties } from '@/features/master/api/use-varieties';
-import { seedRequisitionReportKeys } from '@/features/seed-requisition/report/api/query-keys';
+import { seedRequisitionKeys } from '@/features/seed-requisition/report/api/query-keys';
 import { useDeleteAllSeedRequisitions } from '@/features/seed-requisition/report/api/use-delete-all-seed-requisitions';
-import { useSeedRequisitionReport } from '@/features/seed-requisition/report/api/use-seed-requisition-report';
-import { SeedRequisitionOverview } from '@/features/seed-requisition/report/components/SeedRequisitionOverview';
+import { useSeedRequisitions } from '@/features/seed-requisition/report/api/use-seed-requisitions';
 import type { SeedRequisitionFormOptions } from '@/features/seed-requisition/report/lib/form-options';
 import { getApiErrorMessage } from '@/lib/api-client';
 
-export default function SeedRequisitionReportPage() {
+import { SeedRequisitionOverview } from './SeedRequisitionOverview';
+
+export function SeedRequisitionTabContent() {
   const queryClient = useQueryClient();
-  const { data: requisitions = [], isPending, isError, error } = useSeedRequisitionReport();
+  const { data: requisitions = [], isPending, isError, error } = useSeedRequisitions();
   const { data: farmers = [] } = useFarmers();
   const { data: varieties = [] } = useVarieties();
   const { mutateAsync: deleteAllSeedRequisitions } = useDeleteAllSeedRequisitions();
@@ -36,7 +35,7 @@ export default function SeedRequisitionReportPage() {
   );
 
   const handleRefresh = useCallback(() => {
-    void queryClient.invalidateQueries({ queryKey: seedRequisitionReportKeys.list() });
+    void queryClient.invalidateQueries({ queryKey: seedRequisitionKeys.list() });
   }, [queryClient]);
 
   const handleDeleteAll = useCallback(async () => {
@@ -44,20 +43,20 @@ export default function SeedRequisitionReportPage() {
   }, [deleteAllSeedRequisitions]);
 
   return (
-    <PageCard>
-      <PageCardHeader>
-        <CardTitle className="flex items-center gap-2">
+    <Card className="border-border/50 w-full min-w-0 shadow-sm">
+      <CardHeader className="border-border/50 border-b pb-5">
+        <CardTitle className="flex items-center gap-2 text-lg">
           <span className="bg-primary/10 text-primary flex size-8 shrink-0 items-center justify-center rounded-lg">
             <ClipboardList className="size-4" aria-hidden />
           </span>
-          Report
+          Seed Requisition
         </CardTitle>
-        <CardDescription className="hidden sm:block">
-          Filter, group, and review requisitions. Approve or reject pending rows from the actions
-          menu.
+        <CardDescription className="max-md:text-xs">
+          Browse requisitions in a table. Approve or reject pending rows from the actions menu.
         </CardDescription>
-      </PageCardHeader>
-      <PageCardContent className="min-w-0 overflow-hidden">
+      </CardHeader>
+
+      <CardContent className="min-w-0 overflow-hidden pt-5">
         {isPending ? (
           <PageListSkeleton />
         ) : isError ? (
@@ -72,7 +71,7 @@ export default function SeedRequisitionReportPage() {
             onDeleteAll={handleDeleteAll}
           />
         )}
-      </PageCardContent>
-    </PageCard>
+      </CardContent>
+    </Card>
   );
 }
