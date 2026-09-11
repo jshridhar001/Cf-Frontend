@@ -15,8 +15,15 @@ function readAppName(value: string | undefined): string {
   return trimmed;
 }
 
+function readAppEnv(value: string | undefined): string {
+  return value?.trim() ?? '';
+}
+
 export const env = {
   apiBaseUrl: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000',
   appName: readAppName(import.meta.env.VITE_APP_NAME),
+  appEnv: readAppEnv(import.meta.env.VITE_APP_ENV),
   enableDevtools: readBooleanFlag(import.meta.env.VITE_ENABLE_DEVTOOLS),
 } as const;
+
+export const isDevelopmentEnv = env.appEnv.toLowerCase() === 'development';

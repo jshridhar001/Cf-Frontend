@@ -20,6 +20,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLogout } from '@/features/auth/api/use-logout';
 import { useMe } from '@/features/auth/api/use-me';
+import { isDevelopmentEnv } from '@/lib/env';
 import { cn } from '@/lib/utils';
 
 const routeTitles: Record<string, string> = {
@@ -164,6 +165,14 @@ export function AppTopbar() {
       </div>
 
       <div className="ml-3 flex shrink-0 items-center gap-2">
+        {isDevelopmentEnv ? (
+          <Badge
+            variant="outline"
+            className="h-5 border-amber-500/40 bg-amber-500/15 px-1.5 text-[10px] font-semibold tracking-wide text-amber-800 uppercase dark:text-amber-300"
+          >
+            Development
+          </Badge>
+        ) : null}
         <ThemeToggle />
 
         <DropdownMenu>
