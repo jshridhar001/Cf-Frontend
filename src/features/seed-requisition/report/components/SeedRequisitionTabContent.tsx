@@ -1,14 +1,11 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { ClipboardList } from 'lucide-react';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { PageListSkeleton } from '@/components/page-list-skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useFarmers } from '@/features/farmers/overview/api/use-farmers';
-import { useVarieties } from '@/features/master/api/use-varieties';
 import { seedRequisitionKeys } from '@/features/seed-requisition/report/api/query-keys';
 import { useDeleteAllSeedRequisitions } from '@/features/seed-requisition/report/api/use-delete-all-seed-requisitions';
 import { useSeedRequisitions } from '@/features/seed-requisition/report/api/use-seed-requisitions';
-import type { SeedRequisitionFormOptions } from '@/features/seed-requisition/report/lib/form-options';
 import { getApiErrorMessage } from '@/lib/api-client';
 
 import { SeedRequisitionOverview } from './SeedRequisitionOverview';
@@ -16,23 +13,7 @@ import { SeedRequisitionOverview } from './SeedRequisitionOverview';
 export function SeedRequisitionTabContent() {
   const queryClient = useQueryClient();
   const { data: requisitions = [], isPending, isError, error } = useSeedRequisitions();
-  const { data: farmers = [] } = useFarmers();
-  const { data: varieties = [] } = useVarieties();
   const { mutateAsync: deleteAllSeedRequisitions } = useDeleteAllSeedRequisitions();
-
-  const formOptions = useMemo<SeedRequisitionFormOptions>(
-    () => ({
-      farmers: farmers.map((farmer) => ({
-        value: farmer.id,
-        label: farmer.accountNumber ? `${farmer.name} (${farmer.accountNumber})` : farmer.name,
-      })),
-      varieties: varieties.map((variety) => ({
-        value: variety.id,
-        label: variety.name,
-      })),
-    }),
-    [farmers, varieties],
-  );
 
   const handleRefresh = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: seedRequisitionKeys.list() });
@@ -66,7 +47,6 @@ export function SeedRequisitionTabContent() {
         ) : (
           <SeedRequisitionOverview
             data={requisitions}
-            formOptions={formOptions}
             onRefresh={handleRefresh}
             onDeleteAll={handleDeleteAll}
           />

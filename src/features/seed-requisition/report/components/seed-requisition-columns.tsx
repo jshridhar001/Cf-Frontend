@@ -1,4 +1,4 @@
-import { CheckCircle2, Eye, MoreHorizontal, XCircle } from 'lucide-react';
+import { CheckCircle2, Eye, MoreHorizontal, SquarePen, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -45,13 +45,14 @@ function UniqueCountCell({ value }: { value: unknown }) {
 
 type ColumnHandlers = {
   onView: (requisition: SeedRequisitionRow) => void;
+  onEdit: (requisition: SeedRequisitionRow) => void;
   onApprove: (requisition: SeedRequisitionRow) => void;
   onReject: (requisition: SeedRequisitionRow) => void;
 };
 
 export function createColumns(
   headings: ColumnHeadings,
-  { onView, onApprove, onReject }: ColumnHandlers,
+  { onView, onEdit, onApprove, onReject }: ColumnHandlers,
 ): ColumnDef<SeedRequisitionRow>[] {
   return [
     {
@@ -247,6 +248,10 @@ export function createColumns(
                 <DropdownMenuItem onClick={() => onView(requisition)}>
                   <Eye className="size-4" />
                   View
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled={!isPending} onClick={() => onEdit(requisition)}>
+                  <SquarePen className="size-4" />
+                  Edit
                 </DropdownMenuItem>
                 <DropdownMenuItem disabled={!isPending} onClick={() => onApprove(requisition)}>
                   <CheckCircle2 className="size-4" />

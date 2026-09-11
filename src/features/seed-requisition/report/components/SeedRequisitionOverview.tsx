@@ -27,7 +27,6 @@ import {
   advancedSrGlobalFilterFn,
   selectedValuesFilterFn,
 } from '@/features/seed-requisition/report/lib/filter-fns';
-import type { SeedRequisitionFormOptions } from '@/features/seed-requisition/report/lib/form-options';
 import {
   type ColumnFiltersState,
   type ColumnOrderState,
@@ -54,10 +53,10 @@ import type {
 
 import { ApproveSeedRequisitionDialog } from './approve-seed-requisition-dialog';
 import { CreateSeedRequisitionSheet } from './create-seed-requisition-sheet';
+import { EditSeedRequisitionSheet } from './edit-seed-requisition-sheet';
 import { RejectSeedRequisitionDialog } from './reject-seed-requisition-dialog';
 import { createColumns } from './seed-requisition-columns';
 import { SeedRequisitionDataTable } from './seed-requisition-data-table';
-import { SeedRequisitionMobileList } from './seed-requisition-mobile-list';
 import { SeedRequisitionSummaryCards } from './seed-requisition-summary-cards';
 import { ViewFiltersSheet } from './view-filters/ViewFiltersSheet';
 
@@ -74,7 +73,6 @@ const STATUS_TAB_VALUES = new Set<string>(Object.keys(STATUS_TAB_LABELS));
 
 export type SeedRequisitionOverviewProps = {
   data: SeedRequisitionRow[];
-  formOptions: SeedRequisitionFormOptions;
   onRefresh?: () => void;
   onDeleteAll?: () => Promise<void> | void;
 };
@@ -131,7 +129,6 @@ function getStatusTabFromFilters(columnFilters: ColumnFiltersState): StatusTab {
 
 export function SeedRequisitionOverview({
   data,
-  formOptions,
   onRefresh,
   onDeleteAll,
 }: SeedRequisitionOverviewProps) {
@@ -143,6 +140,7 @@ export function SeedRequisitionOverview({
   const [isPending, startTransition] = useTransition();
   const [approvingRequisition, setApprovingRequisition] = useState<SeedRequisitionRow | null>(null);
   const [rejectingRequisition, setRejectingRequisition] = useState<SeedRequisitionRow | null>(null);
+  const [editingRequisition, setEditingRequisition] = useState<SeedRequisitionRow | null>(null);
   const [search, setSearch] = useState('');
   const [sorting, setSorting] = useState<SortingState>([{ id: 'requisitionDate', desc: true }]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -180,14 +178,20 @@ export function SeedRequisitionOverview({
     [navigate],
   );
 
+  const handleEditRequisition = useCallback((requisition: SeedRequisitionRow) => {
+    if (requisition.status !== 'pending') return;
+    setEditingRequisition(requisition);
+  }, []);
+
   const columns = useMemo(
     () =>
       createColumns(headings, {
         onView: handleViewRequisition,
+        onEdit: handleEditRequisition,
         onApprove: setApprovingRequisition,
         onReject: setRejectingRequisition,
       }),
-    [headings, handleViewRequisition],
+    [headings, handleViewRequisition, handleEditRequisition],
   );
 
   const columnIds = useMemo(() => getSeedRequisitionColumnIds(columns as never), [columns]);
@@ -310,11 +314,6 @@ export function SeedRequisitionOverview({
     };
   }, [summaryRows]);
 
-  const mobileRows = table
-    .getFilteredRowModel()
-    .flatRows.filter((row) => !row.getIsGrouped())
-    .map((row) => row.original);
-
   const handleRefresh = useCallback(() => {
     onRefresh?.();
     toast.success('Refreshed', {
@@ -354,30 +353,65 @@ export function SeedRequisitionOverview({
             />
           </div>
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-wrap items-center gap-2">
-              <ViewFiltersSheet table={table} />
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-              <Button type="button" onClick={() => setIsAddOpen(true)}>
-                <Plus className="size-4" />
-                Add Seed Requisition
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                disabled={rows.length === 0 || isPending}
-                onClick={() => setIsDeleteAllOpen(true)}
-              >
-                <Trash2 className="size-4" />
-                Delete All
-              </Button>
-              <Button type="button" variant="outline" onClick={handleRefresh}>
-                <RefreshCw className="size-4" />
-                Refresh
-              </Button>
-            </div>
+          <div className="flex items-center justify-end gap-1.5 sm:gap-2">
+            <Button
+              type="button"
+              size="icon"
+              className="min-h-11 min-w-11 md:hidden"
+              aria-label="Add seed requisition"
+              onClick={() => setIsAddOpen(true)}
+            >
+              <Plus />
+            </Button>
+            <Button
+              type="button"
+              className="hidden md:inline-flex"
+              onClick={() => setIsAddOpen(true)}
+            >
+              <Plus data-icon="inline-start" />
+              Add Seed Requisition
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              className="min-h-11 min-w-11 md:hidden"
+              aria-label="Delete all seed requisitions"
+              disabled={rows.length === 0 || isPending}
+              onClick={() => setIsDeleteAllOpen(true)}
+            >
+              <Trash2 />
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              className="hidden md:inline-flex"
+              disabled={rows.length === 0 || isPending}
+              onClick={() => setIsDeleteAllOpen(true)}
+            >
+              <Trash2 data-icon="inline-start" />
+              Delete All
+            </Button>
+            <ViewFiltersSheet table={table} />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="min-h-11 min-w-11 md:hidden"
+              aria-label="Refresh"
+              onClick={handleRefresh}
+            >
+              <RefreshCw />
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="hidden md:inline-flex"
+              onClick={handleRefresh}
+            >
+              <RefreshCw data-icon="inline-start" />
+              Refresh
+            </Button>
           </div>
         </div>
 
@@ -388,36 +422,30 @@ export function SeedRequisitionOverview({
             Loading…
           </div>
         ) : (
-          <>
-            <div className="md:hidden">
-              <SeedRequisitionMobileList
-                data={mobileRows}
-                headings={headings}
-                onView={handleViewRequisition}
-              />
-            </div>
-            <div className="hidden min-w-0 md:block">
-              <SeedRequisitionDataTable
-                columns={columns}
-                table={table}
-                rows={tableRows}
-                headerGroups={headerGroups}
-                filteredCount={filteredRowCount}
-                pageIndex={pagination.pageIndex}
-                pageSize={pagination.pageSize}
-                isGrouped={isGrouped}
-                emptyTitle="No requisitions found."
-                entityLabel="requisitions"
-              />
-            </div>
-          </>
+          <div className="min-w-0">
+            <SeedRequisitionDataTable
+              columns={columns}
+              table={table}
+              rows={tableRows}
+              headerGroups={headerGroups}
+              filteredCount={filteredRowCount}
+              pageIndex={pagination.pageIndex}
+              pageSize={pagination.pageSize}
+              isGrouped={isGrouped}
+              emptyTitle="No requisitions found."
+              entityLabel="requisitions"
+            />
+          </div>
         )}
       </ItemGroup>
 
-      <CreateSeedRequisitionSheet
-        open={isAddOpen}
-        options={formOptions}
-        onOpenChange={setIsAddOpen}
+      <CreateSeedRequisitionSheet open={isAddOpen} onOpenChange={setIsAddOpen} />
+
+      <EditSeedRequisitionSheet
+        requisition={editingRequisition}
+        onOpenChange={(open) => {
+          if (!open) setEditingRequisition(null);
+        }}
       />
 
       <ApproveSeedRequisitionDialog

@@ -266,7 +266,9 @@ export default function SeedRequisitionOverviewPage() {
             <RequisitionCard
               key={requisition.id}
               requisition={requisition}
-              onEdit={setEditingRequisition}
+              onEdit={(requisition) => {
+                if (requisition.status === 'PENDING') setEditingRequisition(requisition);
+              }}
               onDelete={setDeletingRequisition}
               onApprove={setApprovingRequisition}
               onReject={setRejectingRequisition}

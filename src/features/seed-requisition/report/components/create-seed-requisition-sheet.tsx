@@ -1,3 +1,5 @@
+import { Loader2 } from 'lucide-react';
+
 import {
   Sheet,
   SheetContent,
@@ -7,24 +9,19 @@ import {
 } from '@/components/ui/sheet';
 import { useCreateSeedRequisition } from '@/features/seed-requisition/report/api/use-create-seed-requisition';
 import { SeedRequisitionForm } from '@/features/seed-requisition/report/components/seed-requisition-form';
-import type { SeedRequisitionFormOptions } from '@/features/seed-requisition/report/lib/form-options';
+import { useSeedRequisitionFormOptions } from '@/features/seed-requisition/report/lib/form-options';
 import { dateOnlyToIsoDatetime } from '@/features/seed-requisition/report/lib/map-seed-requisition';
 import type { CreateSeedRequisitionFormValues } from '@/features/seed-requisition/report/schemas/seed-requisition.schema';
+import { getApiErrorMessage } from '@/lib/api-client';
 
 type CreateSeedRequisitionSheetProps = {
   open: boolean;
-  options: SeedRequisitionFormOptions;
   onOpenChange: (open: boolean) => void;
 };
 
-function CreateSeedRequisitionForm({
-  options,
-  onClose,
-}: {
-  options: SeedRequisitionFormOptions;
-  onClose: () => void;
-}) {
+function CreateSeedRequisitionForm({ onClose }: { onClose: () => void }) {
   const { mutateAsync: createSeedRequisition } = useCreateSeedRequisition();
+  const { options, isPending, isError, error } = useSeedRequisitionFormOptions();
 
   const handleSubmit = async (values: CreateSeedRequisitionFormValues) => {
     await createSeedRequisition({
@@ -40,6 +37,23 @@ function CreateSeedRequisitionForm({
     onClose();
   };
 
+  if (isPending) {
+    return (
+      <div className="text-muted-foreground flex items-center justify-center gap-2 py-10 text-sm">
+        <Loader2 className="size-4 animate-spin" />
+        Loading form…
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <p className="text-destructive py-8 text-center text-sm">
+        {getApiErrorMessage(error, 'Failed to load farmers and varieties.')}
+      </p>
+    );
+  }
+
   return (
     <SeedRequisitionForm
       options={options}
@@ -51,11 +65,7 @@ function CreateSeedRequisitionForm({
   );
 }
 
-export function CreateSeedRequisitionSheet({
-  open,
-  options,
-  onOpenChange,
-}: CreateSeedRequisitionSheetProps) {
+export function CreateSeedRequisitionSheet({ open, onOpenChange }: CreateSeedRequisitionSheetProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -67,9 +77,7 @@ export function CreateSeedRequisitionSheet({
           <SheetDescription>Create a new pending seed requisition.</SheetDescription>
         </SheetHeader>
         <div className="flex-1 overflow-y-auto px-5 py-5">
-          {open ? (
-            <CreateSeedRequisitionForm options={options} onClose={() => onOpenChange(false)} />
-          ) : null}
+          {open ? <CreateSeedRequisitionForm onClose={() => onOpenChange(false)} /> : null}
         </div>
       </SheetContent>
     </Sheet>

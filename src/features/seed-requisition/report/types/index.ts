@@ -51,6 +51,8 @@ export type SeedRequisition = {
 /** Flat row used by the seed requisition table (denormalized display fields). */
 export type SeedRequisitionRow = {
   id: string;
+  farmerId: string;
+  varietyId: string;
   farmer: string;
   variety: string;
   acres: number;
@@ -119,8 +121,8 @@ export type CreateSeedRequisitionInput = {
 export type UpdateSeedRequisitionInput = {
   farmerId?: string;
   varietyId?: string;
-  requestedBags?: number;
-  requestedAcres?: number;
+  requestedBags?: number | null;
+  requestedAcres?: number | null;
   requisitionDate?: string;
   requestedDeliveryDate?: string;
   remarks?: string;

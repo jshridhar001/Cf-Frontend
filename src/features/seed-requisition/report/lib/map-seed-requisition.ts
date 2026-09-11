@@ -39,6 +39,8 @@ function isoToDateOnly(value: string | null | undefined): string {
 export function mapSeedRequisitionToRow(requisition: SeedRequisition): SeedRequisitionRow {
   return {
     id: requisition.id,
+    farmerId: requisition.farmerId,
+    varietyId: requisition.varietyId,
     farmer: requisition.farmer?.name ?? '',
     variety: requisition.variety?.name ?? '',
     acres: Number(requisition.requestedAcres) || 0,

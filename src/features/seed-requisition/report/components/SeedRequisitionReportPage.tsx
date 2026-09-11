@@ -1,39 +1,20 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { ClipboardList } from 'lucide-react';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 
 import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
 import { PageListSkeleton } from '@/components/page-list-skeleton';
 import { CardDescription, CardTitle } from '@/components/ui/card';
-import { useFarmers } from '@/features/farmers/overview/api/use-farmers';
-import { useVarieties } from '@/features/master/api/use-varieties';
 import { seedRequisitionReportKeys } from '@/features/seed-requisition/report/api/query-keys';
 import { useDeleteAllSeedRequisitions } from '@/features/seed-requisition/report/api/use-delete-all-seed-requisitions';
 import { useSeedRequisitionReport } from '@/features/seed-requisition/report/api/use-seed-requisition-report';
 import { SeedRequisitionOverview } from '@/features/seed-requisition/report/components/SeedRequisitionOverview';
-import type { SeedRequisitionFormOptions } from '@/features/seed-requisition/report/lib/form-options';
 import { getApiErrorMessage } from '@/lib/api-client';
 
 export default function SeedRequisitionReportPage() {
   const queryClient = useQueryClient();
   const { data: requisitions = [], isPending, isError, error } = useSeedRequisitionReport();
-  const { data: farmers = [] } = useFarmers();
-  const { data: varieties = [] } = useVarieties();
   const { mutateAsync: deleteAllSeedRequisitions } = useDeleteAllSeedRequisitions();
-
-  const formOptions = useMemo<SeedRequisitionFormOptions>(
-    () => ({
-      farmers: farmers.map((farmer) => ({
-        value: farmer.id,
-        label: farmer.accountNumber ? `${farmer.name} (${farmer.accountNumber})` : farmer.name,
-      })),
-      varieties: varieties.map((variety) => ({
-        value: variety.id,
-        label: variety.name,
-      })),
-    }),
-    [farmers, varieties],
-  );
 
   const handleRefresh = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: seedRequisitionReportKeys.list() });
@@ -67,7 +48,6 @@ export default function SeedRequisitionReportPage() {
         ) : (
           <SeedRequisitionOverview
             data={requisitions}
-            formOptions={formOptions}
             onRefresh={handleRefresh}
             onDeleteAll={handleDeleteAll}
           />

@@ -21,6 +21,7 @@ import type {
   VisibilityState,
 } from '@/features/seed-requisition/report/lib/react-table';
 import type { SeedRequisitionRow } from '@/features/seed-requisition/report/types';
+import { cn } from '@/lib/utils';
 
 import { AdvancedTab } from './AdvancedTab';
 import { ColumnsTab } from './ColumnsTab';
@@ -147,19 +148,37 @@ export function ViewFiltersSheet({ table }: ViewFiltersSheetProps) {
     table.setPageIndex(0);
   };
 
+  const filterCountLabel =
+    activeFilterCount > 0 ? ` (${activeFilterCount.toLocaleString('en-IN')})` : '';
+  const filterAriaLabel = `View filters${filterCountLabel}`;
+  const triggerTone = 'border-primary text-primary hover:bg-primary/10';
+
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>
         <Button
           type="button"
           variant="outline"
-          className="min-w-0 gap-1.5 border-primary text-primary hover:bg-primary/10"
+          size="icon"
+          className={cn('relative min-h-11 min-w-11 md:hidden', triggerTone)}
+          aria-label={filterAriaLabel}
         >
-          <SlidersHorizontal className="size-4 shrink-0" aria-hidden />
-          <span className="truncate">
-            View filters
-            {activeFilterCount > 0 ? ` (${activeFilterCount.toLocaleString('en-IN')})` : ''}
-          </span>
+          <SlidersHorizontal />
+          {activeFilterCount > 0 ? (
+            <span className="bg-primary text-primary-foreground absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full text-[10px] font-semibold tabular-nums">
+              {activeFilterCount.toLocaleString('en-IN')}
+            </span>
+          ) : null}
+        </Button>
+      </SheetTrigger>
+      <SheetTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          className={cn('hidden md:inline-flex', triggerTone)}
+        >
+          <SlidersHorizontal data-icon="inline-start" aria-hidden />
+          View filters{filterCountLabel}
         </Button>
       </SheetTrigger>
       <SheetContent

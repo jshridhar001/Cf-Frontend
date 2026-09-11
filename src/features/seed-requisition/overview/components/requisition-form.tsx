@@ -88,6 +88,7 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
           };
 
     if (isEdit) {
+      if (requisition.status !== 'PENDING') return;
       await updateRequisition({
         requisitionId: requisition.id,
         ...quantity,

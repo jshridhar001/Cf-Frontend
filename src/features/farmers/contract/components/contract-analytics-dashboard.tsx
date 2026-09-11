@@ -1,5 +1,13 @@
-import { FileText, LandPlot, Layers, MapPinned, Sprout, Users } from 'lucide-react';
-import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item';
+import { ChartColumn, FileText, LandPlot, Layers, MapPinned, Sprout, Users } from 'lucide-react';
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemSeparator,
+  ItemTitle,
+} from '@/components/ui/item';
 import {
   AcreageByAreaChart,
   AcreageByVarietyChart,
@@ -59,7 +67,7 @@ function KeyInsights({ insights }: { insights: string[] }) {
   );
 }
 
-export function ContractAnalyticsDashboard({ analytics }: { analytics: ContractAnalytics }) {
+export function ContractAnalyticsKpis({ analytics }: { analytics: ContractAnalytics }) {
   if (analytics.totalContracts === 0) return null;
 
   const topAreaValue = analytics.topArea?.name ?? '—';
@@ -72,7 +80,7 @@ export function ContractAnalyticsDashboard({ analytics }: { analytics: ContractA
     : 'No contracted acres';
 
   return (
-    <div className="flex min-w-0 flex-col gap-4 sm:gap-6">
+    <>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-6">
         <KpiTile
           label="Total Contracts"
@@ -101,49 +109,78 @@ export function ContractAnalyticsDashboard({ analytics }: { analytics: ContractA
         <KpiTile label="Top Area" value={topAreaValue} hint={topAreaHint} icon={MapPinned} />
         <KpiTile label="Top Variety" value={topVarietyValue} hint={topVarietyHint} icon={Sprout} />
       </div>
+      <ItemSeparator className="my-0" />
+    </>
+  );
+}
 
-      {analytics.byArea.length > 0 || analytics.byVariety.length > 0 ? (
-        <div className="grid min-w-0 gap-3 sm:gap-4 lg:grid-cols-2">
-          <ChartPanel
-            title="Contracted Acreage by Area"
-            description="Stations ranked by total contracted acres."
-          >
-            <AcreageByAreaChart data={analytics.byArea} />
-          </ChartPanel>
-          <ChartPanel
-            title="Contracted Acreage by Variety"
-            description="Which varieties are driving contracted acreage."
-          >
-            <AcreageByVarietyChart data={analytics.byVariety} />
-          </ChartPanel>
-        </div>
-      ) : null}
+export function ContractAnalyticsCharts({ analytics }: { analytics: ContractAnalytics }) {
+  if (analytics.totalContracts === 0) return null;
 
-      {analytics.areaNames.length > 0 && analytics.varietyNames.length > 0 ? (
-        <ChartPanel
-          title="Area × Variety"
-          description="Where each variety is contracted, and how much acreage that combination represents."
-        >
-          <AreaVarietyHeatmap analytics={analytics} />
-        </ChartPanel>
-      ) : null}
+  const hasAreaOrVarietyCharts = analytics.byArea.length > 0 || analytics.byVariety.length > 0;
+  const hasHeatmap = analytics.areaNames.length > 0 && analytics.varietyNames.length > 0;
+  const hasShareAndInsights = analytics.byArea.length > 0;
 
-      {analytics.byArea.length > 0 ? (
-        <div className="grid min-w-0 gap-3 sm:gap-4 lg:grid-cols-2">
+  if (!hasAreaOrVarietyCharts && !hasHeatmap && !hasShareAndInsights) return null;
+
+  return (
+    <>
+      <ItemSeparator className="mt-6 mb-0 sm:mt-10" />
+      <ItemGroup className="min-w-0">
+        <Item variant="outline" size="sm">
+          <ItemMedia variant="icon">
+            <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <ChartColumn className="size-4" aria-hidden />
+            </div>
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle>Graphical Analytics</ItemTitle>
+          </ItemContent>
+        </Item>
+
+        {hasAreaOrVarietyCharts ? (
+          <div className="grid min-w-0 gap-3 sm:gap-4 lg:grid-cols-2">
+            <ChartPanel
+              title="Contracted Acreage by Area"
+              description="Stations ranked by total contracted acres."
+            >
+              <AcreageByAreaChart data={analytics.byArea} />
+            </ChartPanel>
+            <ChartPanel
+              title="Contracted Acreage by Variety"
+              description="Which varieties are driving contracted acreage."
+            >
+              <AcreageByVarietyChart data={analytics.byVariety} />
+            </ChartPanel>
+          </div>
+        ) : null}
+
+        {hasHeatmap ? (
           <ChartPanel
-            title="Acreage Share by Area"
-            description="Where most of the contracted acreage is coming from."
+            title="Area × Variety"
+            description="Where each variety is contracted, and how much acreage that combination represents."
           >
-            <AcreageShareChart data={analytics.byArea} />
+            <AreaVarietyHeatmap analytics={analytics} />
           </ChartPanel>
-          <ChartPanel
-            title="Key Insights"
-            description="Patterns supported by the current contracts."
-          >
-            <KeyInsights insights={analytics.insights} />
-          </ChartPanel>
-        </div>
-      ) : null}
-    </div>
+        ) : null}
+
+        {hasShareAndInsights ? (
+          <div className="grid min-w-0 gap-3 sm:gap-4 lg:grid-cols-2">
+            <ChartPanel
+              title="Acreage Share by Area"
+              description="Where most of the contracted acreage is coming from."
+            >
+              <AcreageShareChart data={analytics.byArea} />
+            </ChartPanel>
+            <ChartPanel
+              title="Key Insights"
+              description="Patterns supported by the current contracts."
+            >
+              <KeyInsights insights={analytics.insights} />
+            </ChartPanel>
+          </div>
+        ) : null}
+      </ItemGroup>
+    </>
   );
 }

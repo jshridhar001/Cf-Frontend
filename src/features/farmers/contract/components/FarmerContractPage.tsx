@@ -11,8 +11,12 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
+import { ItemGroup } from '@/components/ui/item';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ContractAnalyticsDashboard } from '@/features/farmers/contract/components/contract-analytics-dashboard';
+import {
+  ContractAnalyticsCharts,
+  ContractAnalyticsKpis,
+} from '@/features/farmers/contract/components/contract-analytics-dashboard';
 import { ContractDrawer } from '@/features/farmers/contract/components/contract-drawer';
 import { DeleteContractDialog } from '@/features/farmers/contract/components/delete-contract-dialog';
 import { FarmerContractsList } from '@/features/farmers/contract/components/farmer-contracts-list';
@@ -29,17 +33,19 @@ function ContractsSkeleton() {
           <Skeleton key={key} className="h-20 rounded-2xl" />
         ))}
       </div>
-      <div className="grid gap-3 sm:gap-4 lg:grid-cols-2">
-        <Skeleton className="h-64 rounded-2xl" />
-        <Skeleton className="h-64 rounded-2xl" />
-      </div>
-      <Skeleton className="h-48 rounded-2xl" />
       <Skeleton className="h-11 w-full rounded-lg sm:max-w-xs" />
       <Skeleton className="hidden h-48 w-full rounded-2xl md:block" />
       <div className="flex flex-col gap-2 md:hidden">
         <Skeleton className="h-28 rounded-xl" />
         <Skeleton className="h-28 rounded-xl" />
       </div>
+      <Skeleton className="h-11 w-full rounded-lg sm:max-w-xs" />
+      <Skeleton className="h-14 w-full rounded-2xl" />
+      <div className="grid gap-3 sm:gap-4 lg:grid-cols-2">
+        <Skeleton className="h-64 rounded-2xl" />
+        <Skeleton className="h-64 rounded-2xl" />
+      </div>
+      <Skeleton className="h-48 rounded-2xl" />
     </div>
   );
 }
@@ -110,8 +116,8 @@ export default function FarmerContractPage() {
             </EmptyHeader>
           </Empty>
         ) : (
-          <div className="flex min-w-0 flex-col gap-4 sm:gap-6">
-            <ContractAnalyticsDashboard analytics={analytics} />
+          <ItemGroup className="min-w-0 sm:gap-6">
+            <ContractAnalyticsKpis analytics={analytics} />
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
               <div className="relative w-full sm:max-w-xs">
                 <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -142,7 +148,9 @@ export default function FarmerContractPage() {
               onEdit={setEditingContract}
               onDelete={setDeletingContract}
             />
-          </div>
+
+            <ContractAnalyticsCharts analytics={analytics} />
+          </ItemGroup>
         )}
       </PageCardContent>
 

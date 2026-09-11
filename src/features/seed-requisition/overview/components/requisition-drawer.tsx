@@ -69,7 +69,7 @@ export function RequisitionDrawer({ requisition, open, onOpenChange }: Requisiti
             <DrawerTitle>{title}</DrawerTitle>
             <DrawerDescription>{description}</DrawerDescription>
           </DrawerHeader>
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5">{form}</div>
+          <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5">{open ? form : null}</div>
         </DrawerContent>
       </Drawer>
     );
@@ -85,7 +85,7 @@ export function RequisitionDrawer({ requisition, open, onOpenChange }: Requisiti
           <SheetTitle>{title}</SheetTitle>
           <SheetDescription>{description}</SheetDescription>
         </SheetHeader>
-        <div className="flex-1 overflow-y-auto px-5 py-5">{form}</div>
+        <div className="flex-1 overflow-y-auto px-5 py-5">{open ? form : null}</div>
       </SheetContent>
     </Sheet>
   );

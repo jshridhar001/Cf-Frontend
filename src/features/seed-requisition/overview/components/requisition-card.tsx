@@ -147,14 +147,14 @@ export function RequisitionCard({
               >
                 <XIcon />
               </CardIconButton>
+              <CardIconButton
+                aria-label={`Edit requisition for ${farmerName}`}
+                onClick={() => onEdit(requisition)}
+              >
+                <SquarePenIcon />
+              </CardIconButton>
             </>
           ) : null}
-          <CardIconButton
-            aria-label={`Edit requisition for ${farmerName}`}
-            onClick={() => onEdit(requisition)}
-          >
-            <SquarePenIcon />
-          </CardIconButton>
           <CardIconButton
             className="text-destructive hover:bg-destructive/10 hover:text-destructive"
             aria-label={`Delete requisition for ${farmerName}`}
