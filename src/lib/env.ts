@@ -26,4 +26,5 @@ export const env = {
   enableDevtools: readBooleanFlag(import.meta.env.VITE_ENABLE_DEVTOOLS),
 } as const;
 
+/** True only when `VITE_APP_ENV` is Development. Production and other values hide the topbar badge. */
 export const isDevelopmentEnv = env.appEnv.toLowerCase() === 'development';
