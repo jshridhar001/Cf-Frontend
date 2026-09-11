@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useUploadFarmerContract } from '@/features/farmers/api/use-upload-farmer-contract';
+import type { ContractLanguage } from '@/features/farmers/lib/contract-language';
 
 function formatFileSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -36,6 +37,7 @@ function isPdfFile(file: File) {
 interface UploadContractToDriveDialogProps {
   farmerId: string;
   contractId: string;
+  language: ContractLanguage;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -43,6 +45,7 @@ interface UploadContractToDriveDialogProps {
 export function UploadContractToDriveDialog({
   farmerId,
   contractId,
+  language,
   open,
   onOpenChange,
 }: UploadContractToDriveDialogProps) {
@@ -91,8 +94,14 @@ export function UploadContractToDriveDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent showCloseButton={!isPending}>
         <DialogHeader>
-          <DialogTitle>Upload to Google Drive</DialogTitle>
-          <DialogDescription>Select a PDF to upload for this contract.</DialogDescription>
+          <DialogTitle>
+            {language === 'hindi' ? 'Upload Hindi contract' : 'Upload English contract'}
+          </DialogTitle>
+          <DialogDescription>
+            {language === 'hindi'
+              ? 'Select a PDF to upload as the Hindi contract.'
+              : 'Select a PDF to upload as the English contract.'}
+          </DialogDescription>
         </DialogHeader>
 
         <input
@@ -142,7 +151,7 @@ export function UploadContractToDriveDialog({
             disabled={!file || isPending}
             onClick={() => {
               if (!file) return;
-              void uploadContract({ farmerId, contractId, file })
+              void uploadContract({ farmerId, contractId, file, language })
                 .then(() => closeDialog())
                 .catch(() => undefined);
             }}

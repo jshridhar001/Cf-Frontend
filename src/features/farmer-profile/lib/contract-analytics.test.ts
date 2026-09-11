@@ -17,6 +17,8 @@ function contract(
   return {
     date: '2026-01-01',
     contractUrl: '',
+    hindiContractUrl: '',
+    isNotarized: false,
     ...overrides,
   };
 }

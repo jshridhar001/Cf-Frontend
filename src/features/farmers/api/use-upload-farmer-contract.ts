@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { farmersKeys } from '@/features/farmers/api/query-keys';
+import type { ContractLanguage } from '@/features/farmers/lib/contract-language';
 import type { FarmerContractResponse } from '@/features/farmers/types';
 import apiClient, { getApiErrorMessage } from '@/lib/api-client';
 
@@ -10,19 +11,25 @@ export type UploadFarmerContractVariables = {
   farmerId: string;
   contractId: string;
   file: File;
+  language: ContractLanguage;
 };
+
+function uploadPath(farmerId: string, contractId: string, language: ContractLanguage) {
+  const suffix = language === 'hindi' ? 'upload-hindi' : 'upload';
+  return `/v1/farmers/${farmerId}/contracts/${contractId}/${suffix}`;
+}
 
 export function useUploadFarmerContract() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationKey: uploadFarmerContractMutationKey,
-    mutationFn: async ({ farmerId, contractId, file }: UploadFarmerContractVariables) => {
+    mutationFn: async ({ farmerId, contractId, file, language }: UploadFarmerContractVariables) => {
       const formData = new FormData();
       formData.append('file', file);
 
       const { data } = await apiClient.post<FarmerContractResponse>(
-        `/v1/farmers/${farmerId}/contracts/${contractId}/upload`,
+        uploadPath(farmerId, contractId, language),
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 60_000 },
       );
@@ -30,12 +37,16 @@ export function useUploadFarmerContract() {
     },
     retry: false,
     meta: { suppressGlobalError: true },
-    onSuccess: async (data, { farmerId }) => {
+    onSuccess: async (data, { farmerId, language }) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: farmersKeys.list() }),
         queryClient.invalidateQueries({ queryKey: farmersKeys.detail(farmerId) }),
       ]);
-      toast.success(data.message || 'Contract uploaded successfully', {
+      const fallback =
+        language === 'hindi'
+          ? 'Hindi contract uploaded successfully'
+          : 'Contract uploaded successfully';
+      toast.success(data.message || fallback, {
         position: 'bottom-right',
       });
     },

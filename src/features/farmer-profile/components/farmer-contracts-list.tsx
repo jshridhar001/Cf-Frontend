@@ -1,5 +1,6 @@
 import { useNavigate } from '@tanstack/react-router';
 import { FileText } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import {
   Empty,
   EmptyDescription,
@@ -43,6 +44,14 @@ export function ContractUrlLink({ href }: { href: string }) {
     >
       {href}
     </a>
+  );
+}
+
+function NotarizedBadge({ isNotarized }: { isNotarized: boolean }) {
+  return (
+    <Badge variant={isNotarized ? 'secondary' : 'outline'}>
+      {isNotarized ? 'Notarized' : 'Not notarized'}
+    </Badge>
   );
 }
 
@@ -108,7 +117,9 @@ export function FarmerContractsList({
               <TableHead className="font-semibold">Variety</TableHead>
               <TableHead className="font-semibold">Date</TableHead>
               <TableHead className="font-semibold">Acres</TableHead>
-              <TableHead className="font-semibold">Contract URL</TableHead>
+              <TableHead className="font-semibold">English URL</TableHead>
+              <TableHead className="font-semibold">Hindi URL</TableHead>
+              <TableHead className="font-semibold">Notarized</TableHead>
               <TableHead className="text-right font-semibold">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -123,12 +134,14 @@ export function FarmerContractsList({
                   <ContractUrlLink href={contract.contractUrl} />
                 </TableCell>
                 <TableCell>
+                  <ContractUrlLink href={contract.hindiContractUrl} />
+                </TableCell>
+                <TableCell>
+                  <NotarizedBadge isNotarized={contract.isNotarized} />
+                </TableCell>
+                <TableCell>
                   <div className="flex justify-end">
-                    <ContractRowActions
-                      contract={contract}
-                      onEdit={onEdit}
-                      onDelete={onDelete}
-                    />
+                    <ContractRowActions contract={contract} onEdit={onEdit} onDelete={onDelete} />
                   </div>
                 </TableCell>
               </TableRow>
@@ -158,7 +171,11 @@ export function FarmerContractsList({
               </ItemActions>
             </ItemHeader>
             <ItemFooter className="mt-1 flex-col items-start gap-1.5 border-t border-border/60 pt-2.5">
+              <NotarizedBadge isNotarized={contract.isNotarized} />
+              <p className="text-xs text-muted-foreground">English</p>
               <ContractUrlLink href={contract.contractUrl} />
+              <p className="text-xs text-muted-foreground">Hindi</p>
+              <ContractUrlLink href={contract.hindiContractUrl} />
             </ItemFooter>
           </Item>
         ))}

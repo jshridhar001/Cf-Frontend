@@ -1,9 +1,12 @@
-import type { AgreementContext } from '@/features/farmers/lib/farmer-contract';
-import {
-  type AgreementBlock,
-  type AgreementRun,
-  buildPotatoMultiplicationAgreement,
+import { agreementLabels } from '@/features/farmers/lib/agreement-labels';
+import { buildPotatoMultiplicationAgreementForLang } from '@/features/farmers/lib/build-agreement';
+import type { ContractLanguage } from '@/features/farmers/lib/contract-language';
+import { type AgreementContext, COMPANY_LOGO_URL } from '@/features/farmers/lib/farmer-contract';
+import type {
+  AgreementBlock,
+  AgreementRun,
 } from '@/features/farmers/lib/potato-multiplication-agreement';
+import { cn } from '@/lib/utils';
 
 function blockKey(block: AgreementBlock): string {
   if (block.type === 'paragraph') return `p:${block.runs.map((run) => run.text).join('')}`;
@@ -33,11 +36,19 @@ function Runs({ runs }: { runs: AgreementRun[] }) {
   );
 }
 
-function BlockView({ block, context }: { block: AgreementBlock; context: AgreementContext }) {
+function BlockView({ block, language }: { block: AgreementBlock; language: ContractLanguage }) {
+  const labels = agreementLabels(language);
+  const isHindi = language === 'hindi';
+
   switch (block.type) {
     case 'title':
       return (
-        <h4 className="scroll-m-20 text-center text-base font-semibold tracking-tight uppercase">
+        <h4
+          className={cn(
+            'scroll-m-20 text-center text-base font-semibold tracking-tight',
+            !isHindi && 'uppercase',
+          )}
+        >
           {block.text}
         </h4>
       );
@@ -47,7 +58,12 @@ function BlockView({ block, context }: { block: AgreementBlock; context: Agreeme
       return <p className="py-2 text-center text-sm font-semibold">{block.text}</p>;
     case 'sectionHeading':
       return (
-        <h4 className="mt-4 scroll-m-20 text-sm font-semibold tracking-tight uppercase">
+        <h4
+          className={cn(
+            'mt-4 scroll-m-20 text-sm font-semibold tracking-tight',
+            !isHindi && 'uppercase',
+          )}
+        >
           {block.text}
         </h4>
       );
@@ -105,19 +121,22 @@ function BlockView({ block, context }: { block: AgreementBlock; context: Agreeme
         <div className="mt-6 flex flex-col gap-6">
           <div className="flex flex-col gap-8 sm:flex-row sm:justify-between">
             <div className="sm:w-[45%]">
-              <p className="mb-10 text-sm font-semibold">First Party</p>
-              <p className="border-t border-neutral-400 pt-1 text-xs text-neutral-600">Signature</p>
-              <p className="mt-1 text-xs text-neutral-600">{context.companyName}</p>
+              <p className="mb-10 text-sm font-semibold">{labels.firstParty}</p>
+              <p className="border-t border-neutral-400 pt-1 text-xs text-neutral-600">
+                {labels.signature}
+              </p>
+              <p className="mt-1 text-xs text-neutral-600">{labels.firstPartyCaption}</p>
             </div>
             <div className="sm:w-[45%]">
-              <p className="mb-10 text-sm font-semibold">Second Party</p>
-              <p className="border-t border-neutral-400 pt-1 text-xs text-neutral-600">Signature</p>
-              <p className="mt-1 text-sm">{context.farmerName}</p>
-              <p className="mt-0.5 text-xs text-neutral-600">Mob. No.: {context.mobileNumber}</p>
+              <p className="mb-10 text-sm font-semibold">{labels.secondParty}</p>
+              <p className="border-t border-neutral-400 pt-1 text-xs text-neutral-600">
+                {labels.signature}
+              </p>
+              <p className="mt-1 text-xs text-neutral-600">{labels.secondPartyCaption}</p>
             </div>
           </div>
           <div>
-            <p className="mb-3 text-sm font-semibold">Witnesses:</p>
+            <p className="mb-3 text-sm font-semibold">{labels.witnesses}</p>
             <p className="mt-6 border-t border-neutral-400 pt-1 text-xs text-neutral-600">1.</p>
             <p className="mt-6 border-t border-neutral-400 pt-1 text-xs text-neutral-600">2.</p>
           </div>
@@ -128,18 +147,31 @@ function BlockView({ block, context }: { block: AgreementBlock; context: Agreeme
   }
 }
 
-export function AgreementHtmlPreview({ context }: { context: AgreementContext }) {
-  const blocks = buildPotatoMultiplicationAgreement(context);
+export function AgreementHtmlPreview({
+  context,
+  language = 'english',
+}: {
+  context: AgreementContext;
+  language?: ContractLanguage;
+}) {
+  const blocks = buildPotatoMultiplicationAgreementForLang(context, language);
+  const isHindi = language === 'hindi';
 
   return (
-    <article className="bg-white px-4 py-6 text-neutral-900 sm:px-8 sm:py-8">
-      <p className="text-center text-sm font-semibold text-green-800">{context.companyName}</p>
-      <p className="mb-4 border-b-2 border-green-800 pb-2 text-center text-xs text-neutral-600">
-        Generated on {context.generatedAtLabel}
-      </p>
+    <article
+      lang={isHindi ? 'hi' : 'en'}
+      className={cn(
+        'bg-white px-4 py-6 text-neutral-900 sm:px-8 sm:py-8',
+        isHindi && 'font-devanagari',
+      )}
+    >
+      <div className="mb-4 flex flex-col items-center border-b-2 border-green-800 pb-2">
+        <img src={COMPANY_LOGO_URL} alt="Bhatti Agritech" className="h-12 w-auto object-contain" />
+        <p className="mt-1 text-xs text-neutral-600">{context.agreementYear}</p>
+      </div>
       <div className="flex flex-col gap-2">
         {blocks.map((block) => (
-          <BlockView key={blockKey(block)} block={block} context={context} />
+          <BlockView key={blockKey(block)} block={block} language={language} />
         ))}
       </div>
     </article>

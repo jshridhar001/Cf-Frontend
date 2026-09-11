@@ -1,6 +1,7 @@
 import { useForm } from '@tanstack/react-form';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
@@ -19,6 +20,10 @@ import {
 } from '@/features/farmers/types';
 import { useVarieties } from '@/features/master/api/use-varieties';
 
+const optionalUrl = z.string().refine((value) => !value.trim() || URL.canParse(value.trim()), {
+  message: 'Enter a valid URL.',
+});
+
 const formSchema = z.object({
   farmerId: z.string().min(1, 'Select a farmer.'),
   variety: z.string().min(1, 'Select a variety.'),
@@ -30,9 +35,9 @@ const formSchema = z.object({
       const n = Number(value);
       return Number.isFinite(n) && n > 0;
     }, 'Enter acres greater than 0.'),
-  contractUrl: z.string().refine((value) => !value.trim() || URL.canParse(value.trim()), {
-    message: 'Enter a valid URL.',
-  }),
+  contractUrl: optionalUrl,
+  hindiContractUrl: optionalUrl,
+  isNotarized: z.boolean(),
 });
 
 function todayIsoDate() {
@@ -74,6 +79,8 @@ export function ContractForm({ farmers, contract, onSuccess, onCancel }: Contrac
       date: contract?.date ? contract.date.slice(0, 10) : todayIsoDate(),
       acres: contract ? String(contract.acres) : '',
       contractUrl: contract?.contractUrl ?? '',
+      hindiContractUrl: contract?.hindiContractUrl ?? '',
+      isNotarized: contract?.isNotarized ?? false,
     },
     validators: {
       onSubmit: formSchema,
@@ -84,6 +91,8 @@ export function ContractForm({ farmers, contract, onSuccess, onCancel }: Contrac
         date: value.date,
         acres: formatContractAcresPayload(value.acres),
         contractUrl: value.contractUrl.trim() || null,
+        hindiContractUrl: value.hindiContractUrl.trim() || null,
+        isNotarized: value.isNotarized,
       };
 
       if (isEdit) {
@@ -235,7 +244,7 @@ export function ContractForm({ farmers, contract, onSuccess, onCancel }: Contrac
             const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Contract URL (optional)</FieldLabel>
+                <FieldLabel htmlFor={field.name}>English contract URL (optional)</FieldLabel>
                 <Input
                   id={field.name}
                   name={field.name}
@@ -252,6 +261,47 @@ export function ContractForm({ farmers, contract, onSuccess, onCancel }: Contrac
               </Field>
             );
           }}
+        </form.Field>
+
+        <form.Field name="hindiContractUrl">
+          {(field) => {
+            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>Hindi contract URL (optional)</FieldLabel>
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  type="url"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  aria-invalid={isInvalid}
+                  placeholder="https://example.com/contracts/ramesh-hi.pdf"
+                  autoComplete="off"
+                  disabled={isPending}
+                />
+                {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
+              </Field>
+            );
+          }}
+        </form.Field>
+
+        <form.Field name="isNotarized">
+          {(field) => (
+            <Field orientation="horizontal">
+              <Checkbox
+                id={field.name}
+                name={field.name}
+                checked={field.state.value}
+                disabled={isPending}
+                onCheckedChange={(checked) => field.handleChange(checked === true)}
+              />
+              <FieldLabel htmlFor={field.name} className="font-normal">
+                Notarized
+              </FieldLabel>
+            </Field>
+          )}
         </form.Field>
       </FieldGroup>
 

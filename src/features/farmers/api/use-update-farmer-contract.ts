@@ -13,6 +13,8 @@ export type UpdateFarmerContractVariables = {
   date: string;
   acres: string;
   contractUrl?: string | null;
+  hindiContractUrl?: string | null;
+  isNotarized?: boolean;
 };
 
 export function useUpdateFarmerContract() {

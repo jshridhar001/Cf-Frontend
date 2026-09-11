@@ -32,6 +32,8 @@ export type FarmerContract = {
   date: string;
   acres: string | number;
   contractUrl: string;
+  hindiContractUrl: string;
+  isNotarized: boolean;
 };
 
 export type FarmerContractRow = FarmerContract & {
@@ -123,6 +125,8 @@ export function flattenFarmerContracts(farmers: Farmer[]): FarmerContractRow[] {
       date: String(contract.date ?? '').slice(0, 10),
       acres: contract.acres,
       contractUrl: String(contract.contractUrl ?? ''),
+      hindiContractUrl: String(contract.hindiContractUrl ?? ''),
+      isNotarized: Boolean(contract.isNotarized),
       farmerId: farmer.id,
       farmerName: farmer.name,
     })),

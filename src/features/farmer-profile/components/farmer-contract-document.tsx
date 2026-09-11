@@ -1,165 +1,199 @@
 'use no memo';
 
-import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
-import type { AgreementContext } from '@/features/farmers/lib/farmer-contract';
+import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import {
-  type AgreementBlock,
-  type AgreementRun,
-  type AgreementTable,
-  buildPotatoMultiplicationAgreement,
+  DEVANAGARI_PDF_FONT,
+  registerDevanagariPdfFont,
+} from '@/features/farmer-profile/lib/register-devanagari-pdf-font';
+import { agreementLabels } from '@/features/farmers/lib/agreement-labels';
+import { buildPotatoMultiplicationAgreementForLang } from '@/features/farmers/lib/build-agreement';
+import type { ContractLanguage } from '@/features/farmers/lib/contract-language';
+import { type AgreementContext, COMPANY_LOGO_URL } from '@/features/farmers/lib/farmer-contract';
+import type {
+  AgreementBlock,
+  AgreementRun,
+  AgreementTable,
 } from '@/features/farmers/lib/potato-multiplication-agreement';
 
-const styles = StyleSheet.create({
-  page: {
-    paddingTop: 36,
-    paddingBottom: 48,
-    paddingHorizontal: 40,
-    fontSize: 9,
-    fontFamily: 'Helvetica',
-    color: '#1a1a1a',
-    lineHeight: 1.4,
-  },
-  brand: {
-    fontSize: 12,
-    fontFamily: 'Helvetica-Bold',
-    color: '#166534',
-    marginBottom: 2,
-    textAlign: 'center',
-  },
-  meta: {
-    fontSize: 8,
-    color: '#525252',
-    marginBottom: 12,
-    paddingBottom: 8,
-    borderBottomWidth: 1.5,
-    borderBottomColor: '#166534',
-    textAlign: 'center',
-  },
-  title: {
-    fontSize: 12,
-    fontFamily: 'Helvetica-Bold',
-    textAlign: 'center',
-    marginBottom: 4,
-    textTransform: 'uppercase',
-  },
-  subtitle: {
-    fontSize: 10,
-    fontFamily: 'Helvetica-Bold',
-    textAlign: 'center',
-    color: '#166534',
-    marginBottom: 12,
-  },
-  centered: {
-    fontSize: 9,
-    fontFamily: 'Helvetica-Bold',
-    textAlign: 'center',
-    marginVertical: 8,
-  },
-  sectionHeading: {
-    fontSize: 9,
-    fontFamily: 'Helvetica-Bold',
-    marginTop: 12,
-    marginBottom: 6,
-    textTransform: 'uppercase',
-  },
-  clauseHeading: {
-    fontSize: 9,
-    fontFamily: 'Helvetica-Bold',
-    color: '#166534',
-    marginTop: 10,
-    marginBottom: 4,
-  },
-  paragraph: {
-    fontSize: 9,
-    marginBottom: 5,
-    textAlign: 'justify',
-  },
-  table: {
-    marginVertical: 8,
-    borderWidth: 1,
-    borderColor: '#d4d4d4',
-  },
-  tableHeaderRow: {
-    flexDirection: 'row',
-    backgroundColor: '#f0fdf4',
-    borderBottomWidth: 1,
-    borderBottomColor: '#bbf7d0',
-  },
-  tableRow: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
-  },
-  th: {
-    flex: 1,
-    padding: 5,
-    fontSize: 8,
-    fontFamily: 'Helvetica-Bold',
-    color: '#166534',
-  },
-  td: {
-    flex: 1,
-    padding: 5,
-    fontSize: 8,
-  },
-  tdStrong: {
-    flex: 1,
-    padding: 5,
-    fontSize: 8,
-    fontFamily: 'Helvetica-Bold',
-  },
-  runStrong: {
-    fontFamily: 'Helvetica-Bold',
-  },
-  signatures: {
-    marginTop: 18,
-  },
-  signatureRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 20,
-    marginBottom: 16,
-  },
-  signatureBlock: {
-    width: '45%',
-  },
-  signatureLabel: {
-    fontSize: 9,
-    fontFamily: 'Helvetica-Bold',
-    marginBottom: 28,
-  },
-  signatureLine: {
-    borderTopWidth: 1,
-    borderTopColor: '#a3a3a3',
-    paddingTop: 4,
-    fontSize: 8,
-    color: '#525252',
-  },
-  witnessLabel: {
-    fontSize: 9,
-    fontFamily: 'Helvetica-Bold',
-    marginBottom: 10,
-  },
-  witnessLine: {
-    borderTopWidth: 1,
-    borderTopColor: '#a3a3a3',
-    marginTop: 22,
-    paddingTop: 4,
-    fontSize: 8,
-    color: '#525252',
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 24,
-    left: 40,
-    right: 40,
-    fontSize: 7,
-    color: '#a3a3a3',
-    textAlign: 'center',
-  },
-});
+type DocumentStyles = ReturnType<typeof createDocumentStyles>;
 
-function PdfRuns({ runs }: { runs: AgreementRun[] }) {
+function createDocumentStyles(language: ContractLanguage) {
+  const isHindi = language === 'hindi';
+  const fontFamily = isHindi ? DEVANAGARI_PDF_FONT : 'Helvetica';
+  const fontFamilyBold = isHindi ? DEVANAGARI_PDF_FONT : 'Helvetica-Bold';
+  const fontWeightBold = isHindi ? 700 : undefined;
+
+  return StyleSheet.create({
+    page: {
+      paddingTop: 36,
+      paddingBottom: 48,
+      paddingHorizontal: 40,
+      fontSize: 9,
+      fontFamily,
+      color: '#1a1a1a',
+      lineHeight: 1.4,
+    },
+    header: {
+      alignItems: 'center',
+      marginBottom: 12,
+      paddingBottom: 8,
+      borderBottomWidth: 1.5,
+      borderBottomColor: '#166534',
+    },
+    logo: {
+      height: 36,
+      width: 140,
+      marginBottom: 4,
+    },
+    year: {
+      fontSize: 8,
+      color: '#525252',
+      textAlign: 'center',
+    },
+    title: {
+      fontSize: 12,
+      fontFamily: fontFamilyBold,
+      fontWeight: fontWeightBold,
+      textAlign: 'center',
+      marginBottom: 4,
+      textTransform: isHindi ? undefined : 'uppercase',
+    },
+    subtitle: {
+      fontSize: 10,
+      fontFamily: fontFamilyBold,
+      fontWeight: fontWeightBold,
+      textAlign: 'center',
+      color: '#166534',
+      marginBottom: 12,
+    },
+    centered: {
+      fontSize: 9,
+      fontFamily: fontFamilyBold,
+      fontWeight: fontWeightBold,
+      textAlign: 'center',
+      marginVertical: 8,
+    },
+    sectionHeading: {
+      fontSize: 9,
+      fontFamily: fontFamilyBold,
+      fontWeight: fontWeightBold,
+      marginTop: 12,
+      marginBottom: 6,
+      textTransform: isHindi ? undefined : 'uppercase',
+    },
+    clauseHeading: {
+      fontSize: 9,
+      fontFamily: fontFamilyBold,
+      fontWeight: fontWeightBold,
+      color: '#166534',
+      marginTop: 10,
+      marginBottom: 4,
+    },
+    paragraph: {
+      fontSize: 9,
+      marginBottom: 5,
+      textAlign: 'justify',
+    },
+    table: {
+      marginVertical: 8,
+      borderWidth: 1,
+      borderColor: '#d4d4d4',
+    },
+    tableHeaderRow: {
+      flexDirection: 'row',
+      backgroundColor: '#f0fdf4',
+      borderBottomWidth: 1,
+      borderBottomColor: '#bbf7d0',
+    },
+    tableRow: {
+      flexDirection: 'row',
+      borderBottomWidth: 1,
+      borderBottomColor: '#e5e5e5',
+    },
+    th: {
+      flex: 1,
+      padding: 5,
+      fontSize: 8,
+      fontFamily: fontFamilyBold,
+      fontWeight: fontWeightBold,
+      color: '#166534',
+    },
+    td: {
+      flex: 1,
+      padding: 5,
+      fontSize: 8,
+    },
+    tdStrong: {
+      flex: 1,
+      padding: 5,
+      fontSize: 8,
+      fontFamily: fontFamilyBold,
+      fontWeight: fontWeightBold,
+    },
+    runStrong: {
+      fontFamily: fontFamilyBold,
+      fontWeight: fontWeightBold,
+    },
+    signatures: {
+      marginTop: 18,
+    },
+    signatureRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      gap: 20,
+      marginBottom: 16,
+    },
+    signatureBlock: {
+      width: '45%',
+    },
+    signatureLabel: {
+      fontSize: 9,
+      fontFamily: fontFamilyBold,
+      fontWeight: fontWeightBold,
+      marginBottom: 28,
+    },
+    signatureLine: {
+      borderTopWidth: 1,
+      borderTopColor: '#a3a3a3',
+      paddingTop: 4,
+      fontSize: 8,
+      color: '#525252',
+    },
+    signatureCaption: {
+      fontSize: 8,
+      color: '#525252',
+      marginTop: 2,
+    },
+    witnessLabel: {
+      fontSize: 9,
+      fontFamily: fontFamilyBold,
+      fontWeight: fontWeightBold,
+      marginBottom: 10,
+    },
+    witnessLine: {
+      borderTopWidth: 1,
+      borderTopColor: '#a3a3a3',
+      marginTop: 22,
+      paddingTop: 4,
+      fontSize: 8,
+      color: '#525252',
+    },
+    footer: {
+      position: 'absolute',
+      bottom: 24,
+      left: 40,
+      right: 40,
+      fontSize: 7,
+      color: '#a3a3a3',
+      textAlign: 'center',
+    },
+  });
+}
+
+const englishStyles = createDocumentStyles('english');
+const hindiStyles = createDocumentStyles('hindi');
+
+function PdfRuns({ runs, styles }: { runs: AgreementRun[]; styles: DocumentStyles }) {
   let offset = 0;
   return (
     <Text style={styles.paragraph}>
@@ -179,7 +213,7 @@ function PdfRuns({ runs }: { runs: AgreementRun[] }) {
   );
 }
 
-function PdfTable({ table }: { table: AgreementTable }) {
+function PdfTable({ table, styles }: { table: AgreementTable; styles: DocumentStyles }) {
   const strongColumns = new Set(table.strongColumns ?? []);
 
   return (
@@ -207,32 +241,42 @@ function PdfTable({ table }: { table: AgreementTable }) {
   );
 }
 
-function PdfSignatures({ context }: { context: AgreementContext }) {
+function PdfSignatures({
+  language,
+  styles,
+}: {
+  language: ContractLanguage;
+  styles: DocumentStyles;
+}) {
+  const labels = agreementLabels(language);
+
   return (
     <View style={styles.signatures}>
       <View style={styles.signatureRow}>
         <View style={styles.signatureBlock}>
-          <Text style={styles.signatureLabel}>First Party</Text>
-          <Text style={styles.signatureLine}>Signature</Text>
-          <Text style={{ fontSize: 8, marginTop: 4, color: '#525252' }}>{context.companyName}</Text>
+          <Text style={styles.signatureLabel}>{labels.firstParty}</Text>
+          <Text style={styles.signatureLine}>{labels.signature}</Text>
+          <Text style={styles.signatureCaption}>{labels.firstPartyCaption}</Text>
         </View>
         <View style={styles.signatureBlock}>
-          <Text style={styles.signatureLabel}>Second Party</Text>
-          <Text style={styles.signatureLine}>Signature</Text>
-          <Text style={{ fontSize: 8, marginTop: 4 }}>{context.farmerName}</Text>
-          <Text style={{ fontSize: 8, marginTop: 2, color: '#525252' }}>
-            Mob. No.: {context.mobileNumber}
-          </Text>
+          <Text style={styles.signatureLabel}>{labels.secondParty}</Text>
+          <Text style={styles.signatureLine}>{labels.signature}</Text>
+          <Text style={styles.signatureCaption}>{labels.secondPartyCaption}</Text>
         </View>
       </View>
-      <Text style={styles.witnessLabel}>Witnesses:</Text>
+      <Text style={styles.witnessLabel}>{labels.witnesses}</Text>
       <Text style={styles.witnessLine}>1.</Text>
       <Text style={styles.witnessLine}>2.</Text>
     </View>
   );
 }
 
-function renderBlock(block: AgreementBlock, context: AgreementContext, index: number) {
+function renderBlock(
+  block: AgreementBlock,
+  language: ContractLanguage,
+  styles: DocumentStyles,
+  index: number,
+) {
   switch (block.type) {
     case 'title':
       return (
@@ -265,11 +309,11 @@ function renderBlock(block: AgreementBlock, context: AgreementContext, index: nu
         </Text>
       );
     case 'paragraph':
-      return <PdfRuns key={index} runs={block.runs} />;
+      return <PdfRuns key={index} runs={block.runs} styles={styles} />;
     case 'table':
-      return <PdfTable key={index} table={block.table} />;
+      return <PdfTable key={index} table={block.table} styles={styles} />;
     case 'signatures':
-      return <PdfSignatures key={index} context={context} />;
+      return <PdfSignatures key={index} language={language} styles={styles} />;
     default:
       return null;
   }
@@ -277,29 +321,40 @@ function renderBlock(block: AgreementBlock, context: AgreementContext, index: nu
 
 type FarmerContractDocumentProps = {
   context: AgreementContext;
+  language?: ContractLanguage;
 };
 
-export function FarmerContractDocument({ context }: FarmerContractDocumentProps) {
-  const blocks = buildPotatoMultiplicationAgreement(context);
+export function FarmerContractDocument({
+  context,
+  language = 'english',
+}: FarmerContractDocumentProps) {
+  if (language === 'hindi') registerDevanagariPdfFont();
+
+  const styles = language === 'hindi' ? hindiStyles : englishStyles;
+  const blocks = buildPotatoMultiplicationAgreementForLang(context, language);
+  const title =
+    language === 'hindi'
+      ? `${blocks.find((block) => block.type === 'title')?.text ?? context.contractTitle} — ${context.farmerName} — ${context.varietyDisplay}`
+      : `${context.contractTitle} — ${context.farmerName} — ${context.varietyDisplay}`;
 
   return (
     <Document
-      title={`${context.contractTitle} — ${context.farmerName} — ${context.varietyDisplay}`}
+      title={title}
       author={context.companyName}
       subject={`Potato multiplication agreement for ${context.farmerName} (${context.varietyDisplay})`}
     >
       <Page size="A4" style={styles.page} wrap>
-        <Text style={styles.brand}>{context.companyName}</Text>
-        <Text style={styles.meta}>Generated on {context.generatedAtLabel}</Text>
+        <View style={styles.header}>
+          <Image src={COMPANY_LOGO_URL} style={styles.logo} />
+          <Text style={styles.year}>{context.agreementYear}</Text>
+        </View>
 
-        {blocks.map((block, index) => renderBlock(block, context, index))}
+        {blocks.map((block, index) => renderBlock(block, language, styles, index))}
 
         <Text
           style={styles.footer}
           fixed
-          render={({ pageNumber, totalPages }) =>
-            `${context.companyName} · ${context.contractTitle} · ${context.varietyDisplay} · Page ${pageNumber} of ${totalPages}`
-          }
+          render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`}
         />
       </Page>
     </Document>
