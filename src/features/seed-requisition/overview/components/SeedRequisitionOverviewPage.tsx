@@ -1,6 +1,15 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { getRouteApi } from '@tanstack/react-router';
-import { ClipboardList, Loader2, Plus, RefreshCw, Search, Trash2Icon } from 'lucide-react';
+import {
+  ClipboardList,
+  LayoutGrid,
+  Loader2,
+  Plus,
+  RefreshCw,
+  Search,
+  Table2,
+  Trash2Icon,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,9 +30,12 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { seedRequisitionKeys } from '@/features/seed-requisition/overview/api/query-keys';
 import { useSeedRequisitions } from '@/features/seed-requisition/overview/api/use-seed-requisitions';
 import { ApproveRequisitionDialog } from '@/features/seed-requisition/overview/components/approve-requisition-dialog';
+import { columns } from '@/features/seed-requisition/overview/components/columns';
+import { DataTable } from '@/features/seed-requisition/overview/components/data-table';
 import { DeleteAllRequisitionsDialog } from '@/features/seed-requisition/overview/components/delete-all-requisitions-dialog';
 import { DeleteRequisitionDialog } from '@/features/seed-requisition/overview/components/delete-requisition-dialog';
 import { RejectRequisitionDialog } from '@/features/seed-requisition/overview/components/reject-requisition-dialog';
@@ -48,6 +60,12 @@ import { getApiErrorMessage } from '@/lib/api-client';
 const DEFAULT_SORT: RequisitionSortValue = 'farmer-asc';
 const ALL_STATUSES = 'all';
 const overviewRoute = getRouteApi('/_authenticated/seed-requisition/overview');
+
+type OverviewLayout = 'cards' | 'table';
+
+function isOverviewLayout(value: string): value is OverviewLayout {
+  return value === 'cards' || value === 'table';
+}
 
 function SeedRequisitionOverviewSkeleton() {
   return (
@@ -77,6 +95,7 @@ export default function SeedRequisitionOverviewPage() {
   const [approvingRequisition, setApprovingRequisition] = useState<SeedRequisition | null>(null);
   const [rejectingRequisition, setRejectingRequisition] = useState<SeedRequisition | null>(null);
   const [deleteAllOpen, setDeleteAllOpen] = useState(false);
+  const [layout, setLayout] = useState<OverviewLayout>('cards');
 
   const requisitionList = data?.items ?? [];
   const total = data?.meta.total ?? requisitionList.length;
@@ -102,7 +121,13 @@ export default function SeedRequisitionOverviewPage() {
   }
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-4 sm:gap-6">
+    <Tabs
+      value={layout}
+      onValueChange={(value) => {
+        if (isOverviewLayout(value)) setLayout(value);
+      }}
+      className="flex min-w-0 flex-1 flex-col gap-4 sm:gap-6"
+    >
       <Item variant="outline" size="sm">
         <ItemMedia variant="icon">
           <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
@@ -113,6 +138,16 @@ export default function SeedRequisitionOverviewPage() {
           <ItemTitle>{countLabel}</ItemTitle>
         </ItemContent>
         <ItemActions>
+          <TabsList className="h-11 min-h-11 w-fit group-data-horizontal/tabs:h-11 md:h-9 md:min-h-9 md:group-data-horizontal/tabs:h-9">
+            <TabsTrigger value="table" aria-label="Table layout" className="gap-1.5 px-2.5">
+              <Table2 />
+              <span className="hidden sm:inline">Table</span>
+            </TabsTrigger>
+            <TabsTrigger value="cards" aria-label="Cards layout" className="gap-1.5 px-2.5">
+              <LayoutGrid />
+              <span className="hidden sm:inline">Cards</span>
+            </TabsTrigger>
+          </TabsList>
           <Button variant="outline" size="sm" onClick={refreshList} disabled={isFetching}>
             {isFetching ? (
               <Loader2 className="size-4 animate-spin" data-icon="inline-start" />
@@ -261,18 +296,34 @@ export default function SeedRequisitionOverviewPage() {
           </EmptyHeader>
         </Empty>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {visibleRequisitions.map((requisition) => (
-            <RequisitionCard
-              key={requisition.id}
-              requisition={requisition}
-              onEdit={setEditingRequisition}
-              onDelete={setDeletingRequisition}
-              onApprove={setApprovingRequisition}
-              onReject={setRejectingRequisition}
+        <>
+          <TabsContent value="table" className="min-w-0">
+            <DataTable
+              columns={columns}
+              data={visibleRequisitions}
+              meta={{
+                onEdit: setEditingRequisition,
+                onDelete: setDeletingRequisition,
+                onApprove: setApprovingRequisition,
+                onReject: setRejectingRequisition,
+              }}
             />
-          ))}
-        </div>
+          </TabsContent>
+          <TabsContent value="cards">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {visibleRequisitions.map((requisition) => (
+                <RequisitionCard
+                  key={requisition.id}
+                  requisition={requisition}
+                  onEdit={setEditingRequisition}
+                  onDelete={setDeletingRequisition}
+                  onApprove={setApprovingRequisition}
+                  onReject={setRejectingRequisition}
+                />
+              ))}
+            </div>
+          </TabsContent>
+        </>
       )}
 
       {data !== undefined && !isError ? (
@@ -319,6 +370,6 @@ export default function SeedRequisitionOverviewPage() {
         onOpenChange={setDeleteAllOpen}
         count={total}
       />
-    </div>
+    </Tabs>
   );
 }

@@ -158,6 +158,7 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
   return (
     <form
       id={isEdit ? 'edit-requisition-form' : 'create-requisition-form'}
+      className="min-w-0"
       onSubmit={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -237,27 +238,27 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
 
         <form.Field name="quantityType">
           {(quantityField) => (
-            <Field className="w-full min-w-0">
+            <Field className="w-full min-w-0 overflow-hidden">
               <FieldLabel>Quantity</FieldLabel>
               <Tabs
                 value={quantityField.state.value}
                 onValueChange={(next) => {
                   if (next === 'bags' || next === 'acres') quantityField.handleChange(next);
                 }}
-                className="w-full gap-3"
+                className="w-full min-w-0 gap-3"
               >
-                <TabsList className="grid h-11 w-full grid-cols-2 bg-primary/10 p-1 sm:h-10">
+                <TabsList className="flex h-11 w-full min-w-0 overflow-hidden bg-primary/10 p-1 group-data-horizontal/tabs:h-11 sm:h-10 sm:group-data-horizontal/tabs:h-10">
                   <TabsTrigger
                     value="acres"
                     disabled={isPending}
-                    className="min-h-9 w-full data-active:bg-primary data-active:text-primary-foreground dark:data-active:bg-primary dark:data-active:text-primary-foreground"
+                    className="h-full min-h-0 min-w-0 flex-1 px-2 after:hidden data-active:bg-primary data-active:text-primary-foreground dark:data-active:bg-primary dark:data-active:text-primary-foreground"
                   >
                     Acres
                   </TabsTrigger>
                   <TabsTrigger
                     value="bags"
                     disabled={isPending}
-                    className="min-h-9 w-full data-active:bg-primary data-active:text-primary-foreground dark:data-active:bg-primary dark:data-active:text-primary-foreground"
+                    className="h-full min-h-0 min-w-0 flex-1 px-2 after:hidden data-active:bg-primary data-active:text-primary-foreground dark:data-active:bg-primary dark:data-active:text-primary-foreground"
                   >
                     Bags
                   </TabsTrigger>
