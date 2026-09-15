@@ -293,7 +293,6 @@ export default function SeedDispatchOverviewPage() {
             </Button>
             <Button
               type="button"
-              variant="secondary"
               className="h-11 min-w-0 flex-1 gap-1.5 sm:h-9 sm:flex-none sm:w-auto"
               onClick={() => toast.message('Add dispatch coming soon')}
               aria-label="Add dispatch"

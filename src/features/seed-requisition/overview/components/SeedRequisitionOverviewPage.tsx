@@ -3,6 +3,8 @@ import { getRouteApi } from '@tanstack/react-router';
 import { type PaginationState } from '@tanstack/react-table';
 import {
   ClipboardList,
+  Eye,
+  FileSpreadsheet,
   LayoutGrid,
   Loader2,
   Plus,
@@ -12,6 +14,7 @@ import {
   Trash2Icon,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   Empty,
@@ -62,7 +65,13 @@ import {
   SEED_REQUISITION_PAGE_SIZE,
   SEED_REQUISITION_STATUSES,
 } from '@/features/seed-requisition/overview/types';
+import {
+  buildSeedRequisitionExcelPackage,
+  exportSeedRequisitionExcel,
+} from '@/features/seed-requisition/overview/utils/export-seed-requisition-excel';
 import { getApiErrorMessage } from '@/lib/api-client';
+import { openExcelPreviewInNewTab } from '@/lib/excel-preview-tab';
+import { preloadExcelJS } from '@/lib/load-exceljs';
 
 const ALL_STATUSES = 'all';
 const overviewRoute = getRouteApi('/_authenticated/seed-requisition/overview');
@@ -112,6 +121,7 @@ export default function SeedRequisitionOverviewPage() {
   const [approvingRequisition, setApprovingRequisition] = useState<SeedRequisition | null>(null);
   const [rejectingRequisition, setRejectingRequisition] = useState<SeedRequisition | null>(null);
   const [deleteAllOpen, setDeleteAllOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [layout, setLayout] = useState<OverviewLayout>(getDefaultOverviewLayout);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -169,6 +179,36 @@ export default function SeedRequisitionOverviewPage() {
     });
     table.resetSorting();
     void queryClient.invalidateQueries({ queryKey: seedRequisitionKeys.lists() });
+  };
+
+  const handleExportError = (error: unknown, fallback: string) => {
+    const message = error instanceof Error ? error.message : fallback;
+    toast.error(message, { position: 'top-center' });
+  };
+
+  const handlePreviewExcel = async () => {
+    if (isExporting) return;
+    setIsExporting(true);
+    try {
+      await openExcelPreviewInNewTab(() => buildSeedRequisitionExcelPackage(table));
+    } catch (error) {
+      handleExportError(error, 'Failed to open Excel preview. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleDownloadExcel = async () => {
+    if (isExporting) return;
+    setIsExporting(true);
+    try {
+      await exportSeedRequisitionExcel(table);
+      toast.success('Excel downloaded', { position: 'top-center' });
+    } catch (error) {
+      handleExportError(error, 'Failed to export Excel. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   if (isPending && data === undefined) {
@@ -278,6 +318,46 @@ export default function SeedRequisitionOverviewPage() {
             ) : null}
             <Button
               type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-full"
+              disabled={isExporting}
+              onMouseEnter={() => {
+                void preloadExcelJS();
+              }}
+              onClick={() => {
+                void handlePreviewExcel();
+              }}
+            >
+              {isExporting ? (
+                <Loader2 className="size-4 animate-spin" data-icon="inline-start" />
+              ) : (
+                <Eye data-icon="inline-start" />
+              )}
+              Preview
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-full"
+              disabled={isExporting}
+              onMouseEnter={() => {
+                void preloadExcelJS();
+              }}
+              onClick={() => {
+                void handleDownloadExcel();
+              }}
+            >
+              {isExporting ? (
+                <Loader2 className="size-4 animate-spin" data-icon="inline-start" />
+              ) : (
+                <FileSpreadsheet data-icon="inline-start" />
+              )}
+              Excel
+            </Button>
+            <Button
+              type="button"
               variant="destructive"
               size="icon"
               className="size-11 shrink-0 rounded-full md:hidden"
@@ -300,7 +380,6 @@ export default function SeedRequisitionOverviewPage() {
             </Button>
             <Button
               type="button"
-              variant="secondary"
               className="h-11 min-w-0 flex-1 gap-1.5 sm:h-9 sm:flex-none sm:w-auto"
               onClick={() => setCreateOpen(true)}
               aria-label="Add requisition"
