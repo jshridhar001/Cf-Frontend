@@ -156,8 +156,6 @@ export const columns = columnHelper.columns([
     header: 'Bags',
     sortFn: 'alphanumeric',
     aggregationFn: 'sum',
-    enableGrouping: false,
-    enableColumnFilter: false,
     meta: { filterLabel: 'Bags' },
     cell: ({ row }) =>
       hasRequestedAcres(row.original) ? (
@@ -172,8 +170,6 @@ export const columns = columnHelper.columns([
     header: 'Acres',
     sortFn: 'alphanumeric',
     aggregationFn: 'sum',
-    enableGrouping: false,
-    enableColumnFilter: false,
     meta: { filterLabel: 'Acres' },
     cell: ({ row }) =>
       hasRequestedAcres(row.original) ? (

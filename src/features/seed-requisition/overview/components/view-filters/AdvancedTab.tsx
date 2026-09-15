@@ -9,7 +9,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { RequisitionsTable } from '@/features/seed-requisition/overview/components/use-requisitions-table';
-import { getColumnFilterLabel } from '@/features/seed-requisition/overview/components/view-filters/helpers';
+import {
+  getColumnFilterLabel,
+  isActionsColumn,
+} from '@/features/seed-requisition/overview/components/view-filters/helpers';
 import {
   ADVANCED_FILTER_OPERATORS,
   type AdvancedFilterCondition,
@@ -34,7 +37,7 @@ export function AdvancedTab({
 }) {
   const columns = table
     .getAllLeafColumns()
-    .filter((column) => column.id !== 'actions' && column.getCanFilter());
+    .filter((column) => !isActionsColumn(column.id) && column.getCanFilter());
   const firstColumnId = columns[0]?.id ?? 'farmer';
 
   const addCondition = () => {

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import type { RequisitionsTable } from '@/features/seed-requisition/overview/components/use-requisitions-table';
 import {
   getColumnFilterLabel,
+  isActionsColumn,
   moveItem,
 } from '@/features/seed-requisition/overview/components/view-filters/helpers';
 
@@ -62,7 +63,9 @@ export function GroupingTab({
   grouping: GroupingState;
   onGroupingChange: (next: GroupingState) => void;
 }) {
-  const groupable = table.getAllLeafColumns().filter((column) => column.getCanGroup());
+  const groupable = table
+    .getAllLeafColumns()
+    .filter((column) => !isActionsColumn(column.id) && column.getCanGroup());
   const available = groupable.filter((column) => !grouping.includes(column.id));
 
   return (

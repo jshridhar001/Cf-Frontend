@@ -15,6 +15,7 @@ import {
   formatFacetLabel,
   getColumnFilterLabel,
   getSelectedFilterKeys,
+  isActionsColumn,
   setColumnFilterValue,
 } from '@/features/seed-requisition/overview/components/view-filters/helpers';
 import { getFilterValueKey } from '@/features/seed-requisition/overview/lib/filter-fns';
@@ -161,7 +162,9 @@ export function FiltersTab({
   columnFilters: ColumnFiltersState;
   onColumnFiltersChange: (next: ColumnFiltersState) => void;
 }) {
-  const columns = table.getAllLeafColumns().filter((column) => column.getCanFilter());
+  const columns = table
+    .getAllLeafColumns()
+    .filter((column) => !isActionsColumn(column.id) && column.getCanFilter());
 
   return (
     <Accordion className="rounded-2xl" type="single" collapsible>

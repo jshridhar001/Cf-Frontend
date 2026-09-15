@@ -2,12 +2,18 @@ import type { ColumnFiltersState } from '@tanstack/react-table';
 import type { RequisitionColumnMeta } from '@/features/seed-requisition/overview/components/data-table-features';
 import { getFilterValueKey } from '@/features/seed-requisition/overview/lib/filter-fns';
 
+export const ACTIONS_COLUMN_ID = 'actions';
+
 type LabeledColumn = {
   id: string;
   columnDef: {
     meta?: RequisitionColumnMeta;
   };
 };
+
+export function isActionsColumn(columnId: string) {
+  return columnId === ACTIONS_COLUMN_ID;
+}
 
 export function getColumnFilterLabel(column: LabeledColumn): string {
   return column.columnDef.meta?.filterLabel ?? column.id;
