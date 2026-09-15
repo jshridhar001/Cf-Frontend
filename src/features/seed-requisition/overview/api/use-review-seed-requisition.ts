@@ -12,6 +12,7 @@ export const reviewSeedRequisitionMutationKey = [...seedRequisitionKeys.all, 're
 export type ReviewSeedRequisitionVariables = {
   requisitionId: string;
   status: Extract<SeedRequisitionStatus, 'APPROVED' | 'REJECTED'>;
+  approvedDeliveryDate?: string;
   rejectionRemarks?: string;
 };
 

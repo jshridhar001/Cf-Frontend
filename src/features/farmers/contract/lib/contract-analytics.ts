@@ -3,7 +3,6 @@ import type { Farmer } from '@/features/farmers/overview/types';
 
 export const UNASSIGNED_AREA = 'Unassigned';
 export const UNSPECIFIED_VARIETY = 'Unspecified';
-export const AREA_SHARE_DONUT_MAX = 6;
 export const MAX_INSIGHTS = 5;
 export const CONCENTRATION_SHARE = 0.7;
 

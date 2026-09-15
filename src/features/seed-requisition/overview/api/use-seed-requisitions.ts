@@ -6,7 +6,6 @@ import type {
   SeedRequisitionListParams,
   SeedRequisitionsResponse,
 } from '@/features/seed-requisition/overview/types';
-import { SEED_REQUISITION_PAGE_SIZE } from '@/features/seed-requisition/overview/types';
 import apiClient from '@/lib/api-client';
 
 export type SeedRequisitionListResult = {
@@ -16,8 +15,6 @@ export type SeedRequisitionListResult = {
 
 function compactParams(params: SeedRequisitionListParams) {
   return {
-    page: params.page,
-    pageSize: params.pageSize,
     ...(params.status ? { status: params.status } : {}),
     ...(params.farmerId ? { farmerId: params.farmerId } : {}),
     ...(params.varietyId ? { varietyId: params.varietyId } : {}),
@@ -32,12 +29,13 @@ async function fetchSeedRequisitions(
   const { data } = await apiClient.get<SeedRequisitionsResponse>('/v1/seed-requisitions', {
     params: compactParams(params),
   });
+  const items = data.data ?? [];
   return {
-    items: data.data ?? [],
+    items,
     meta: data.meta ?? {
-      page: params.page,
-      pageSize: params.pageSize,
-      total: data.data?.length ?? 0,
+      page: 1,
+      pageSize: items.length,
+      total: items.length,
     },
   };
 }
@@ -54,5 +52,3 @@ export function seedRequisitionsQueryOptions(params: SeedRequisitionListParams) 
 export function useSeedRequisitions(params: SeedRequisitionListParams) {
   return useQuery(seedRequisitionsQueryOptions(params));
 }
-
-export { SEED_REQUISITION_PAGE_SIZE };

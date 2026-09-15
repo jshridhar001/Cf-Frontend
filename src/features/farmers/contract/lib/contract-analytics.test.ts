@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import type { FarmerContract } from '@/features/farmers/contract/types';
 import type { Farmer } from '@/features/farmers/overview/types';
 import {
-  AREA_SHARE_DONUT_MAX,
   buildContractAnalytics,
   formatAcresWithUnit,
   parseContractAcres,
@@ -247,9 +246,5 @@ describe('buildContractAnalytics', () => {
     ]);
 
     expect(analytics.insights.some((line) => line.includes('strongest presence'))).toBe(false);
-  });
-
-  it('keeps the donut threshold at six areas', () => {
-    expect(AREA_SHARE_DONUT_MAX).toBe(6);
   });
 });

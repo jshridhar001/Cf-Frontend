@@ -27,7 +27,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  AREA_SHARE_DONUT_MAX,
   type ContractAnalytics,
   formatAcresWithUnit,
   formatSharePercent,
@@ -95,14 +94,20 @@ function toShareSlices(rows: NamedAcres[]): ShareSlice[] {
     name: row.name,
     acres: row.acres,
     share: row.share,
-    fill: CHART_COLORS[index % CHART_COLORS.length],
+    fill: `var(--color-s${index})`,
   }));
 }
 
 function shareChartConfig(slices: ShareSlice[]): ChartConfig {
-  return Object.fromEntries(
-    slices.map((slice) => [slice.key, { label: slice.name, color: slice.fill }]),
-  );
+  return {
+    acres: { label: 'Acres' },
+    ...Object.fromEntries(
+      slices.map((slice, index) => [
+        slice.key,
+        { label: slice.name, color: CHART_COLORS[index % CHART_COLORS.length] },
+      ]),
+    ),
+  };
 }
 
 export function ChartPanel({
@@ -269,11 +274,13 @@ export function AreaVarietyHeatmap({ analytics }: { analytics: ContractAnalytics
 
 function AcreageShareDonut({ slices, config }: { slices: ShareSlice[]; config: ChartConfig }) {
   return (
-    <ChartContainer config={config} className="aspect-auto mx-auto h-64 w-full max-w-md">
+    <ChartContainer config={config} className="mx-auto aspect-square max-h-[250px]">
       <PieChart>
         <ChartTooltip
+          cursor={false}
           content={
             <ChartTooltipContent
+              hideLabel
               nameKey="key"
               formatter={(value, _name, item) => {
                 const share = item.payload as ShareSlice | undefined;
@@ -287,66 +294,16 @@ function AcreageShareDonut({ slices, config }: { slices: ShareSlice[]; config: C
             />
           }
         />
-        <Pie
-          data={slices}
-          dataKey="acres"
-          nameKey="key"
-          innerRadius={58}
-          outerRadius={84}
-          strokeWidth={2}
-        >
-          {slices.map((slice) => (
-            <Cell key={slice.key} fill={slice.fill} />
-          ))}
-        </Pie>
-        <ChartLegend content={<ChartLegendContent nameKey="key" className="flex-wrap" />} />
-      </PieChart>
-    </ChartContainer>
-  );
-}
-
-function AcreageShareStackedBar({ slices, config }: { slices: ShareSlice[]; config: ChartConfig }) {
-  const row = Object.fromEntries([
-    ['name', 'Share'],
-    ...slices.map((slice) => [slice.key, slice.share * 100]),
-  ]);
-
-  return (
-    <ChartContainer config={config} className="aspect-auto h-28 w-full">
-      <BarChart
-        accessibilityLayer
-        data={[row]}
-        layout="vertical"
-        margin={{ left: 0, right: 0, top: 8, bottom: 8 }}
-      >
-        <XAxis type="number" domain={[0, 100]} hide />
-        <YAxis type="category" dataKey="name" hide />
-        <ChartTooltip
+        <Pie data={slices} dataKey="acres" nameKey="key" innerRadius={60} />
+        <ChartLegend
           content={
-            <ChartTooltipContent
-              formatter={(value, name) => {
-                const slice = slices.find((entry) => entry.key === name);
-                return (
-                  <span className="font-mono font-medium tabular-nums">
-                    {slice ? formatAcresWithUnit(slice.acres) : ''}
-                    {` · ${formatSharePercent(Number(value) / 100)}`}
-                  </span>
-                );
-              }}
+            <ChartLegendContent
+              nameKey="key"
+              className="-translate-y-2 flex-wrap gap-2 *:basis-1/4 *:justify-center"
             />
           }
         />
-        {slices.map((slice) => (
-          <Bar
-            key={slice.key}
-            dataKey={slice.key}
-            stackId="share"
-            fill={`var(--color-${slice.key})`}
-            maxBarSize={28}
-          />
-        ))}
-        <ChartLegend content={<ChartLegendContent className="flex-wrap" />} />
-      </BarChart>
+      </PieChart>
     </ChartContainer>
   );
 }
@@ -358,10 +315,6 @@ export function AcreageShareChart({ data }: { data: NamedAcres[] }) {
 
   const slices = toShareSlices(data);
   const config = shareChartConfig(slices);
-
-  if (slices.length > AREA_SHARE_DONUT_MAX) {
-    return <AcreageShareStackedBar slices={slices} config={config} />;
-  }
 
   return <AcreageShareDonut slices={slices} config={config} />;
 }

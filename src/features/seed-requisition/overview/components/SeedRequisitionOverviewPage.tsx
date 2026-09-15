@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { getRouteApi } from '@tanstack/react-router';
+import { type PaginationState } from '@tanstack/react-table';
 import {
   ClipboardList,
   LayoutGrid,
@@ -34,7 +35,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { seedRequisitionKeys } from '@/features/seed-requisition/overview/api/query-keys';
 import { useSeedRequisitions } from '@/features/seed-requisition/overview/api/use-seed-requisitions';
 import { ApproveRequisitionDialog } from '@/features/seed-requisition/overview/components/approve-requisition-dialog';
-import { columns } from '@/features/seed-requisition/overview/components/columns';
 import { DataTable } from '@/features/seed-requisition/overview/components/data-table';
 import { DeleteAllRequisitionsDialog } from '@/features/seed-requisition/overview/components/delete-all-requisitions-dialog';
 import { DeleteRequisitionDialog } from '@/features/seed-requisition/overview/components/delete-requisition-dialog';
@@ -42,40 +42,58 @@ import { RejectRequisitionDialog } from '@/features/seed-requisition/overview/co
 import { RequisitionCard } from '@/features/seed-requisition/overview/components/requisition-card';
 import { RequisitionDrawer } from '@/features/seed-requisition/overview/components/requisition-drawer';
 import { RequisitionPagination } from '@/features/seed-requisition/overview/components/requisition-pagination';
+import { RequisitionSummaryCards } from '@/features/seed-requisition/overview/components/requisition-summary-cards';
+import { useRequisitionsTable } from '@/features/seed-requisition/overview/components/use-requisitions-table';
+import { ViewFiltersSheet } from '@/features/seed-requisition/overview/components/view-filters/ViewFiltersSheet';
 import {
-  filterAndSortRequisitions,
-  isRequisitionSortValue,
-  REQUISITION_SORT_OPTIONS,
-  type RequisitionSortValue,
-} from '@/features/seed-requisition/overview/lib/filter-sort';
+  emptyGlobalFilter,
+  isActiveCondition,
+  isAdvancedGlobalFilter,
+} from '@/features/seed-requisition/overview/lib/filter-fns';
 import { hasActiveFilters, toListParams } from '@/features/seed-requisition/overview/lib/search';
-import type { SeedRequisition } from '@/features/seed-requisition/overview/types';
+import { summarizeRequisitions } from '@/features/seed-requisition/overview/lib/summary';
+import type {
+  SeedRequisition,
+  SeedRequisitionStatus,
+} from '@/features/seed-requisition/overview/types';
 import {
   formatSeedRequisitionStatus,
   isSeedRequisitionStatus,
+  SEED_REQUISITION_PAGE_SIZE,
   SEED_REQUISITION_STATUSES,
 } from '@/features/seed-requisition/overview/types';
 import { getApiErrorMessage } from '@/lib/api-client';
 
-const DEFAULT_SORT: RequisitionSortValue = 'farmer-asc';
 const ALL_STATUSES = 'all';
 const overviewRoute = getRouteApi('/_authenticated/seed-requisition/overview');
 
 type OverviewLayout = 'cards' | 'table';
+const DESKTOP_LAYOUT_QUERY = '(min-width: 768px)';
 
 function isOverviewLayout(value: string): value is OverviewLayout {
   return value === 'cards' || value === 'table';
 }
 
+function getDefaultOverviewLayout(): OverviewLayout {
+  if (typeof window === 'undefined') return 'cards';
+  return window.matchMedia(DESKTOP_LAYOUT_QUERY).matches ? 'table' : 'cards';
+}
+
 function SeedRequisitionOverviewSkeleton() {
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-4 sm:gap-6">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <Skeleton className="h-28 rounded-xl" />
+        <Skeleton className="h-28 rounded-xl" />
+        <Skeleton className="h-28 rounded-xl" />
+        <Skeleton className="h-28 rounded-xl" />
+      </div>
       <Skeleton className="h-16 w-full rounded-2xl" />
       <Skeleton className="h-36 w-full rounded-xl" />
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <Skeleton className="hidden h-64 rounded-xl md:block" />
+      <div className="grid gap-4 sm:grid-cols-2 md:hidden">
         <Skeleton className="h-40 rounded-4xl" />
         <Skeleton className="h-40 rounded-4xl" />
-        <Skeleton className="hidden h-40 rounded-4xl sm:block" />
       </div>
     </div>
   );
@@ -88,31 +106,68 @@ export default function SeedRequisitionOverviewPage() {
   const listParams = toListParams(searchParams);
   const { data, isPending, isError, error, isFetching } = useSeedRequisitions(listParams);
   const [search, setSearch] = useState('');
-  const [sort, setSort] = useState<RequisitionSortValue>(DEFAULT_SORT);
   const [createOpen, setCreateOpen] = useState(false);
   const [editingRequisition, setEditingRequisition] = useState<SeedRequisition | null>(null);
   const [deletingRequisition, setDeletingRequisition] = useState<SeedRequisition | null>(null);
   const [approvingRequisition, setApprovingRequisition] = useState<SeedRequisition | null>(null);
   const [rejectingRequisition, setRejectingRequisition] = useState<SeedRequisition | null>(null);
   const [deleteAllOpen, setDeleteAllOpen] = useState(false);
-  const [layout, setLayout] = useState<OverviewLayout>('cards');
+  const [layout, setLayout] = useState<OverviewLayout>(getDefaultOverviewLayout);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: SEED_REQUISITION_PAGE_SIZE,
+  });
 
   const requisitionList = data?.items ?? [];
   const total = data?.meta.total ?? requisitionList.length;
   const canDeleteAll = total > 0;
   const hasSearch = search.trim().length > 0;
-  const hasFilters = hasSearch || hasActiveFilters(searchParams);
 
-  const visibleRequisitions = useMemo(
-    () => filterAndSortRequisitions(requisitionList, search, sort),
-    [requisitionList, search, sort],
-  );
+  const summary = useMemo(() => summarizeRequisitions(requisitionList), [requisitionList]);
 
-  const countLabel = `${total} ${total === 1 ? 'requisition' : 'requisitions'}`;
+  const table = useRequisitionsTable({
+    data: requisitionList,
+    pagination,
+    onPaginationChange: setPagination,
+    status: searchParams.status,
+    meta: {
+      onEdit: setEditingRequisition,
+      onDelete: setDeletingRequisition,
+      onApprove: setApprovingRequisition,
+      onReject: setRejectingRequisition,
+    },
+  });
+
+  const pagedRequisitions = table
+    .getRowModel()
+    .rows.filter((row) => !row.getIsGrouped())
+    .map((row) => row.original);
+  const tableFiltersActive =
+    table.state.columnFilters.length > 0 ||
+    table.state.grouping.length > 0 ||
+    (isAdvancedGlobalFilter(table.state.globalFilter) &&
+      table.state.globalFilter.conditions.some(isActiveCondition));
+  const hasFilters = hasSearch || hasActiveFilters(searchParams) || tableFiltersActive;
+
+  const setStatusFilter = (status: SeedRequisitionStatus | undefined) => {
+    void navigate({
+      search: (prev) => {
+        if (!status) {
+          const { status: _status, ...rest } = prev;
+          return rest;
+        }
+        return { ...prev, status };
+      },
+    });
+  };
 
   const refreshList = () => {
     setSearch('');
-    setSort(DEFAULT_SORT);
+    table.setGlobalFilter((current: unknown) => {
+      const base = isAdvancedGlobalFilter(current) ? current : emptyGlobalFilter();
+      return { ...base, manualSearch: '' };
+    });
+    table.resetSorting();
     void queryClient.invalidateQueries({ queryKey: seedRequisitionKeys.lists() });
   };
 
@@ -128,6 +183,14 @@ export default function SeedRequisitionOverviewPage() {
       }}
       className="flex min-w-0 flex-1 flex-col gap-4 sm:gap-6"
     >
+      {data !== undefined && !isError ? (
+        <RequisitionSummaryCards
+          summary={summary}
+          selectedStatus={searchParams.status}
+          onSelect={setStatusFilter}
+        />
+      ) : null}
+
       <Item variant="outline" size="sm">
         <ItemMedia variant="icon">
           <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
@@ -135,7 +198,7 @@ export default function SeedRequisitionOverviewPage() {
           </div>
         </ItemMedia>
         <ItemContent>
-          <ItemTitle>{countLabel}</ItemTitle>
+          <ItemTitle>Requisitions</ItemTitle>
         </ItemContent>
         <ItemActions>
           <TabsList className="h-11 min-h-11 w-fit group-data-horizontal/tabs:h-11 md:h-9 md:min-h-9 md:group-data-horizontal/tabs:h-9">
@@ -164,11 +227,18 @@ export default function SeedRequisitionOverviewPage() {
           <div className="relative w-full">
             <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search by farmer, account, or variety"
+              placeholder="Search by farmer, account, station, or variety"
               className="w-full pl-10"
               inputMode="search"
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => {
+                const value = event.target.value;
+                setSearch(value);
+                table.setGlobalFilter((current: unknown) => {
+                  const base = isAdvancedGlobalFilter(current) ? current : emptyGlobalFilter();
+                  return { ...base, manualSearch: value };
+                });
+              }}
             />
           </div>
         </div>
@@ -181,16 +251,11 @@ export default function SeedRequisitionOverviewPage() {
               value={searchParams.status ?? ALL_STATUSES}
               onValueChange={(value) => {
                 if (!value) return;
-                void navigate({
-                  search: (prev) => {
-                    if (value === ALL_STATUSES) {
-                      const { status: _status, ...rest } = prev;
-                      return { ...rest, page: 1 };
-                    }
-                    if (!isSeedRequisitionStatus(value)) return prev;
-                    return { ...prev, page: 1, status: value };
-                  },
-                });
+                if (value === ALL_STATUSES) {
+                  setStatusFilter(undefined);
+                  return;
+                }
+                if (isSeedRequisitionStatus(value)) setStatusFilter(value);
               }}
             >
               <SelectTrigger className="h-11 w-full min-w-0 sm:h-9 sm:w-44">
@@ -205,26 +270,12 @@ export default function SeedRequisitionOverviewPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Select
-              value={sort}
-              onValueChange={(value) => {
-                if (value && isRequisitionSortValue(value)) setSort(value);
-              }}
-            >
-              <SelectTrigger className="h-11 w-full min-w-0 sm:h-9 sm:w-55">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                {REQUISITION_SORT_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
           <div className="flex min-w-0 items-center gap-2 sm:shrink-0">
+            {layout === 'table' ? (
+              <ViewFiltersSheet table={table} onAppliedStatus={setStatusFilter} />
+            ) : null}
             <Button
               type="button"
               variant="destructive"
@@ -279,7 +330,7 @@ export default function SeedRequisitionOverviewPage() {
             Try again
           </Button>
         </Empty>
-      ) : visibleRequisitions.length === 0 ? (
+      ) : requisitionList.length === 0 ? (
         <Empty className="rounded-xl border bg-muted/10">
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -298,20 +349,11 @@ export default function SeedRequisitionOverviewPage() {
       ) : (
         <>
           <TabsContent value="table" className="min-w-0">
-            <DataTable
-              columns={columns}
-              data={visibleRequisitions}
-              meta={{
-                onEdit: setEditingRequisition,
-                onDelete: setDeletingRequisition,
-                onApprove: setApprovingRequisition,
-                onReject: setRejectingRequisition,
-              }}
-            />
+            <DataTable table={table} />
           </TabsContent>
           <TabsContent value="cards">
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {visibleRequisitions.map((requisition) => (
+              {pagedRequisitions.map((requisition) => (
                 <RequisitionCard
                   key={requisition.id}
                   requisition={requisition}
@@ -326,13 +368,7 @@ export default function SeedRequisitionOverviewPage() {
         </>
       )}
 
-      {data !== undefined && !isError ? (
-        <RequisitionPagination
-          page={searchParams.page}
-          pageSize={searchParams.pageSize}
-          total={total}
-        />
-      ) : null}
+      {data !== undefined && !isError ? <RequisitionPagination table={table} /> : null}
 
       <RequisitionDrawer
         requisition={editingRequisition}

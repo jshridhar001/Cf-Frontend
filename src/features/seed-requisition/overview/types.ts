@@ -39,6 +39,7 @@ export type SeedRequisition = {
   fulfilledAcres: string;
   requisitionDate: string;
   requestedDeliveryDate: string;
+  approvedDeliveryDate: string | null;
   remarks: string | null;
   rejectionRemarks: string | null;
   createdById: string;
@@ -80,8 +81,6 @@ export type SeedRequisitionMessageResponse = {
 };
 
 export type SeedRequisitionListParams = {
-  page: number;
-  pageSize: number;
   status?: SeedRequisitionStatus;
   farmerId?: string;
   varietyId?: string;

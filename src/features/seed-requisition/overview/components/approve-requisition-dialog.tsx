@@ -1,4 +1,5 @@
 import { CheckIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -10,8 +11,14 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Field, FieldLabel } from '@/components/ui/field';
 import { useReviewSeedRequisition } from '@/features/seed-requisition/overview/api/use-review-seed-requisition';
+import { DateFilterButton } from '@/features/seed-requisition/overview/components/date-filter-button';
 import type { SeedRequisition } from '@/features/seed-requisition/overview/types';
+import {
+  toDateInputValue,
+  toRequisitionDateParam,
+} from '@/features/seed-requisition/overview/types';
 
 interface ApproveRequisitionDialogProps {
   requisition: SeedRequisition | null;
@@ -25,7 +32,15 @@ export function ApproveRequisitionDialog({
   onOpenChange,
 }: ApproveRequisitionDialogProps) {
   const { mutateAsync: reviewRequisition, isPending } = useReviewSeedRequisition();
+  const [approvedDeliveryDate, setApprovedDeliveryDate] = useState('');
   const farmerName = requisition?.farmer?.name ?? 'this farmer';
+
+  useEffect(() => {
+    if (open && requisition) {
+      setApprovedDeliveryDate(toDateInputValue(requisition.requestedDeliveryDate));
+    }
+    if (!open) setApprovedDeliveryDate('');
+  }, [open, requisition]);
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen && isPending) return;
@@ -41,19 +56,34 @@ export function ApproveRequisitionDialog({
           </AlertDialogMedia>
           <AlertDialogTitle>Approve requisition for {farmerName}?</AlertDialogTitle>
           <AlertDialogDescription>
-            This marks the requisition as approved. You can still edit quantity later if needed.
+            Set the approved delivery date. It starts as the requested date; you can change it
+            before approving.
           </AlertDialogDescription>
         </AlertDialogHeader>
+        <Field>
+          <FieldLabel htmlFor="approved-delivery-date">Approved delivery date</FieldLabel>
+          <DateFilterButton
+            id="approved-delivery-date"
+            value={approvedDeliveryDate || undefined}
+            onChange={(next) => setApprovedDeliveryDate(next ?? '')}
+            placeholder="Pick a date"
+            clearable={false}
+          />
+        </Field>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
           <Button
             type="button"
-            disabled={isPending || !requisition}
+            disabled={isPending || !requisition || approvedDeliveryDate.length === 0}
             onClick={() => {
-              if (!requisition) return;
-              void reviewRequisition({ requisitionId: requisition.id, status: 'APPROVED' })
+              if (!requisition || approvedDeliveryDate.length === 0) return;
+              void reviewRequisition({
+                requisitionId: requisition.id,
+                status: 'APPROVED',
+                approvedDeliveryDate: toRequisitionDateParam(approvedDeliveryDate),
+              })
                 .then(() => {
-                  onOpenChange(false);
+                  handleOpenChange(false);
                 })
                 .catch(() => undefined);
             }}

@@ -16,10 +16,14 @@ export function DateFilterButton({
   value,
   onChange,
   placeholder,
+  clearable = true,
+  id,
 }: {
   value: string | undefined;
   onChange: (next: string | undefined) => void;
   placeholder: string;
+  clearable?: boolean;
+  id?: string;
 }) {
   const [open, setOpen] = useState(false);
   const selected = parseDay(value);
@@ -28,6 +32,7 @@ export function DateFilterButton({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
+          id={id}
           type="button"
           variant="outline"
           className={cn(
@@ -48,7 +53,7 @@ export function DateFilterButton({
             setOpen(false);
           }}
         />
-        {value ? (
+        {clearable && value ? (
           <div className="border-t p-2">
             <Button
               type="button"

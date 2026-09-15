@@ -27,6 +27,12 @@ import {
 const ACRES_MAX_DECIMALS = 3;
 const QUANTITY_TYPES = ['bags', 'acres'] as const;
 
+const QUANTITY_TAB_LIST_CLASS =
+  'grid h-11 w-full min-w-0 grid-cols-2 items-stretch overflow-hidden rounded-full bg-muted p-1 group-data-horizontal/tabs:h-11 sm:h-10 sm:group-data-horizontal/tabs:h-10';
+
+const QUANTITY_TAB_TRIGGER_CLASS =
+  'h-full min-h-0 w-full min-w-0 rounded-full border-0 px-2 py-0 shadow-none ring-0 after:hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50 data-active:bg-primary data-active:text-primary-foreground dark:data-active:bg-primary dark:data-active:text-primary-foreground';
+
 function sanitizeAcresInput(raw: string): string {
   const value = raw.replace(/[^\d.]/g, '');
   const firstDot = value.indexOf('.');
@@ -238,7 +244,7 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
 
         <form.Field name="quantityType">
           {(quantityField) => (
-            <Field className="w-full min-w-0 overflow-hidden">
+            <Field className="w-full min-w-0">
               <FieldLabel>Quantity</FieldLabel>
               <Tabs
                 value={quantityField.state.value}
@@ -247,18 +253,18 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
                 }}
                 className="w-full min-w-0 gap-3"
               >
-                <TabsList className="flex h-11 w-full min-w-0 overflow-hidden bg-primary/10 p-1 group-data-horizontal/tabs:h-11 sm:h-10 sm:group-data-horizontal/tabs:h-10">
+                <TabsList className={QUANTITY_TAB_LIST_CLASS}>
                   <TabsTrigger
                     value="acres"
                     disabled={isPending}
-                    className="h-full min-h-0 min-w-0 flex-1 px-2 after:hidden data-active:bg-primary data-active:text-primary-foreground dark:data-active:bg-primary dark:data-active:text-primary-foreground"
+                    className={QUANTITY_TAB_TRIGGER_CLASS}
                   >
                     Acres
                   </TabsTrigger>
                   <TabsTrigger
                     value="bags"
                     disabled={isPending}
-                    className="h-full min-h-0 min-w-0 flex-1 px-2 after:hidden data-active:bg-primary data-active:text-primary-foreground dark:data-active:bg-primary dark:data-active:text-primary-foreground"
+                    className={QUANTITY_TAB_TRIGGER_CLASS}
                   >
                     Bags
                   </TabsTrigger>

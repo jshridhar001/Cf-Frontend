@@ -1,7 +1,5 @@
 import { z } from 'zod';
 import {
-  isSeedRequisitionPageSize,
-  SEED_REQUISITION_PAGE_SIZE,
   SEED_REQUISITION_STATUSES,
   type SeedRequisitionListParams,
   toRequisitionDateParam,
@@ -15,13 +13,6 @@ const optionalDay = z
   .catch(undefined);
 
 export const seedRequisitionSearchSchema = z.object({
-  page: z.coerce.number().int().min(1).default(1).catch(1),
-  pageSize: z.coerce
-    .number()
-    .int()
-    .transform((value) => (isSeedRequisitionPageSize(value) ? value : SEED_REQUISITION_PAGE_SIZE))
-    .default(SEED_REQUISITION_PAGE_SIZE)
-    .catch(SEED_REQUISITION_PAGE_SIZE),
   status: z.enum(SEED_REQUISITION_STATUSES).optional().catch(undefined),
   farmerId: optionalId,
   varietyId: optionalId,
@@ -31,16 +22,10 @@ export const seedRequisitionSearchSchema = z.object({
 
 export type SeedRequisitionSearch = z.infer<typeof seedRequisitionSearchSchema>;
 
-export const DEFAULT_SEED_REQUISITION_SEARCH: SeedRequisitionSearch = {
-  page: 1,
-  pageSize: SEED_REQUISITION_PAGE_SIZE,
-};
+export const DEFAULT_SEED_REQUISITION_SEARCH: SeedRequisitionSearch = {};
 
 export function toListParams(search: SeedRequisitionSearch): SeedRequisitionListParams {
   return {
-    page: search.page,
-    pageSize: search.pageSize,
-    ...(search.status ? { status: search.status } : {}),
     ...(search.farmerId ? { farmerId: search.farmerId } : {}),
     ...(search.varietyId ? { varietyId: search.varietyId } : {}),
     ...(search.requisitionDateFrom
