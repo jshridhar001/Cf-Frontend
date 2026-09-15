@@ -13,8 +13,6 @@ import {
 import type { ChartConfig } from '@/components/ui/chart';
 import {
   ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
@@ -40,7 +38,8 @@ const acresChartConfig = {
   },
 } satisfies ChartConfig;
 
-const CHART_COLORS = [
+/** shadcn chart theme tokens (`--chart-1` … `--chart-5`). */
+const AREA_SHARE_COLORS = [
   'var(--chart-1)',
   'var(--chart-2)',
   'var(--chart-3)',
@@ -104,10 +103,54 @@ function shareChartConfig(slices: ShareSlice[]): ChartConfig {
     ...Object.fromEntries(
       slices.map((slice, index) => [
         slice.key,
-        { label: slice.name, color: CHART_COLORS[index % CHART_COLORS.length] },
+        {
+          label: slice.name,
+          color: AREA_SHARE_COLORS[index % AREA_SHARE_COLORS.length],
+        },
       ]),
     ),
   };
+}
+
+function formatSliceShareLabel(share: number) {
+  return `${(share * 100).toFixed(1)}%`;
+}
+
+type ShareLabelProps = {
+  cx?: number;
+  cy?: number;
+  midAngle?: number;
+  outerRadius?: number;
+  payload?: ShareSlice;
+};
+
+function ShareSliceLabel({ cx, cy, midAngle, outerRadius, payload }: ShareLabelProps) {
+  if (
+    cx == null ||
+    cy == null ||
+    midAngle == null ||
+    outerRadius == null ||
+    payload == null
+  ) {
+    return null;
+  }
+
+  const radian = Math.PI / 180;
+  const radius = outerRadius + 20;
+  const x = cx + radius * Math.cos(-midAngle * radian);
+  const y = cy + radius * Math.sin(-midAngle * radian);
+
+  return (
+    <text
+      x={x}
+      y={y}
+      textAnchor={x > cx ? 'start' : 'end'}
+      dominantBaseline="central"
+      className="fill-foreground text-[11px]"
+    >
+      {`${payload.name}: ${formatSliceShareLabel(payload.share)}`}
+    </text>
+  );
 }
 
 export function ChartPanel({
@@ -274,8 +317,11 @@ export function AreaVarietyHeatmap({ analytics }: { analytics: ContractAnalytics
 
 function AcreageShareDonut({ slices, config }: { slices: ShareSlice[]; config: ChartConfig }) {
   return (
-    <ChartContainer config={config} className="mx-auto aspect-square max-h-[250px]">
-      <PieChart>
+    <ChartContainer
+      config={config}
+      className="mx-auto aspect-square w-full max-h-[320px] [&_.recharts-pie-label-line]:stroke-muted-foreground/50"
+    >
+      <PieChart margin={{ top: 28, right: 72, bottom: 28, left: 72 }}>
         <ChartTooltip
           cursor={false}
           content={
@@ -294,14 +340,21 @@ function AcreageShareDonut({ slices, config }: { slices: ShareSlice[]; config: C
             />
           }
         />
-        <Pie data={slices} dataKey="acres" nameKey="key" innerRadius={60} />
-        <ChartLegend
-          content={
-            <ChartLegendContent
-              nameKey="key"
-              className="-translate-y-2 flex-wrap gap-2 *:basis-1/4 *:justify-center"
-            />
-          }
+        <Pie
+          data={slices}
+          dataKey="acres"
+          nameKey="key"
+          innerRadius="68%"
+          outerRadius="82%"
+          paddingAngle={4}
+          stroke="var(--background)"
+          strokeWidth={2}
+          label={ShareSliceLabel}
+          labelLine={{
+            stroke: 'var(--muted-foreground)',
+            strokeOpacity: 0.45,
+            strokeWidth: 1,
+          }}
         />
       </PieChart>
     </ChartContainer>

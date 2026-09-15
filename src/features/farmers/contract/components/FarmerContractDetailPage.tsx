@@ -1,8 +1,9 @@
-import { useNavigate } from '@tanstack/react-router';
-import { FileText, User } from 'lucide-react';
+import { useNavigate, useRouter } from '@tanstack/react-router';
+import { ChevronLeft, FileText, User } from 'lucide-react';
 import { lazy, Suspense } from 'react';
 import { PageTabsList, PageTabsTrigger } from '@/components/page-tabs';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Empty,
   EmptyDescription,
@@ -31,6 +32,27 @@ const LANGUAGE_TABS: { value: ContractLanguage; label: string }[] = [
   { value: 'hindi', label: 'Hindi' },
 ];
 
+function canGoBack(history: { canGoBack?: () => boolean; length: number }) {
+  if (typeof history.canGoBack === 'function') {
+    return history.canGoBack();
+  }
+  return history.length > 1;
+}
+
+function BackButton({ onBack }: { onBack: () => void }) {
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      className="h-auto min-h-11 w-fit justify-start gap-1 px-2"
+      onClick={onBack}
+    >
+      <ChevronLeft className="size-4" />
+      Back
+    </Button>
+  );
+}
+
 function contractUrlForLanguage(
   contract: { contractUrl?: string | null; hindiContractUrl?: string | null },
   language: ContractLanguage,
@@ -48,10 +70,23 @@ export default function FarmerContractDetailPage({
   contractId: string;
   lang: ContractLanguage;
 }) {
+  const router = useRouter();
   const navigate = useNavigate();
   const { data: farmer, isPending, isError, error } = useFarmer(id);
   const notFound = isError && getHttpStatusFromError(error) === 404;
   const contract = farmer?.contracts?.find((item) => String(item.id) === contractId);
+
+  const handleBack = () => {
+    if (canGoBack(router.history)) {
+      router.history.back();
+      return;
+    }
+    void navigate({
+      to: '/farmers/$id',
+      params: { id },
+      search: { tab: 'contract' },
+    });
+  };
 
   const handleLangChange = (value: string) => {
     if (!CONTRACT_LANGUAGES.includes(value as ContractLanguage)) return;
@@ -66,6 +101,7 @@ export default function FarmerContractDetailPage({
   if (isPending && farmer === undefined) {
     return (
       <div className="flex min-w-0 flex-1 flex-col gap-4 sm:gap-6">
+        <BackButton onBack={handleBack} />
         <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">Contract Page</h3>
         <Skeleton className="h-48 w-full rounded-md" />
       </div>
@@ -75,6 +111,7 @@ export default function FarmerContractDetailPage({
   if (notFound || (!isPending && !farmer && !isError)) {
     return (
       <div className="flex min-w-0 flex-1 flex-col gap-4 sm:gap-6">
+        <BackButton onBack={handleBack} />
         <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">Contract Page</h3>
         <Empty className="border border-dashed p-6 sm:p-12">
           <EmptyHeader>
@@ -92,6 +129,7 @@ export default function FarmerContractDetailPage({
   if (isError || !farmer) {
     return (
       <div className="flex min-w-0 flex-1 flex-col gap-4 sm:gap-6">
+        <BackButton onBack={handleBack} />
         <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">Contract Page</h3>
         <p className="text-sm text-destructive">{getApiErrorMessage(error)}</p>
       </div>
@@ -101,6 +139,7 @@ export default function FarmerContractDetailPage({
   if (!contract) {
     return (
       <div className="flex min-w-0 flex-1 flex-col gap-4 sm:gap-6">
+        <BackButton onBack={handleBack} />
         <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">Contract Page</h3>
         <Empty className="border border-dashed p-6 sm:p-12">
           <EmptyHeader>
@@ -119,6 +158,7 @@ export default function FarmerContractDetailPage({
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-4 sm:gap-6">
+      <BackButton onBack={handleBack} />
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">Contract Page</h3>
         <Badge variant={contract.isNotarized ? 'secondary' : 'outline'}>
