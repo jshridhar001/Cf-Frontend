@@ -18,6 +18,7 @@ import {
 import {
   formatRequisitionDate,
   formatSeedRequisitionStatus,
+  getRequisitionPlaceLabel,
   type SeedRequisition,
 } from '@/features/seed-requisition/overview/types';
 
@@ -134,15 +135,13 @@ export const columns = columnHelper.columns([
       );
     },
   }),
-  columnHelper.accessor((row) => row.farmer?.station?.name?.trim() || '—', {
-    id: 'station',
-    header: 'Station',
+  columnHelper.accessor((row) => getRequisitionPlaceLabel(row.farmer), {
+    id: 'village',
+    header: 'Village',
     sortFn: 'text',
-    meta: { filterLabel: 'Station' },
+    meta: { filterLabel: 'Village' },
     cell: ({ row }) => (
-      <span className="text-muted-foreground">
-        {row.original.farmer?.station?.name?.trim() || '—'}
-      </span>
+      <span className="text-muted-foreground">{getRequisitionPlaceLabel(row.original.farmer)}</span>
     ),
   }),
   columnHelper.accessor((row) => row.variety?.name ?? 'Unknown variety', {

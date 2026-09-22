@@ -12,17 +12,20 @@ import {
 } from '@/components/ui/select';
 import { useCreateFarmer } from '@/features/farmers/overview/api/use-create-farmer';
 import { useFarmerFamilies } from '@/features/farmers/overview/api/use-farmer-families';
+import { FarmerAddressFields } from '@/features/farmers/overview/components/farmer-address-fields';
 import {
+  emptyFarmerAddress,
+  farmerAreaCascade,
   FARMER_ACCOUNT_TYPES,
   FARMER_STATUSES,
   type FarmerAccountType,
+  type FarmerAddressValues,
   type FarmerStatus,
   formatFarmerAccountType,
   formatFarmerStatus,
   isFarmerAccountType,
   isFarmerStatus,
 } from '@/features/farmers/overview/types';
-import { useStations } from '@/features/master/api/use-stations';
 
 const optionalText = z.string();
 
@@ -39,8 +42,12 @@ const formSchema = z
     }),
     accountType: z.enum(FARMER_ACCOUNT_TYPES, { message: 'Select an account type.' }),
     status: z.enum(FARMER_STATUSES, { message: 'Select a status.' }),
-    stationId: z.string().min(1, 'Station is required.'),
-    localityId: z.string().min(1, 'Locality is required.'),
+    stateId: z.string(),
+    districtId: z.string(),
+    postOfficeId: z.string(),
+    policeStationId: z.string(),
+    villageId: z.string(),
+    areaId: z.string().min(1, 'Area is required.'),
     familyId: z.string(),
     familyName: z.string(),
     familyAccountNumber: z.string(),
@@ -80,7 +87,6 @@ interface CreateFarmerFormProps {
 
 export function CreateFarmerForm({ onSuccess, onCancel }: CreateFarmerFormProps) {
   const { mutateAsync: createFarmer, isPending } = useCreateFarmer();
-  const { data: stations = [] } = useStations();
   const { data: families = [] } = useFarmerFamilies();
 
   const form = useForm({
@@ -92,8 +98,7 @@ export function CreateFarmerForm({ onSuccess, onCancel }: CreateFarmerFormProps)
       panNumber: '',
       accountType: 'INDIVIDUAL' as FarmerAccountType,
       status: 'ACTIVE' as FarmerStatus,
-      stationId: '',
-      localityId: '',
+      ...emptyFarmerAddress(),
       familyId: '',
       familyName: '',
       familyAccountNumber: '',
@@ -114,8 +119,7 @@ export function CreateFarmerForm({ onSuccess, onCancel }: CreateFarmerFormProps)
         mobileNumber: value.mobileNumber.trim(),
         accountType: value.accountType,
         status: value.status,
-        stationId: value.stationId,
-        localityId: value.localityId,
+        areaId: value.areaId,
         bankName: value.bankName.trim(),
         ifscCode: value.ifscCode.trim().toUpperCase(),
         bankAccountNumber: value.bankAccountNumber.trim(),
@@ -198,8 +202,13 @@ export function CreateFarmerForm({ onSuccess, onCancel }: CreateFarmerFormProps)
                           field.handleChange(value);
                           const family = families.find((item) => item.id === value);
                           if (family) {
-                            form.setFieldValue('stationId', family.stationId);
-                            form.setFieldValue('localityId', family.localityId);
+                            const cascade = farmerAreaCascade(family.area);
+                            form.setFieldValue('stateId', cascade.stateId);
+                            form.setFieldValue('districtId', cascade.districtId);
+                            form.setFieldValue('postOfficeId', cascade.postOfficeId);
+                            form.setFieldValue('policeStationId', cascade.policeStationId);
+                            form.setFieldValue('villageId', cascade.villageId);
+                            form.setFieldValue('areaId', family.areaId || cascade.areaId);
                           }
                         }}
                       >
@@ -216,7 +225,7 @@ export function CreateFarmerForm({ onSuccess, onCancel }: CreateFarmerFormProps)
                         </SelectContent>
                       </Select>
                       <FieldDescription>
-                        Station and locality are taken from the parent family.
+                        Address is taken from the parent family.
                       </FieldDescription>
                       {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
                     </Field>
@@ -344,81 +353,42 @@ export function CreateFarmerForm({ onSuccess, onCancel }: CreateFarmerFormProps)
           {(accountType) => {
             const lockPlace = accountType === 'FAMILY_MEMBER';
             return (
-              <>
-                <form.Field name="stationId">
-                  {(field) => {
-                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                    return (
-                      <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>Station</FieldLabel>
-                        <Select
-                          name={field.name}
-                          value={field.state.value || undefined}
+              <form.Subscribe
+                selector={(state) => ({
+                  stateId: state.values.stateId,
+                  districtId: state.values.districtId,
+                  postOfficeId: state.values.postOfficeId,
+                  policeStationId: state.values.policeStationId,
+                  villageId: state.values.villageId,
+                  areaId: state.values.areaId,
+                })}
+              >
+                {(address) => (
+                  <form.Field name="areaId">
+                    {(field) => {
+                      const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                      return (
+                        <FarmerAddressFields
+                          values={address}
                           disabled={isPending || lockPlace}
-                          onValueChange={(value) => {
-                            if (!value) return;
-                            field.handleChange(value);
-                            form.setFieldValue('localityId', '');
+                          areaError={isInvalid ? 'Area is required.' : undefined}
+                          description={
+                            lockPlace ? 'Address comes from the parent family.' : undefined
+                          }
+                          onChange={(next: FarmerAddressValues) => {
+                            form.setFieldValue('stateId', next.stateId);
+                            form.setFieldValue('districtId', next.districtId);
+                            form.setFieldValue('postOfficeId', next.postOfficeId);
+                            form.setFieldValue('policeStationId', next.policeStationId);
+                            form.setFieldValue('villageId', next.villageId);
+                            field.handleChange(next.areaId);
                           }}
-                        >
-                          <SelectTrigger
-                            id={field.name}
-                            aria-invalid={isInvalid}
-                            className="w-full"
-                          >
-                            <SelectValue placeholder="Select a station" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {stations.map((station) => (
-                              <SelectItem key={station.id} value={station.id}>
-                                {station.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
-                      </Field>
-                    );
-                  }}
-                </form.Field>
-                <form.Field name="localityId">
-                  {(field) => {
-                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                    const stationId = form.getFieldValue('stationId');
-                    const localities =
-                      stations.find((station) => station.id === stationId)?.localities ?? [];
-                    return (
-                      <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>Locality</FieldLabel>
-                        <Select
-                          name={field.name}
-                          value={field.state.value || undefined}
-                          disabled={isPending || lockPlace || !stationId}
-                          onValueChange={(value) => {
-                            if (value) field.handleChange(value);
-                          }}
-                        >
-                          <SelectTrigger
-                            id={field.name}
-                            aria-invalid={isInvalid}
-                            className="w-full"
-                          >
-                            <SelectValue placeholder="Select a locality" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {localities.map((locality) => (
-                              <SelectItem key={locality.id} value={locality.id}>
-                                {locality.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
-                      </Field>
-                    );
-                  }}
-                </form.Field>
-              </>
+                        />
+                      );
+                    }}
+                  </form.Field>
+                )}
+              </form.Subscribe>
             );
           }}
         </form.Subscribe>

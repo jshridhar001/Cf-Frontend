@@ -165,3 +165,17 @@ export type LocalityMessageResponse = {
   success: boolean;
   message: string;
 };
+
+export type {
+  AddressArea,
+  AddressDistrict,
+  AddressEntity,
+  AddressItemResponse,
+  AddressListResponse,
+  AddressMessageResponse,
+  AddressPlace,
+  AddressPoliceStation,
+  AddressPostOffice,
+  AddressState,
+  AddressVillage,
+} from './addresses';

@@ -22,7 +22,7 @@ const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.s
 
 const COLUMN_WIDTHS: Record<string, number> = {
   farmer: 28,
-  station: 18,
+  village: 22,
   variety: 16,
   bags: 10,
   acres: 10,

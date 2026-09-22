@@ -41,6 +41,7 @@ const routeTitles: Record<string, string> = {
   '/transfer-stock': 'Transfer Stock',
   '/master': 'Master',
   '/master/stations': 'Master',
+  '/master/addresses': 'Master',
   '/master/varieties': 'Master',
   '/master/facilities': 'Master',
   '/master/seed-sizes': 'Master',

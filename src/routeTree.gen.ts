@@ -28,6 +28,7 @@ import { Route as AuthenticatedFarmersAnalyticsRouteImport } from './routes/_aut
 import { Route as AuthenticatedFarmersContractRouteImport } from './routes/_authenticated/farmers.contract'
 import { Route as AuthenticatedFarmersOverviewRouteImport } from './routes/_authenticated/farmers.overview'
 import { Route as AuthenticatedFarmersReportRouteImport } from './routes/_authenticated/farmers.report'
+import { Route as AuthenticatedMasterAddressesRouteImport } from './routes/_authenticated/master.addresses'
 import { Route as AuthenticatedMasterFacilitiesRouteImport } from './routes/_authenticated/master.facilities'
 import { Route as AuthenticatedMasterFarmersRouteImport } from './routes/_authenticated/master.farmers'
 import { Route as AuthenticatedMasterGenerationsRouteImport } from './routes/_authenticated/master.generations'
@@ -148,6 +149,12 @@ const AuthenticatedFarmersReportRoute =
     path: '/report',
     getParentRoute: () => AuthenticatedFarmersRoute,
   } as any)
+const AuthenticatedMasterAddressesRoute =
+  AuthenticatedMasterAddressesRouteImport.update({
+    id: '/addresses',
+    path: '/addresses',
+    getParentRoute: () => AuthenticatedMasterRoute,
+  } as any)
 const AuthenticatedMasterFacilitiesRoute =
   AuthenticatedMasterFacilitiesRouteImport.update({
     id: '/facilities',
@@ -258,6 +265,7 @@ export interface FileRoutesByFullPath {
   '/farmers/contract': typeof AuthenticatedFarmersContractRoute
   '/farmers/overview': typeof AuthenticatedFarmersOverviewRoute
   '/farmers/report': typeof AuthenticatedFarmersReportRoute
+  '/master/addresses': typeof AuthenticatedMasterAddressesRoute
   '/master/facilities': typeof AuthenticatedMasterFacilitiesRoute
   '/master/farmers': typeof AuthenticatedMasterFarmersRoute
   '/master/generations': typeof AuthenticatedMasterGenerationsRoute
@@ -292,6 +300,7 @@ export interface FileRoutesByTo {
   '/farmers/contract': typeof AuthenticatedFarmersContractRoute
   '/farmers/overview': typeof AuthenticatedFarmersOverviewRoute
   '/farmers/report': typeof AuthenticatedFarmersReportRoute
+  '/master/addresses': typeof AuthenticatedMasterAddressesRoute
   '/master/facilities': typeof AuthenticatedMasterFacilitiesRoute
   '/master/farmers': typeof AuthenticatedMasterFarmersRoute
   '/master/generations': typeof AuthenticatedMasterGenerationsRoute
@@ -329,6 +338,7 @@ export interface FileRoutesById {
   '/_authenticated/farmers/contract': typeof AuthenticatedFarmersContractRoute
   '/_authenticated/farmers/overview': typeof AuthenticatedFarmersOverviewRoute
   '/_authenticated/farmers/report': typeof AuthenticatedFarmersReportRoute
+  '/_authenticated/master/addresses': typeof AuthenticatedMasterAddressesRoute
   '/_authenticated/master/facilities': typeof AuthenticatedMasterFacilitiesRoute
   '/_authenticated/master/farmers': typeof AuthenticatedMasterFarmersRoute
   '/_authenticated/master/generations': typeof AuthenticatedMasterGenerationsRoute
@@ -366,6 +376,7 @@ export interface FileRouteTypes {
     | '/farmers/contract'
     | '/farmers/overview'
     | '/farmers/report'
+    | '/master/addresses'
     | '/master/facilities'
     | '/master/farmers'
     | '/master/generations'
@@ -400,6 +411,7 @@ export interface FileRouteTypes {
     | '/farmers/contract'
     | '/farmers/overview'
     | '/farmers/report'
+    | '/master/addresses'
     | '/master/facilities'
     | '/master/farmers'
     | '/master/generations'
@@ -436,6 +448,7 @@ export interface FileRouteTypes {
     | '/_authenticated/farmers/contract'
     | '/_authenticated/farmers/overview'
     | '/_authenticated/farmers/report'
+    | '/_authenticated/master/addresses'
     | '/_authenticated/master/facilities'
     | '/_authenticated/master/farmers'
     | '/_authenticated/master/generations'
@@ -594,6 +607,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/farmers/report'
       preLoaderRoute: typeof AuthenticatedFarmersReportRouteImport
       parentRoute: typeof AuthenticatedFarmersRoute
+    }
+    '/_authenticated/master/addresses': {
+      id: '/_authenticated/master/addresses'
+      path: '/addresses'
+      fullPath: '/master/addresses'
+      preLoaderRoute: typeof AuthenticatedMasterAddressesRouteImport
+      parentRoute: typeof AuthenticatedMasterRoute
     }
     '/_authenticated/master/facilities': {
       id: '/_authenticated/master/facilities'
@@ -760,6 +780,7 @@ const AuthenticatedFarmersRouteWithChildren =
   AuthenticatedFarmersRoute._addFileChildren(AuthenticatedFarmersRouteChildren)
 
 interface AuthenticatedMasterRouteChildren {
+  AuthenticatedMasterAddressesRoute: typeof AuthenticatedMasterAddressesRoute
   AuthenticatedMasterFacilitiesRoute: typeof AuthenticatedMasterFacilitiesRoute
   AuthenticatedMasterFarmersRoute: typeof AuthenticatedMasterFarmersRoute
   AuthenticatedMasterGenerationsRoute: typeof AuthenticatedMasterGenerationsRoute
@@ -770,6 +791,7 @@ interface AuthenticatedMasterRouteChildren {
 }
 
 const AuthenticatedMasterRouteChildren: AuthenticatedMasterRouteChildren = {
+  AuthenticatedMasterAddressesRoute: AuthenticatedMasterAddressesRoute,
   AuthenticatedMasterFacilitiesRoute: AuthenticatedMasterFacilitiesRoute,
   AuthenticatedMasterFarmersRoute: AuthenticatedMasterFarmersRoute,
   AuthenticatedMasterGenerationsRoute: AuthenticatedMasterGenerationsRoute,

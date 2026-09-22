@@ -18,8 +18,7 @@ export type CreateFarmerVariables = {
   panNumber?: string;
   accountType: FarmerAccountType;
   status: FarmerStatus;
-  stationId: string;
-  localityId: string;
+  areaId: string;
   contractUrl?: string;
   bankName: string;
   ifscCode: string;
@@ -36,8 +35,7 @@ function compactBody(variables: CreateFarmerVariables) {
     mobileNumber: variables.mobileNumber,
     accountType: variables.accountType,
     status: variables.status,
-    stationId: variables.stationId,
-    localityId: variables.localityId,
+    areaId: variables.areaId,
     bankName: variables.bankName,
     ifscCode: variables.ifscCode,
     bankAccountNumber: variables.bankAccountNumber,

@@ -267,7 +267,7 @@ export default function SeedRequisitionOverviewPage() {
           <div className="relative w-full">
             <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search by farmer, account, station, or variety"
+              placeholder="Search by farmer, account, village, or variety"
               className="w-full pl-10"
               inputMode="search"
               value={search}

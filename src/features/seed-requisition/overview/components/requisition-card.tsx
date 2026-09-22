@@ -25,6 +25,7 @@ import {
   formatRequestedQuantity,
   formatRequisitionDate,
   formatSeedRequisitionStatus,
+  getRequisitionPlaceLabel,
   type SeedRequisition,
 } from '@/features/seed-requisition/overview/types';
 import { cn } from '@/lib/utils';
@@ -93,7 +94,7 @@ export function RequisitionCard({
 }) {
   const farmerName = requisition.farmer?.name ?? 'Unknown farmer';
   const accountNumber = requisition.farmer?.accountNumber;
-  const stationName = requisition.farmer?.station?.name?.trim() || '—';
+  const placeLabel = getRequisitionPlaceLabel(requisition.farmer);
   const varietyName = requisition.variety?.name ?? 'Unknown variety';
   const isPending = requisition.status === 'PENDING';
 
@@ -114,7 +115,7 @@ export function RequisitionCard({
       </CardHeader>
       <CardContent className="flex flex-col gap-1.5 px-4">
         <RequisitionRow icon={Sprout} value={varietyName} />
-        <RequisitionRow icon={MapPin} value={stationName} />
+        <RequisitionRow icon={MapPin} value={placeLabel} />
         <RequisitionRow icon={LandPlot} value={formatRequestedQuantity(requisition)} />
         <RequisitionRow
           icon={CalendarDays}

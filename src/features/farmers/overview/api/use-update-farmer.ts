@@ -11,8 +11,7 @@ export type UpdateFarmerVariables = {
   name: string;
   mobileNumber: string;
   status: FarmerStatus;
-  stationId: string;
-  localityId: string;
+  areaId: string;
   bankName: string;
   ifscCode: string;
   bankAccountNumber: string;

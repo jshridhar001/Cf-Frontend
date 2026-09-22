@@ -1,6 +1,7 @@
-import type {
-  SeedRequisition,
-  SeedRequisitionStatus,
+import {
+  getRequisitionPlaceLabel,
+  type SeedRequisition,
+  type SeedRequisitionStatus,
 } from '@/features/seed-requisition/overview/types';
 
 function farmerName(requisition: SeedRequisition) {
@@ -18,12 +19,12 @@ export function filterAndSortRequisitions(
     if (!query) return true;
     const name = farmerName(requisition).toLowerCase();
     const account = (requisition.farmer?.accountNumber ?? '').toLowerCase();
-    const station = (requisition.farmer?.station?.name ?? '').toLowerCase();
+    const place = getRequisitionPlaceLabel(requisition.farmer).toLowerCase();
     const variety = (requisition.variety?.name ?? '').toLowerCase();
     return (
       name.includes(query) ||
       account.includes(query) ||
-      station.includes(query) ||
+      place.includes(query) ||
       variety.includes(query)
     );
   });

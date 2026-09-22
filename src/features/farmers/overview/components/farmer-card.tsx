@@ -15,8 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import {
   type Farmer,
   formatFarmerStatus,
-  getFarmerLocalityName,
-  getFarmerStationName,
+  getFarmerPlacePath,
 } from '@/features/farmers/overview/types';
 import { cn } from '@/lib/utils';
 
@@ -68,9 +67,7 @@ export function FarmerCard({
   onEdit: (farmer: Farmer) => void;
   onDelete: (farmer: Farmer) => void;
 }) {
-  const locality = getFarmerLocalityName(farmer);
-  const station = getFarmerStationName(farmer);
-  const placeLabel = [locality, station].filter(Boolean).join(' · ');
+  const placeLabel = getFarmerPlacePath(farmer) || '—';
   const isActive = farmer.status === 'ACTIVE';
 
   return (

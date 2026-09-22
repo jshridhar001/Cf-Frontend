@@ -78,13 +78,48 @@ export type AgreementContext = {
   generatedAtLabel: string;
 };
 
+function splitNameAndFather(name: string): { farmerName: string; fatherName: string } {
+  const match = name.match(/^(.*?)\s+\b(?:S\/O|W\/O|D\/O)\s+(.+)$/i);
+  const given = match?.[1]?.trim();
+  const father = match?.[2]?.trim();
+  if (given && father) {
+    return { farmerName: given, fatherName: father };
+  }
+  return { farmerName: name, fatherName: AGREEMENT_BLANK };
+}
+
+function farmerVillage(farmer: Farmer): string {
+  return farmer.area?.village?.name ?? '';
+}
+
+function farmerPoliceStation(farmer: Farmer): string {
+  return farmer.area?.village?.policeStation?.name ?? '';
+}
+
+function farmerPostOffice(farmer: Farmer): string {
+  return farmer.area?.village?.policeStation?.postOffice?.name ?? '';
+}
+
+function farmerPinCode(farmer: Farmer): string {
+  return farmer.area?.village?.policeStation?.postOffice?.pincode ?? '';
+}
+
+function farmerDistrict(farmer: Farmer): string {
+  return farmer.area?.village?.policeStation?.postOffice?.district?.name ?? '';
+}
+
+function farmerState(farmer: Farmer): string {
+  return farmer.area?.village?.policeStation?.postOffice?.district?.state?.name ?? '';
+}
+
 export function buildAgreementContext(
   farmer: Farmer,
   contract: FarmerContract,
   generatedAt: Date = new Date(),
 ): AgreementContext {
   const agreementDate = parseContractDate(contract.date, generatedAt);
-  const village = displayOptional(farmer.locality?.name);
+  const village = displayOptional(farmerVillage(farmer));
+  const { farmerName, fatherName } = splitNameAndFather(farmer.name);
 
   return {
     companyName: COMPANY_NAME,
@@ -96,8 +131,8 @@ export function buildAgreementContext(
     agreementDay: format(agreementDate, 'd'),
     agreementMonth: format(agreementDate, 'MMMM'),
     agreementYear: format(agreementDate, 'yyyy'),
-    farmerName: farmer.name,
-    fatherName: AGREEMENT_BLANK,
+    farmerName,
+    fatherName,
     panNumber: displayOptional(farmer.panNumber),
     aadharNumber: displayOptional(farmer.aadharNumber),
     bankAccountNumber: displayOptional(farmer.bankAccountNumber),
@@ -105,12 +140,12 @@ export function buildAgreementContext(
     bankBranch: AGREEMENT_BLANK,
     ifsCode: displayOptional(farmer.ifscCode),
     village,
-    policeStation: AGREEMENT_BLANK,
-    postOffice: AGREEMENT_BLANK,
+    policeStation: displayOptional(farmerPoliceStation(farmer)),
+    postOffice: displayOptional(farmerPostOffice(farmer)),
     tehsil: AGREEMENT_BLANK,
-    district: displayOptional(farmer.station?.name),
-    state: displayOptional(farmer.station?.state),
-    pinCode: AGREEMENT_BLANK,
+    district: displayOptional(farmerDistrict(farmer)),
+    state: displayOptional(farmerState(farmer)),
+    pinCode: displayOptional(farmerPinCode(farmer)),
     landAcres: acresLabel(contract.acres),
     landVillage: village,
     mobileNumber: farmer.mobileNumber,

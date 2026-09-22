@@ -9,16 +9,51 @@ export type SeedRequisitionPageSize = (typeof SEED_REQUISITION_PAGE_SIZES)[numbe
 export type SeedRequisitionStatus = (typeof SEED_REQUISITION_STATUSES)[number];
 
 export type SeedRequisitionPlace = {
+  id?: string;
   name: string;
+  pincode?: string | null;
 };
 
 export type SeedRequisitionFarmer = {
   name: string;
   accountNumber: string;
   mobileNumber?: string;
-  station?: SeedRequisitionPlace | null;
-  locality?: SeedRequisitionPlace | null;
+  area?: {
+    id?: string;
+    name?: string;
+    village?: (SeedRequisitionPlace & {
+      policeStation?: (SeedRequisitionPlace & {
+        postOffice?: (SeedRequisitionPlace & {
+          district?: SeedRequisitionPlace & { state?: SeedRequisitionPlace };
+        }) | null;
+      }) | null;
+    }) | null;
+    policeStation?: SeedRequisitionPlace | null;
+    postOffice?: SeedRequisitionPlace | null;
+    district?: SeedRequisitionPlace | null;
+    state?: SeedRequisitionPlace | null;
+  } | null;
 };
+
+export function getRequisitionVillageName(farmer?: SeedRequisitionFarmer | null): string {
+  return farmer?.area?.village?.name?.trim() ?? '';
+}
+
+export function getRequisitionDistrictName(farmer?: SeedRequisitionFarmer | null): string {
+  return (
+    farmer?.area?.village?.policeStation?.postOffice?.district?.name?.trim() ||
+    farmer?.area?.district?.name?.trim() ||
+    ''
+  );
+}
+
+export function getRequisitionPlaceLabel(farmer?: SeedRequisitionFarmer | null): string {
+  return (
+    [getRequisitionVillageName(farmer), getRequisitionDistrictName(farmer)]
+      .filter(Boolean)
+      .join(' · ') || '—'
+  );
+}
 
 export type SeedRequisitionVariety = {
   name: string;

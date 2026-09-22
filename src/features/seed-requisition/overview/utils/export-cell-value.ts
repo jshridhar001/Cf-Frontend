@@ -4,6 +4,7 @@ import type { SeedRequisition } from '@/features/seed-requisition/overview/types
 import {
   formatRequisitionDate,
   formatSeedRequisitionStatus,
+  getRequisitionPlaceLabel,
 } from '@/features/seed-requisition/overview/types';
 
 export type RequisitionsExportTable = Table<DataTableFeatures, SeedRequisition>;
@@ -89,8 +90,8 @@ function leafCellForColumn(requisition: SeedRequisition, columnId: string): Expo
       const accountNumber = requisition.farmer?.accountNumber;
       return textCell(accountNumber ? `${name} (#${accountNumber})` : name);
     }
-    case 'station':
-      return textCell(requisition.farmer?.station?.name?.trim() || '—');
+    case 'village':
+      return textCell(getRequisitionPlaceLabel(requisition.farmer));
     case 'variety':
       return textCell(requisition.variety?.name ?? 'Unknown variety');
     case 'bags': {

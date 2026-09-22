@@ -5,7 +5,8 @@ import {
   type SortingState,
   useTable,
 } from '@tanstack/react-table';
-import { PlusIcon, SearchIcon } from 'lucide-react';
+import { PlusIcon, SearchIcon, Trash2Icon } from 'lucide-react';
+import type { ReactNode } from 'react';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
@@ -31,28 +32,44 @@ import {
   ariaSortValue,
   MasterTableSortHeader,
 } from '@/features/master/components/master-table-sort-header';
+import {
+  ADDRESS_LEVEL_CONFIG,
+  type AddressLevel,
+  getAddressParentName,
+  getAddressPath,
+  getAddressPincode,
+} from '@/features/master/lib/address-levels';
 import { formatCreatedAt } from '@/features/master/lib/format-created-at';
 import {
   type MasterTableFeatures,
   masterTableFeatures,
 } from '@/features/master/lib/master-table-features';
-import { type LocalitiesTableMeta, type LocalitiesTableRow } from './locality-table-column';
+import { type AddressTableMeta, type AddressTableRow } from './address-entity-table-column';
 
-interface LocalitiesTableProps<TData extends RowData> {
+interface AddressEntityTableProps<TData extends RowData> {
+  level: AddressLevel;
   columns: ColumnDef<MasterTableFeatures, TData>[];
   data: TData[];
+  filterSlot?: ReactNode;
   onAdd?: () => void;
-  onEdit?: (locality: LocalitiesTableRow) => void;
-  onDelete?: (locality: LocalitiesTableRow) => void;
+  onDeleteAll?: () => void;
+  deleteAllDisabled?: boolean;
+  onEdit?: (entity: AddressTableRow) => void;
+  onDelete?: (entity: AddressTableRow) => void;
 }
 
-export function LocalitiesTable<TData extends RowData>({
+export function AddressEntityTable<TData extends RowData>({
+  level,
   columns,
   data,
+  filterSlot,
   onAdd,
+  onDeleteAll,
+  deleteAllDisabled,
   onEdit,
   onDelete,
-}: LocalitiesTableProps<TData>) {
+}: AddressEntityTableProps<TData>) {
+  const config = ADDRESS_LEVEL_CONFIG[level];
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
 
@@ -65,7 +82,7 @@ export function LocalitiesTable<TData extends RowData>({
     meta: {
       onEdit,
       onDelete,
-    } satisfies LocalitiesTableMeta,
+    } satisfies AddressTableMeta,
     state: {
       sorting,
       columnFilters,
@@ -82,15 +99,26 @@ export function LocalitiesTable<TData extends RowData>({
             <SearchIcon />
           </InputGroupAddon>
           <InputGroupInput
-            placeholder="Filter localities…"
+            placeholder={`Filter ${config.label.toLowerCase()}…`}
             value={nameFilter}
             onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
           />
         </InputGroup>
+        {filterSlot}
         <div className="hidden items-center gap-2 sm:ml-auto md:flex">
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
+            disabled={deleteAllDisabled}
+            onClick={onDeleteAll}
+          >
+            <Trash2Icon data-icon="inline-start" />
+            Delete All
+          </Button>
           <Button type="button" size="sm" onClick={onAdd}>
             <PlusIcon data-icon="inline-start" />
-            Add Locality
+            Add {config.singular}
           </Button>
         </div>
       </div>
@@ -139,7 +167,7 @@ export function LocalitiesTable<TData extends RowData>({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No localities found.
+                  No results.
                 </TableCell>
               </TableRow>
             )}
@@ -150,18 +178,25 @@ export function LocalitiesTable<TData extends RowData>({
       <ItemGroup className="md:hidden">
         {table.getRowModel().rows.length ? (
           table.getRowModel().rows.map((row) => {
-            const locality = row.original as LocalitiesTableRow;
+            const entity = row.original as AddressTableRow;
+            const parentName = getAddressParentName(level, entity);
+            const pincode = getAddressPincode(entity);
+            const path = config.showPath ? getAddressPath(entity) : null;
+            const details = [pincode, parentName, path].filter(Boolean).join(' · ');
+
             return (
               <Item key={row.id} variant="outline" size="sm" className="items-start">
                 <ItemHeader className="gap-3">
                   <ItemContent className="min-w-0 pr-1">
-                    <ItemTitle>{locality.name}</ItemTitle>
-                    <ItemDescription>{formatCreatedAt(locality.createdAt)}</ItemDescription>
+                    <ItemTitle>{entity.name}</ItemTitle>
+                    <ItemDescription>
+                      {details || formatCreatedAt(entity.createdAt)}
+                    </ItemDescription>
                   </ItemContent>
                   <ItemActions className="shrink-0 self-start">
                     <MasterRowActions
-                      onEdit={() => onEdit?.(locality)}
-                      onDelete={() => onDelete?.(locality)}
+                      onEdit={() => onEdit?.(entity)}
+                      onDelete={() => onDelete?.(entity)}
                     />
                   </ItemActions>
                 </ItemHeader>
@@ -170,7 +205,7 @@ export function LocalitiesTable<TData extends RowData>({
           })
         ) : (
           <div className="rounded-2xl border px-3 py-8 text-center text-sm text-muted-foreground">
-            No localities found.
+            No results.
           </div>
         )}
       </ItemGroup>

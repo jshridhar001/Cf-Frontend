@@ -3,8 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import {
   formatFarmerStatus,
   type Farmer,
-  getFarmerLocalityName,
-  getFarmerStationName,
+  getFarmerDistrictName,
+  getFarmerVillageName,
 } from '@/features/farmers/overview/types';
 import { MasterRowActions } from '@/features/master/components/master-row-actions';
 import type { MasterTableFeatures } from '@/features/master/lib/master-table-features';
@@ -32,14 +32,14 @@ export const columns = columnHelper.columns([
     header: 'Mobile',
     sortFn: 'alphanumeric',
   }),
-  columnHelper.accessor((row) => getFarmerStationName(row), {
-    id: 'station',
-    header: 'Station',
+  columnHelper.accessor((row) => getFarmerVillageName(row), {
+    id: 'village',
+    header: 'Village',
     sortFn: 'text',
   }),
-  columnHelper.accessor((row) => getFarmerLocalityName(row), {
-    id: 'locality',
-    header: 'Locality',
+  columnHelper.accessor((row) => getFarmerDistrictName(row), {
+    id: 'district',
+    header: 'District',
     sortFn: 'text',
   }),
   columnHelper.accessor('status', {

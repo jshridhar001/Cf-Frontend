@@ -42,7 +42,7 @@ export function FarmerDrawer({ farmer, open, onOpenChange }: FarmerDrawerProps) 
   const title = isEdit ? 'Edit farmer' : 'Add farmer';
   const description = isEdit
     ? 'Update this farmer contact, place, status, and bank details.'
-    : 'Create a contracted farmer. Station and locality come from master data.';
+    : 'Create a contracted farmer. Address is chosen from master data.';
 
   const form = isEdit ? (
     <EditFarmerForm

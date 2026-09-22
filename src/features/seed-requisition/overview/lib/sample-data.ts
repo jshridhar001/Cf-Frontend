@@ -43,7 +43,7 @@ export const SAMPLE_SEED_REQUISITIONS: SeedRequisition[] = [
     farmer: {
       name: 'Ramesh Kumar',
       accountNumber: 'F-SEED-1001',
-      station: { name: 'BAHERI' },
+      area: { village: { name: 'BAHERI' }, district: { name: 'Bareilly' } },
     },
     variety: { name: 'Himalini' },
   },
@@ -71,7 +71,7 @@ export const SAMPLE_SEED_REQUISITIONS: SeedRequisition[] = [
     farmer: {
       name: 'Sita Devi',
       accountNumber: 'F-SEED-1002',
-      station: { name: 'BAZPUR' },
+      area: { village: { name: 'BAZPUR' }, district: { name: 'Udham Singh Nagar' } },
     },
     variety: { name: 'Kufri Jyoti' },
   },
@@ -99,7 +99,7 @@ export const SAMPLE_SEED_REQUISITIONS: SeedRequisition[] = [
     farmer: {
       name: 'Harish Singh',
       accountNumber: 'F-SEED-1003',
-      station: { name: 'BANDA' },
+      area: { village: { name: 'BANDA' }, district: { name: 'Shahjahanpur' } },
     },
     variety: { name: 'Kufri Chandramukhi' },
   },
@@ -127,7 +127,7 @@ export const SAMPLE_SEED_REQUISITIONS: SeedRequisition[] = [
     farmer: {
       name: 'Meena Joshi',
       accountNumber: 'F-SEED-1004',
-      station: { name: 'BILASPUR' },
+      area: { village: { name: 'BILASPUR' }, district: { name: 'Rampur' } },
     },
     variety: { name: 'Himalini' },
   },
@@ -155,7 +155,7 @@ export const SAMPLE_SEED_REQUISITIONS: SeedRequisition[] = [
     farmer: {
       name: 'Anil Negi',
       accountNumber: 'F-SEED-1005',
-      station: { name: 'KASHIPUR' },
+      area: { village: { name: 'KASHIPUR' }, district: { name: 'Udham Singh Nagar' } },
     },
     variety: { name: 'Kufri Bahar' },
   },
@@ -183,7 +183,7 @@ export const SAMPLE_SEED_REQUISITIONS: SeedRequisition[] = [
     farmer: {
       name: 'Ramesh Kumar',
       accountNumber: 'F-SEED-1001',
-      station: { name: 'BAHERI' },
+      area: { village: { name: 'BAHERI' }, district: { name: 'Bareilly' } },
     },
     variety: { name: 'Kufri Jyoti' },
   },
@@ -211,7 +211,7 @@ export const SAMPLE_SEED_REQUISITIONS: SeedRequisition[] = [
     farmer: {
       name: 'Sita Devi',
       accountNumber: 'F-SEED-1002',
-      station: { name: 'BAZPUR' },
+      area: { village: { name: 'BAZPUR' }, district: { name: 'Udham Singh Nagar' } },
     },
     variety: { name: 'Kufri Bahar' },
   },

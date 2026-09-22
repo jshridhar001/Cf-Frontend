@@ -51,11 +51,9 @@ export function formatSharePercent(share: number): string {
   return `${Math.round(share * 100)}%`;
 }
 
-export function resolveAreaName(farmer: Pick<Farmer, 'station' | 'stationId'>): string {
-  const name = farmer.station?.name?.trim();
+export function resolveAreaName(farmer: Pick<Farmer, 'area'>): string {
+  const name = farmer.area?.village?.policeStation?.postOffice?.district?.name?.trim();
   if (name) return name;
-  const stationId = farmer.stationId?.trim();
-  if (stationId) return stationId;
   return UNASSIGNED_AREA;
 }
 
@@ -64,10 +62,8 @@ export function resolveVarietyName(variety: string | null | undefined): string {
   return name ? name : UNSPECIFIED_VARIETY;
 }
 
-function resolveLocalityName(farmer: Pick<Farmer, 'locality' | 'localityId'>): string {
-  const name = farmer.locality?.name?.trim();
-  if (name) return name;
-  return farmer.localityId?.trim() ?? '';
+function resolveLocalityName(farmer: Pick<Farmer, 'area'>): string {
+  return farmer.area?.village?.name?.trim() ?? '';
 }
 
 function collectContractFacts(farmers: Farmer[]): ContractFact[] {

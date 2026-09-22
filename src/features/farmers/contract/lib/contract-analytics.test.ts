@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { FarmerContract } from '@/features/farmers/contract/types';
-import type { Farmer } from '@/features/farmers/overview/types';
+import type { Farmer, FarmerArea } from '@/features/farmers/overview/types';
 import {
   buildContractAnalytics,
   formatAcresWithUnit,
@@ -23,6 +23,32 @@ function contract(
   };
 }
 
+function districtArea(district: string, village = 'Village'): FarmerArea {
+  return {
+    id: `area-${district}`,
+    name: village,
+    villageId: `village-${village}`,
+    village: {
+      id: `village-${village}`,
+      name: village,
+      policeStation: {
+        id: `ps-${district}`,
+        name: `${district} PS`,
+        postOffice: {
+          id: `po-${district}`,
+          name: `${district} PO`,
+          pincode: '244713',
+          district: {
+            id: `district-${district}`,
+            name: district,
+            state: { id: 'state-uk', name: 'Uttarakhand' },
+          },
+        },
+      },
+    },
+  };
+}
+
 function farmer(overrides: Partial<Farmer> & Pick<Farmer, 'id' | 'name'>): Farmer {
   return {
     accountNumber: '',
@@ -31,8 +57,7 @@ function farmer(overrides: Partial<Farmer> & Pick<Farmer, 'id' | 'name'>): Farme
     panNumber: null,
     accountType: 'INDIVIDUAL',
     status: 'ACTIVE',
-    stationId: '',
-    localityId: '',
+    areaId: '',
     familyId: null,
     contractUrl: null,
     bankName: null,
@@ -61,12 +86,10 @@ describe('parseContractAcres', () => {
 });
 
 describe('resolveAreaName / resolveVarietyName', () => {
-  it('uses station name, then stationId, then Unassigned', () => {
-    expect(resolveAreaName({ station: { id: '1', name: 'BANDA' }, stationId: 'st-1' })).toBe(
-      'BANDA',
-    );
-    expect(resolveAreaName({ station: null, stationId: 'st-1' })).toBe('st-1');
-    expect(resolveAreaName({ station: null, stationId: '' })).toBe(UNASSIGNED_AREA);
+  it('uses district name, then Unassigned', () => {
+    expect(resolveAreaName({ area: districtArea('BANDA') })).toBe('BANDA');
+    expect(resolveAreaName({ area: null })).toBe(UNASSIGNED_AREA);
+    expect(resolveAreaName({ area: undefined })).toBe(UNASSIGNED_AREA);
   });
 
   it('falls back to Unspecified for blank varieties', () => {
@@ -89,7 +112,7 @@ describe('buildContractAnalytics', () => {
     farmer({
       id: 'f-baheri',
       name: 'Ramesh',
-      station: { id: 's1', name: 'BAHERI' },
+      area: districtArea('BAHERI'),
       contracts: [
         contract({ id: 'c1', variety: 'Kufri Jyoti', acres: '2.50' }),
         contract({ id: 'c2', variety: 'Kufri Bahar', acres: '1.25' }),
@@ -98,7 +121,7 @@ describe('buildContractAnalytics', () => {
     farmer({
       id: 'f-banda',
       name: 'Sita',
-      station: { id: 's2', name: 'BANDA' },
+      area: districtArea('BANDA'),
       contracts: [
         contract({ id: 'c3', variety: 'Kufri Pukhraj', acres: '4.00' }),
         contract({ id: 'c4', variety: 'Kufri Chipsona', acres: '1.75' }),
@@ -107,7 +130,7 @@ describe('buildContractAnalytics', () => {
     farmer({
       id: 'f-bazpur',
       name: 'Amit',
-      station: { id: 's3', name: 'BAZPUR' },
+      area: districtArea('BAZPUR'),
       contracts: [
         contract({ id: 'c5', variety: 'Kufri Jyoti', acres: '0.75' }),
         contract({ id: 'c6', variety: 'Kufri Chipsona', acres: '3.00' }),
@@ -116,20 +139,20 @@ describe('buildContractAnalytics', () => {
     farmer({
       id: 'f-bilaspur',
       name: 'Geeta',
-      station: { id: 's4', name: 'BILASPUR' },
+      area: districtArea('BILASPUR'),
       contracts: [contract({ id: 'c7', variety: 'Kufri Bahar', acres: '5.50' })],
     }),
     farmer({
       id: 'f-none',
       name: 'No contracts',
-      station: { id: 's5', name: 'HALDWANI' },
+      area: districtArea('HALDWANI'),
       contracts: [],
     }),
     farmer({
       id: 'f-family',
       name: 'Family member',
       accountType: 'FAMILY_MEMBER',
-      station: { id: 's2', name: 'BANDA' },
+      area: districtArea('BANDA'),
     }),
   ];
 
@@ -164,7 +187,7 @@ describe('buildContractAnalytics', () => {
       farmer({
         id: 'f1',
         name: 'One',
-        station: { id: 's1', name: 'BANDA' },
+        area: districtArea('BANDA'),
         contracts: [
           contract({ id: 'good', variety: 'Kufri Jyoti', acres: '2' }),
           contract({ id: 'bad', variety: 'Kufri Bahar', acres: 'nope' }),
@@ -178,13 +201,12 @@ describe('buildContractAnalytics', () => {
     expect(analytics.byVariety.map((row) => row.name)).toEqual(['Kufri Jyoti']);
   });
 
-  it('handles missing station and variety without throwing', () => {
+  it('handles missing district and variety without throwing', () => {
     const analytics = buildContractAnalytics([
       farmer({
         id: 'f1',
         name: 'One',
-        station: null,
-        stationId: '',
+        area: null,
         contracts: [contract({ id: 'c1', variety: '  ', acres: '1.5' })],
       }),
     ]);
@@ -207,7 +229,7 @@ describe('buildContractAnalytics', () => {
       farmer({
         id: 'f1',
         name: 'One',
-        station: { id: 's1', name: 'BANDA' },
+        area: districtArea('BANDA'),
         contracts: [contract({ id: 'c1', variety: 'Kufri Jyoti', acres: '2' })],
       }),
     ]);
@@ -234,13 +256,13 @@ describe('buildContractAnalytics', () => {
       farmer({
         id: 'f1',
         name: 'One',
-        station: { id: 's1', name: 'BANDA' },
+        area: districtArea('BANDA'),
         contracts: [contract({ id: 'c1', variety: 'Kufri Jyoti', acres: '3' })],
       }),
       farmer({
         id: 'f2',
         name: 'Two',
-        station: { id: 's2', name: 'BAHERI' },
+        area: districtArea('BAHERI'),
         contracts: [contract({ id: 'c2', variety: 'Kufri Bahar', acres: '2' })],
       }),
     ]);

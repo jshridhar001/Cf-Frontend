@@ -58,8 +58,7 @@ import {
   type Farmer,
   formatFarmerAccountType,
   formatFarmerStatus,
-  getFarmerLocalityName,
-  getFarmerStationName,
+  getFarmerPlacePath,
 } from '@/features/farmers/overview/types';
 import { useFarmer } from '@/features/farmers/profile/api/use-farmer';
 import {
@@ -452,9 +451,7 @@ function FarmerProfileLoaded({
   onDeleteOpenChange: (open: boolean) => void;
   onDeleted: () => void;
 }) {
-  const locality = getFarmerLocalityName(farmer);
-  const station = getFarmerStationName(farmer);
-  const placeLabel = [locality, station].filter(Boolean).join(' ');
+  const placeLabel = getFarmerPlacePath(farmer);
   const familyName = farmer.family?.name ?? farmer.familyName;
   const [createContractOpen, setCreateContractOpen] = useState(false);
   const [editingContract, setEditingContract] = useState<FarmerContractRow | null>(null);
