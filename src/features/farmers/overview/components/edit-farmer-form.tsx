@@ -1,7 +1,7 @@
 import { useForm } from '@tanstack/react-form';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -18,10 +18,13 @@ import {
   formatFarmerStatus,
   isFarmerStatus,
 } from '@/features/farmers/overview/types';
+import { useStations } from '@/features/master/api/use-stations';
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.').max(64),
   mobileNumber: z.string().min(8, 'Enter a valid mobile number.').max(20),
+  stationId: z.string().min(1, 'Station is required.'),
+  localityId: z.string().min(1, 'Locality is required.'),
   status: z.enum(FARMER_STATUSES, { message: 'Select a status.' }),
   bankName: z.string().min(2, 'Bank name must be at least 2 characters.').max(64),
   ifscCode: z
@@ -40,11 +43,15 @@ interface EditFarmerFormProps {
 
 export function EditFarmerForm({ farmer, onSuccess, onCancel }: EditFarmerFormProps) {
   const { mutateAsync: updateFarmer, isPending } = useUpdateFarmer();
+  const { data: stations = [] } = useStations();
+  const lockPlace = farmer.accountType === 'FAMILY_MEMBER';
 
   const form = useForm({
     defaultValues: {
       name: farmer.name,
       mobileNumber: farmer.mobileNumber,
+      stationId: farmer.stationId,
+      localityId: farmer.localityId,
       status: farmer.status,
       bankName: farmer.bankName ?? '',
       ifscCode: farmer.ifscCode ?? '',
@@ -59,6 +66,8 @@ export function EditFarmerForm({ farmer, onSuccess, onCancel }: EditFarmerFormPr
         farmerId: farmer.id,
         name: value.name.trim(),
         mobileNumber: value.mobileNumber.trim(),
+        stationId: value.stationId,
+        localityId: value.localityId,
         status: value.status,
         bankName: value.bankName.trim(),
         ifscCode: value.ifscCode.trim().toUpperCase(),
@@ -150,6 +159,86 @@ export function EditFarmerForm({ farmer, onSuccess, onCancel }: EditFarmerFormPr
                   autoComplete="tel"
                   disabled={isPending}
                 />
+                {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
+              </Field>
+            );
+          }}
+        </form.Field>
+
+        <form.Field name="stationId">
+          {(field) => {
+            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={`edit-${field.name}`}>Station</FieldLabel>
+                <Select
+                  name={field.name}
+                  value={field.state.value || undefined}
+                  disabled={isPending || lockPlace}
+                  onValueChange={(value) => {
+                    if (!value) return;
+                    field.handleChange(value);
+                    form.setFieldValue('localityId', '');
+                  }}
+                >
+                  <SelectTrigger
+                    id={`edit-${field.name}`}
+                    aria-invalid={isInvalid}
+                    className="w-full"
+                  >
+                    <SelectValue placeholder="Select a station" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {stations.map((station) => (
+                      <SelectItem key={station.id} value={station.id}>
+                        {station.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {lockPlace ? (
+                  <FieldDescription>
+                    Station and locality come from the parent family.
+                  </FieldDescription>
+                ) : null}
+                {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
+              </Field>
+            );
+          }}
+        </form.Field>
+
+        <form.Field name="localityId">
+          {(field) => {
+            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            const stationId = form.getFieldValue('stationId');
+            const localities =
+              stations.find((station) => station.id === stationId)?.localities ?? [];
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={`edit-${field.name}`}>Locality</FieldLabel>
+                <Select
+                  name={field.name}
+                  value={field.state.value || undefined}
+                  disabled={isPending || lockPlace || !stationId}
+                  onValueChange={(value) => {
+                    if (value) field.handleChange(value);
+                  }}
+                >
+                  <SelectTrigger
+                    id={`edit-${field.name}`}
+                    aria-invalid={isInvalid}
+                    className="w-full"
+                  >
+                    <SelectValue placeholder="Select a locality" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {localities.map((locality) => (
+                      <SelectItem key={locality.id} value={locality.id}>
+                        {locality.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
               </Field>
             );
