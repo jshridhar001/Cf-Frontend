@@ -32,6 +32,7 @@ const tabs = [
   { label: 'Seed Sizes', value: 'seed-sizes', to: '/master/seed-sizes' },
   { label: 'Generations', value: 'generations', to: '/master/generations' },
   { label: 'Tuber Sizes', value: 'tuber-sizes', to: '/master/tuber-sizes' },
+  { label: 'Farmers', value: 'farmers', to: '/master/farmers' },
 ] as const;
 
 type TabValue = (typeof tabs)[number]['value'];

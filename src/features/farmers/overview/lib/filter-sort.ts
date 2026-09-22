@@ -13,6 +13,10 @@ export function isFarmerSortValue(value: string): value is FarmerSortValue {
   return FARMER_SORT_OPTIONS.some((option) => option.value === value);
 }
 
+export function farmerHasContracts(farmer: Farmer): boolean {
+  return (farmer.contracts ?? []).length > 0;
+}
+
 function accountSortValue(accountNumber: string) {
   const match = accountNumber.match(/\d+/);
   return match ? Number(match[0]) : 0;

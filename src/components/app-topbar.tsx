@@ -46,6 +46,7 @@ const routeTitles: Record<string, string> = {
   '/master/seed-sizes': 'Master',
   '/master/generations': 'Master',
   '/master/tuber-sizes': 'Master',
+  '/master/farmers': 'Master',
   '/access-control': 'Access Control',
   '/access-control/users': 'Access Control',
   '/access-control/permissions': 'Access Control',

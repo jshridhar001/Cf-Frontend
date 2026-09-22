@@ -29,6 +29,7 @@ import { Route as AuthenticatedFarmersContractRouteImport } from './routes/_auth
 import { Route as AuthenticatedFarmersOverviewRouteImport } from './routes/_authenticated/farmers.overview'
 import { Route as AuthenticatedFarmersReportRouteImport } from './routes/_authenticated/farmers.report'
 import { Route as AuthenticatedMasterFacilitiesRouteImport } from './routes/_authenticated/master.facilities'
+import { Route as AuthenticatedMasterFarmersRouteImport } from './routes/_authenticated/master.farmers'
 import { Route as AuthenticatedMasterGenerationsRouteImport } from './routes/_authenticated/master.generations'
 import { Route as AuthenticatedMasterSeedSizesRouteImport } from './routes/_authenticated/master.seed-sizes'
 import { Route as AuthenticatedMasterStationsRouteImport } from './routes/_authenticated/master.stations'
@@ -153,6 +154,12 @@ const AuthenticatedMasterFacilitiesRoute =
     path: '/facilities',
     getParentRoute: () => AuthenticatedMasterRoute,
   } as any)
+const AuthenticatedMasterFarmersRoute =
+  AuthenticatedMasterFarmersRouteImport.update({
+    id: '/farmers',
+    path: '/farmers',
+    getParentRoute: () => AuthenticatedMasterRoute,
+  } as any)
 const AuthenticatedMasterGenerationsRoute =
   AuthenticatedMasterGenerationsRouteImport.update({
     id: '/generations',
@@ -252,6 +259,7 @@ export interface FileRoutesByFullPath {
   '/farmers/overview': typeof AuthenticatedFarmersOverviewRoute
   '/farmers/report': typeof AuthenticatedFarmersReportRoute
   '/master/facilities': typeof AuthenticatedMasterFacilitiesRoute
+  '/master/farmers': typeof AuthenticatedMasterFarmersRoute
   '/master/generations': typeof AuthenticatedMasterGenerationsRoute
   '/master/seed-sizes': typeof AuthenticatedMasterSeedSizesRoute
   '/master/stations': typeof AuthenticatedMasterStationsRoute
@@ -285,6 +293,7 @@ export interface FileRoutesByTo {
   '/farmers/overview': typeof AuthenticatedFarmersOverviewRoute
   '/farmers/report': typeof AuthenticatedFarmersReportRoute
   '/master/facilities': typeof AuthenticatedMasterFacilitiesRoute
+  '/master/farmers': typeof AuthenticatedMasterFarmersRoute
   '/master/generations': typeof AuthenticatedMasterGenerationsRoute
   '/master/seed-sizes': typeof AuthenticatedMasterSeedSizesRoute
   '/master/stations': typeof AuthenticatedMasterStationsRoute
@@ -321,6 +330,7 @@ export interface FileRoutesById {
   '/_authenticated/farmers/overview': typeof AuthenticatedFarmersOverviewRoute
   '/_authenticated/farmers/report': typeof AuthenticatedFarmersReportRoute
   '/_authenticated/master/facilities': typeof AuthenticatedMasterFacilitiesRoute
+  '/_authenticated/master/farmers': typeof AuthenticatedMasterFarmersRoute
   '/_authenticated/master/generations': typeof AuthenticatedMasterGenerationsRoute
   '/_authenticated/master/seed-sizes': typeof AuthenticatedMasterSeedSizesRoute
   '/_authenticated/master/stations': typeof AuthenticatedMasterStationsRoute
@@ -357,6 +367,7 @@ export interface FileRouteTypes {
     | '/farmers/overview'
     | '/farmers/report'
     | '/master/facilities'
+    | '/master/farmers'
     | '/master/generations'
     | '/master/seed-sizes'
     | '/master/stations'
@@ -390,6 +401,7 @@ export interface FileRouteTypes {
     | '/farmers/overview'
     | '/farmers/report'
     | '/master/facilities'
+    | '/master/farmers'
     | '/master/generations'
     | '/master/seed-sizes'
     | '/master/stations'
@@ -425,6 +437,7 @@ export interface FileRouteTypes {
     | '/_authenticated/farmers/overview'
     | '/_authenticated/farmers/report'
     | '/_authenticated/master/facilities'
+    | '/_authenticated/master/farmers'
     | '/_authenticated/master/generations'
     | '/_authenticated/master/seed-sizes'
     | '/_authenticated/master/stations'
@@ -589,6 +602,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMasterFacilitiesRouteImport
       parentRoute: typeof AuthenticatedMasterRoute
     }
+    '/_authenticated/master/farmers': {
+      id: '/_authenticated/master/farmers'
+      path: '/farmers'
+      fullPath: '/master/farmers'
+      preLoaderRoute: typeof AuthenticatedMasterFarmersRouteImport
+      parentRoute: typeof AuthenticatedMasterRoute
+    }
     '/_authenticated/master/generations': {
       id: '/_authenticated/master/generations'
       path: '/generations'
@@ -741,6 +761,7 @@ const AuthenticatedFarmersRouteWithChildren =
 
 interface AuthenticatedMasterRouteChildren {
   AuthenticatedMasterFacilitiesRoute: typeof AuthenticatedMasterFacilitiesRoute
+  AuthenticatedMasterFarmersRoute: typeof AuthenticatedMasterFarmersRoute
   AuthenticatedMasterGenerationsRoute: typeof AuthenticatedMasterGenerationsRoute
   AuthenticatedMasterSeedSizesRoute: typeof AuthenticatedMasterSeedSizesRoute
   AuthenticatedMasterStationsRoute: typeof AuthenticatedMasterStationsRoute
@@ -750,6 +771,7 @@ interface AuthenticatedMasterRouteChildren {
 
 const AuthenticatedMasterRouteChildren: AuthenticatedMasterRouteChildren = {
   AuthenticatedMasterFacilitiesRoute: AuthenticatedMasterFacilitiesRoute,
+  AuthenticatedMasterFarmersRoute: AuthenticatedMasterFarmersRoute,
   AuthenticatedMasterGenerationsRoute: AuthenticatedMasterGenerationsRoute,
   AuthenticatedMasterSeedSizesRoute: AuthenticatedMasterSeedSizesRoute,
   AuthenticatedMasterStationsRoute: AuthenticatedMasterStationsRoute,
