@@ -1,48 +1,60 @@
 'use client';
 
 import { useForm } from '@tanstack/react-form';
+import { useMemo } from 'react';
 import * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { useUpdateLocality } from '@/features/master/api/use-update-locality';
-import type { Locality } from '@/features/master/types';
+import { useUpdateNamedMaster } from '@/features/master/api/use-update-named-master';
+import { type AddressMasterId, getAddressMaster } from '@/features/master/lib/address-masters';
+import type { NamedMaster } from '@/features/master/types';
 
-const formSchema = z.object({
-  name: z
-    .string()
-    .min(1, 'Locality name is required.')
-    .max(128, 'Locality name must be at most 128 characters.'),
-});
-
-export type EditLocalityFormValues = {
+export type EditNamedMasterFormValues = {
   name: string;
 };
 
-interface EditLocalityFormProps {
-  locality: Locality;
-  onSuccess?: (values: EditLocalityFormValues) => void;
+interface EditNamedMasterFormProps {
+  resourceId: AddressMasterId;
+  item: NamedMaster;
+  onSuccess?: (values: EditNamedMasterFormValues) => void;
   onCancel?: () => void;
 }
 
-export function EditLocalityForm({ locality, onSuccess, onCancel }: EditLocalityFormProps) {
-  const { mutateAsync: updateLocality, isPending } = useUpdateLocality();
+export function EditNamedMasterForm({
+  resourceId,
+  item,
+  onSuccess,
+  onCancel,
+}: EditNamedMasterFormProps) {
+  const resource = getAddressMaster(resourceId);
+  const { mutateAsync: updateNamedMaster, isPending } = useUpdateNamedMaster(resourceId);
+  const formSchema = useMemo(
+    () =>
+      z.object({
+        name: z
+          .string()
+          .min(1, `${resource.singularTitle} name is required.`)
+          .max(128, `${resource.singularTitle} name must be at most 128 characters.`),
+      }),
+    [resource.singularTitle],
+  );
 
   const form = useForm({
     defaultValues: {
-      name: locality.name,
+      name: item.name,
     },
     validators: {
       onSubmit: formSchema,
     },
     onSubmit: async ({ value }) => {
-      const submitted: EditLocalityFormValues = {
+      const submitted: EditNamedMasterFormValues = {
         name: value.name.trim(),
       };
 
-      await updateLocality({
-        localityId: locality.id,
+      await updateNamedMaster({
+        id: item.id,
         name: submitted.name,
       });
       onSuccess?.(submitted);
@@ -51,10 +63,10 @@ export function EditLocalityForm({ locality, onSuccess, onCancel }: EditLocality
 
   return (
     <form
-      id="edit-locality-form"
-      onSubmit={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
+      id={`edit-named-master-${resourceId}`}
+      onSubmit={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
         void form.handleSubmit();
       }}
     >
@@ -64,15 +76,15 @@ export function EditLocalityForm({ locality, onSuccess, onCancel }: EditLocality
             const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Locality Name</FieldLabel>
+                <FieldLabel htmlFor={field.name}>{resource.singularTitle} Name</FieldLabel>
                 <Input
                   id={field.name}
                   name={field.name}
                   value={field.state.value}
                   onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
+                  onChange={(event) => field.handleChange(event.target.value)}
                   aria-invalid={isInvalid}
-                  placeholder="Mashobra"
+                  placeholder={resource.singularTitle}
                   autoComplete="off"
                   disabled={isPending}
                 />

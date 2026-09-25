@@ -22,10 +22,11 @@ import { Route as AuthenticatedTransferStockRouteImport } from './routes/_authen
 import { Route as AuthenticatedAccessControlPermissionsRouteImport } from './routes/_authenticated/access-control.permissions'
 import { Route as AuthenticatedAccessControlSessionsRouteImport } from './routes/_authenticated/access-control.sessions'
 import { Route as AuthenticatedAccessControlUsersRouteImport } from './routes/_authenticated/access-control.users'
+import { Route as AuthenticatedMasterAddressesRouteImport } from './routes/_authenticated/master.addresses'
 import { Route as AuthenticatedMasterFacilitiesRouteImport } from './routes/_authenticated/master.facilities'
+import { Route as AuthenticatedMasterFarmersRouteImport } from './routes/_authenticated/master.farmers'
 import { Route as AuthenticatedMasterGenerationsRouteImport } from './routes/_authenticated/master.generations'
 import { Route as AuthenticatedMasterSeedSizesRouteImport } from './routes/_authenticated/master.seed-sizes'
-import { Route as AuthenticatedMasterStationsRouteImport } from './routes/_authenticated/master.stations'
 import { Route as AuthenticatedMasterTuberSizesRouteImport } from './routes/_authenticated/master.tuber-sizes'
 import { Route as AuthenticatedMasterVarietiesRouteImport } from './routes/_authenticated/master.varieties'
 import { Route as AuthenticatedSeedDispatchesAnalyticsRouteImport } from './routes/_authenticated/seed-dispatches.analytics'
@@ -105,10 +106,22 @@ const AuthenticatedAccessControlUsersRoute =
     path: '/users',
     getParentRoute: () => AuthenticatedAccessControlRoute,
   } as any)
+const AuthenticatedMasterAddressesRoute =
+  AuthenticatedMasterAddressesRouteImport.update({
+    id: '/addresses',
+    path: '/addresses',
+    getParentRoute: () => AuthenticatedMasterRoute,
+  } as any)
 const AuthenticatedMasterFacilitiesRoute =
   AuthenticatedMasterFacilitiesRouteImport.update({
     id: '/facilities',
     path: '/facilities',
+    getParentRoute: () => AuthenticatedMasterRoute,
+  } as any)
+const AuthenticatedMasterFarmersRoute =
+  AuthenticatedMasterFarmersRouteImport.update({
+    id: '/farmers',
+    path: '/farmers',
     getParentRoute: () => AuthenticatedMasterRoute,
   } as any)
 const AuthenticatedMasterGenerationsRoute =
@@ -121,12 +134,6 @@ const AuthenticatedMasterSeedSizesRoute =
   AuthenticatedMasterSeedSizesRouteImport.update({
     id: '/seed-sizes',
     path: '/seed-sizes',
-    getParentRoute: () => AuthenticatedMasterRoute,
-  } as any)
-const AuthenticatedMasterStationsRoute =
-  AuthenticatedMasterStationsRouteImport.update({
-    id: '/stations',
-    path: '/stations',
     getParentRoute: () => AuthenticatedMasterRoute,
   } as any)
 const AuthenticatedMasterTuberSizesRoute =
@@ -191,10 +198,11 @@ export interface FileRoutesByFullPath {
   '/access-control/permissions': typeof AuthenticatedAccessControlPermissionsRoute
   '/access-control/sessions': typeof AuthenticatedAccessControlSessionsRoute
   '/access-control/users': typeof AuthenticatedAccessControlUsersRoute
+  '/master/addresses': typeof AuthenticatedMasterAddressesRoute
   '/master/facilities': typeof AuthenticatedMasterFacilitiesRoute
+  '/master/farmers': typeof AuthenticatedMasterFarmersRoute
   '/master/generations': typeof AuthenticatedMasterGenerationsRoute
   '/master/seed-sizes': typeof AuthenticatedMasterSeedSizesRoute
-  '/master/stations': typeof AuthenticatedMasterStationsRoute
   '/master/tuber-sizes': typeof AuthenticatedMasterTuberSizesRoute
   '/master/varieties': typeof AuthenticatedMasterVarietiesRoute
   '/seed-dispatches/analytics': typeof AuthenticatedSeedDispatchesAnalyticsRoute
@@ -217,10 +225,11 @@ export interface FileRoutesByTo {
   '/access-control/permissions': typeof AuthenticatedAccessControlPermissionsRoute
   '/access-control/sessions': typeof AuthenticatedAccessControlSessionsRoute
   '/access-control/users': typeof AuthenticatedAccessControlUsersRoute
+  '/master/addresses': typeof AuthenticatedMasterAddressesRoute
   '/master/facilities': typeof AuthenticatedMasterFacilitiesRoute
+  '/master/farmers': typeof AuthenticatedMasterFarmersRoute
   '/master/generations': typeof AuthenticatedMasterGenerationsRoute
   '/master/seed-sizes': typeof AuthenticatedMasterSeedSizesRoute
-  '/master/stations': typeof AuthenticatedMasterStationsRoute
   '/master/tuber-sizes': typeof AuthenticatedMasterTuberSizesRoute
   '/master/varieties': typeof AuthenticatedMasterVarietiesRoute
   '/seed-dispatches/analytics': typeof AuthenticatedSeedDispatchesAnalyticsRoute
@@ -245,10 +254,11 @@ export interface FileRoutesById {
   '/_authenticated/access-control/permissions': typeof AuthenticatedAccessControlPermissionsRoute
   '/_authenticated/access-control/sessions': typeof AuthenticatedAccessControlSessionsRoute
   '/_authenticated/access-control/users': typeof AuthenticatedAccessControlUsersRoute
+  '/_authenticated/master/addresses': typeof AuthenticatedMasterAddressesRoute
   '/_authenticated/master/facilities': typeof AuthenticatedMasterFacilitiesRoute
+  '/_authenticated/master/farmers': typeof AuthenticatedMasterFarmersRoute
   '/_authenticated/master/generations': typeof AuthenticatedMasterGenerationsRoute
   '/_authenticated/master/seed-sizes': typeof AuthenticatedMasterSeedSizesRoute
-  '/_authenticated/master/stations': typeof AuthenticatedMasterStationsRoute
   '/_authenticated/master/tuber-sizes': typeof AuthenticatedMasterTuberSizesRoute
   '/_authenticated/master/varieties': typeof AuthenticatedMasterVarietiesRoute
   '/_authenticated/seed-dispatches/analytics': typeof AuthenticatedSeedDispatchesAnalyticsRoute
@@ -273,10 +283,11 @@ export interface FileRouteTypes {
     | '/access-control/permissions'
     | '/access-control/sessions'
     | '/access-control/users'
+    | '/master/addresses'
     | '/master/facilities'
+    | '/master/farmers'
     | '/master/generations'
     | '/master/seed-sizes'
-    | '/master/stations'
     | '/master/tuber-sizes'
     | '/master/varieties'
     | '/seed-dispatches/analytics'
@@ -299,10 +310,11 @@ export interface FileRouteTypes {
     | '/access-control/permissions'
     | '/access-control/sessions'
     | '/access-control/users'
+    | '/master/addresses'
     | '/master/facilities'
+    | '/master/farmers'
     | '/master/generations'
     | '/master/seed-sizes'
-    | '/master/stations'
     | '/master/tuber-sizes'
     | '/master/varieties'
     | '/seed-dispatches/analytics'
@@ -326,10 +338,11 @@ export interface FileRouteTypes {
     | '/_authenticated/access-control/permissions'
     | '/_authenticated/access-control/sessions'
     | '/_authenticated/access-control/users'
+    | '/_authenticated/master/addresses'
     | '/_authenticated/master/facilities'
+    | '/_authenticated/master/farmers'
     | '/_authenticated/master/generations'
     | '/_authenticated/master/seed-sizes'
-    | '/_authenticated/master/stations'
     | '/_authenticated/master/tuber-sizes'
     | '/_authenticated/master/varieties'
     | '/_authenticated/seed-dispatches/analytics'
@@ -439,11 +452,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAccessControlUsersRouteImport
       parentRoute: typeof AuthenticatedAccessControlRoute
     }
+    '/_authenticated/master/addresses': {
+      id: '/_authenticated/master/addresses'
+      path: '/addresses'
+      fullPath: '/master/addresses'
+      preLoaderRoute: typeof AuthenticatedMasterAddressesRouteImport
+      parentRoute: typeof AuthenticatedMasterRoute
+    }
     '/_authenticated/master/facilities': {
       id: '/_authenticated/master/facilities'
       path: '/facilities'
       fullPath: '/master/facilities'
       preLoaderRoute: typeof AuthenticatedMasterFacilitiesRouteImport
+      parentRoute: typeof AuthenticatedMasterRoute
+    }
+    '/_authenticated/master/farmers': {
+      id: '/_authenticated/master/farmers'
+      path: '/farmers'
+      fullPath: '/master/farmers'
+      preLoaderRoute: typeof AuthenticatedMasterFarmersRouteImport
       parentRoute: typeof AuthenticatedMasterRoute
     }
     '/_authenticated/master/generations': {
@@ -458,13 +485,6 @@ declare module '@tanstack/react-router' {
       path: '/seed-sizes'
       fullPath: '/master/seed-sizes'
       preLoaderRoute: typeof AuthenticatedMasterSeedSizesRouteImport
-      parentRoute: typeof AuthenticatedMasterRoute
-    }
-    '/_authenticated/master/stations': {
-      id: '/_authenticated/master/stations'
-      path: '/stations'
-      fullPath: '/master/stations'
-      preLoaderRoute: typeof AuthenticatedMasterStationsRouteImport
       parentRoute: typeof AuthenticatedMasterRoute
     }
     '/_authenticated/master/tuber-sizes': {
@@ -547,19 +567,21 @@ const AuthenticatedAccessControlRouteWithChildren =
   )
 
 interface AuthenticatedMasterRouteChildren {
+  AuthenticatedMasterAddressesRoute: typeof AuthenticatedMasterAddressesRoute
   AuthenticatedMasterFacilitiesRoute: typeof AuthenticatedMasterFacilitiesRoute
+  AuthenticatedMasterFarmersRoute: typeof AuthenticatedMasterFarmersRoute
   AuthenticatedMasterGenerationsRoute: typeof AuthenticatedMasterGenerationsRoute
   AuthenticatedMasterSeedSizesRoute: typeof AuthenticatedMasterSeedSizesRoute
-  AuthenticatedMasterStationsRoute: typeof AuthenticatedMasterStationsRoute
   AuthenticatedMasterTuberSizesRoute: typeof AuthenticatedMasterTuberSizesRoute
   AuthenticatedMasterVarietiesRoute: typeof AuthenticatedMasterVarietiesRoute
 }
 
 const AuthenticatedMasterRouteChildren: AuthenticatedMasterRouteChildren = {
+  AuthenticatedMasterAddressesRoute: AuthenticatedMasterAddressesRoute,
   AuthenticatedMasterFacilitiesRoute: AuthenticatedMasterFacilitiesRoute,
+  AuthenticatedMasterFarmersRoute: AuthenticatedMasterFarmersRoute,
   AuthenticatedMasterGenerationsRoute: AuthenticatedMasterGenerationsRoute,
   AuthenticatedMasterSeedSizesRoute: AuthenticatedMasterSeedSizesRoute,
-  AuthenticatedMasterStationsRoute: AuthenticatedMasterStationsRoute,
   AuthenticatedMasterTuberSizesRoute: AuthenticatedMasterTuberSizesRoute,
   AuthenticatedMasterVarietiesRoute: AuthenticatedMasterVarietiesRoute,
 }

@@ -18,14 +18,15 @@ export const Route = createFileRoute('/_authenticated/master')({
     }
 
     if (location.pathname === '/master' || location.pathname === '/master/') {
-      throw redirect({ to: '/master/stations' });
+      throw redirect({ to: '/master/farmers' });
     }
   },
   component: MasterLayout,
 });
 
 const tabs = [
-  { label: 'Stations', value: 'stations', to: '/master/stations' },
+  { label: 'Farmers', value: 'farmers', to: '/master/farmers' },
+  { label: 'Addresses', value: 'addresses', to: '/master/addresses' },
   { label: 'Varieties', value: 'varieties', to: '/master/varieties' },
   { label: 'Facilities', value: 'facilities', to: '/master/facilities' },
   { label: 'Seed Sizes', value: 'seed-sizes', to: '/master/seed-sizes' },
@@ -41,7 +42,7 @@ function MasterLayout() {
 
   const activeTab =
     tabs.find((tab) => pathname === tab.to || pathname.startsWith(`${tab.to}/`))?.value ??
-    'stations';
+    'farmers';
 
   return (
     <Tabs

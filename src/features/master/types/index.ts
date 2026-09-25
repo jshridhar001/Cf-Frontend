@@ -115,53 +115,24 @@ export type TuberSizeMessageResponse = {
   message: string;
 };
 
-export type Locality = {
+export type NamedMaster = {
   id: string;
   name: string;
-  stationId: string;
   createdAt: string;
   updatedAt: string;
 };
 
-export type StationRecord = {
-  id: string;
-  name: string;
-  city: string | null;
-  state: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type Station = StationRecord & {
-  localities: Locality[];
-};
-
-export type StationsResponse = {
+export type NamedMastersResponse = {
   success: boolean;
-  data: Station[];
+  data: NamedMaster[];
 };
 
-export type StationResponse = {
+export type NamedMasterResponse = {
   success: boolean;
-  data: StationRecord;
+  data: NamedMaster;
 };
 
-export type StationMessageResponse = {
-  success: boolean;
-  message: string;
-};
-
-export type LocalitiesResponse = {
-  success: boolean;
-  data: Locality[];
-};
-
-export type LocalityResponse = {
-  success: boolean;
-  data: Locality;
-};
-
-export type LocalityMessageResponse = {
+export type NamedMasterMessageResponse = {
   success: boolean;
   message: string;
 };

@@ -1,32 +1,42 @@
 'use client';
 
 import { useForm } from '@tanstack/react-form';
+import { useMemo } from 'react';
 import * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { useCreateLocality } from '@/features/master/api/use-create-locality';
+import { useCreateNamedMaster } from '@/features/master/api/use-create-named-master';
+import { type AddressMasterId, getAddressMaster } from '@/features/master/lib/address-masters';
 
-const formSchema = z.object({
-  name: z
-    .string()
-    .min(1, 'Locality name is required.')
-    .max(128, 'Locality name must be at most 128 characters.'),
-});
-
-export type CreateLocalityFormValues = {
+export type CreateNamedMasterFormValues = {
   name: string;
 };
 
-interface CreateLocalityFormProps {
-  stationId: string;
-  onSuccess?: (values: CreateLocalityFormValues) => void;
+interface CreateNamedMasterFormProps {
+  resourceId: AddressMasterId;
+  onSuccess?: (values: CreateNamedMasterFormValues) => void;
   onCancel?: () => void;
 }
 
-export function CreateLocalityForm({ stationId, onSuccess, onCancel }: CreateLocalityFormProps) {
-  const { mutateAsync: createLocality, isPending } = useCreateLocality();
+export function CreateNamedMasterForm({
+  resourceId,
+  onSuccess,
+  onCancel,
+}: CreateNamedMasterFormProps) {
+  const resource = getAddressMaster(resourceId);
+  const { mutateAsync: createNamedMaster, isPending } = useCreateNamedMaster(resourceId);
+  const formSchema = useMemo(
+    () =>
+      z.object({
+        name: z
+          .string()
+          .min(1, `${resource.singularTitle} name is required.`)
+          .max(128, `${resource.singularTitle} name must be at most 128 characters.`),
+      }),
+    [resource.singularTitle],
+  );
 
   const form = useForm({
     defaultValues: {
@@ -36,14 +46,11 @@ export function CreateLocalityForm({ stationId, onSuccess, onCancel }: CreateLoc
       onSubmit: formSchema,
     },
     onSubmit: async ({ value }) => {
-      const submitted: CreateLocalityFormValues = {
+      const submitted: CreateNamedMasterFormValues = {
         name: value.name.trim(),
       };
 
-      await createLocality({
-        name: submitted.name,
-        stationId,
-      });
+      await createNamedMaster(submitted);
       form.reset();
       onSuccess?.(submitted);
     },
@@ -51,10 +58,10 @@ export function CreateLocalityForm({ stationId, onSuccess, onCancel }: CreateLoc
 
   return (
     <form
-      id="create-locality-form"
-      onSubmit={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
+      id={`create-named-master-${resourceId}`}
+      onSubmit={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
         void form.handleSubmit();
       }}
     >
@@ -64,15 +71,15 @@ export function CreateLocalityForm({ stationId, onSuccess, onCancel }: CreateLoc
             const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Locality Name</FieldLabel>
+                <FieldLabel htmlFor={field.name}>{resource.singularTitle} Name</FieldLabel>
                 <Input
                   id={field.name}
                   name={field.name}
                   value={field.state.value}
                   onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
+                  onChange={(event) => field.handleChange(event.target.value)}
                   aria-invalid={isInvalid}
-                  placeholder="Mashobra"
+                  placeholder={resource.singularTitle}
                   autoComplete="off"
                   disabled={isPending}
                 />
@@ -98,7 +105,7 @@ export function CreateLocalityForm({ stationId, onSuccess, onCancel }: CreateLoc
         <form.Subscribe selector={(state) => state.canSubmit}>
           {(canSubmit) => (
             <Button type="submit" disabled={!canSubmit || isPending}>
-              {isPending ? 'Creating…' : 'Create Locality'}
+              {isPending ? 'Creating…' : `Create ${resource.singularTitle}`}
             </Button>
           )}
         </form.Subscribe>

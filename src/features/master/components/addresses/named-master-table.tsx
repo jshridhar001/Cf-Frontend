@@ -5,7 +5,7 @@ import {
   type SortingState,
   useTable,
 } from '@tanstack/react-table';
-import { PlusIcon, SearchIcon } from 'lucide-react';
+import { PlusIcon, SearchIcon, Trash2Icon } from 'lucide-react';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
@@ -36,23 +36,32 @@ import {
   type MasterTableFeatures,
   masterTableFeatures,
 } from '@/features/master/lib/master-table-features';
-import { type LocalitiesTableMeta, type LocalitiesTableRow } from './locality-table-column';
+import type { NamedMaster } from '@/features/master/types';
+import { type NamedMasterTableMeta } from './named-master-table-column';
 
-interface LocalitiesTableProps<TData extends RowData> {
+interface NamedMasterTableProps<TData extends RowData> {
   columns: ColumnDef<MasterTableFeatures, TData>[];
   data: TData[];
+  filterPlaceholder: string;
+  addLabel: string;
   onAdd?: () => void;
-  onEdit?: (locality: LocalitiesTableRow) => void;
-  onDelete?: (locality: LocalitiesTableRow) => void;
+  onDeleteAll?: () => void;
+  deleteAllDisabled?: boolean;
+  onEdit?: (item: NamedMaster) => void;
+  onDelete?: (item: NamedMaster) => void;
 }
 
-export function LocalitiesTable<TData extends RowData>({
+export function NamedMasterTable<TData extends RowData>({
   columns,
   data,
+  filterPlaceholder,
+  addLabel,
   onAdd,
+  onDeleteAll,
+  deleteAllDisabled,
   onEdit,
   onDelete,
-}: LocalitiesTableProps<TData>) {
+}: NamedMasterTableProps<TData>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
 
@@ -65,7 +74,7 @@ export function LocalitiesTable<TData extends RowData>({
     meta: {
       onEdit,
       onDelete,
-    } satisfies LocalitiesTableMeta,
+    } satisfies NamedMasterTableMeta,
     state: {
       sorting,
       columnFilters,
@@ -82,15 +91,25 @@ export function LocalitiesTable<TData extends RowData>({
             <SearchIcon />
           </InputGroupAddon>
           <InputGroupInput
-            placeholder="Filter localities…"
+            placeholder={filterPlaceholder}
             value={nameFilter}
             onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
           />
         </InputGroup>
         <div className="hidden items-center gap-2 sm:ml-auto md:flex">
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
+            disabled={deleteAllDisabled}
+            onClick={onDeleteAll}
+          >
+            <Trash2Icon data-icon="inline-start" />
+            Delete All
+          </Button>
           <Button type="button" size="sm" onClick={onAdd}>
             <PlusIcon data-icon="inline-start" />
-            Add Locality
+            {addLabel}
           </Button>
         </div>
       </div>
@@ -139,7 +158,7 @@ export function LocalitiesTable<TData extends RowData>({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No localities found.
+                  No results.
                 </TableCell>
               </TableRow>
             )}
@@ -150,18 +169,18 @@ export function LocalitiesTable<TData extends RowData>({
       <ItemGroup className="md:hidden">
         {table.getRowModel().rows.length ? (
           table.getRowModel().rows.map((row) => {
-            const locality = row.original as LocalitiesTableRow;
+            const item = row.original as NamedMaster;
             return (
               <Item key={row.id} variant="outline" size="sm" className="items-start">
                 <ItemHeader className="gap-3">
                   <ItemContent className="min-w-0 pr-1">
-                    <ItemTitle>{locality.name}</ItemTitle>
-                    <ItemDescription>{formatCreatedAt(locality.createdAt)}</ItemDescription>
+                    <ItemTitle>{item.name}</ItemTitle>
+                    <ItemDescription>{formatCreatedAt(item.createdAt)}</ItemDescription>
                   </ItemContent>
                   <ItemActions className="shrink-0 self-start">
                     <MasterRowActions
-                      onEdit={() => onEdit?.(locality)}
-                      onDelete={() => onDelete?.(locality)}
+                      onEdit={() => onEdit?.(item)}
+                      onDelete={() => onDelete?.(item)}
                     />
                   </ItemActions>
                 </ItemHeader>
@@ -170,7 +189,7 @@ export function LocalitiesTable<TData extends RowData>({
           })
         ) : (
           <div className="rounded-2xl border px-3 py-8 text-center text-sm text-muted-foreground">
-            No localities found.
+            No results.
           </div>
         )}
       </ItemGroup>
