@@ -35,7 +35,10 @@ import { env } from '@/lib/env';
 
 type AppPath =
   | '/dashboard'
-  | '/farmers'
+  | '/farmers/overview'
+  | '/farmers/analytics'
+  | '/farmers/report'
+  | '/farmers/contract'
   | '/messages'
   | '/notifications'
   | '/seed-requisition/overview'
@@ -68,8 +71,14 @@ const platformNavItems: NavItem[] = [
   },
   {
     title: 'Farmers',
-    url: '/farmers',
+    url: '/farmers/overview',
     icon: User,
+    items: [
+      { title: 'Overview', url: '/farmers/overview' },
+      { title: 'Analytics', url: '/farmers/analytics' },
+      { title: 'Report', url: '/farmers/report' },
+      { title: 'Contract', url: '/farmers/contract' },
+    ],
   },
   {
     title: 'Messages',

@@ -54,12 +54,13 @@ apiClient.interceptors.response.use(
 
 type ApiErrorBody = {
   message?: string;
-  error?: { message?: string };
+  error?: string | { message?: string };
 };
 
 export function getApiErrorMessage(error: unknown, fallback = 'Something went wrong'): string {
   if (isAxiosError(error)) {
     const data = error.response?.data as ApiErrorBody | undefined;
+    if (typeof data?.error === 'string') return data.error;
     if (typeof data?.error?.message === 'string') return data.error.message;
     if (typeof data?.message === 'string') return data.message;
   }
