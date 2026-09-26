@@ -70,6 +70,9 @@ export type ApiFarmer = {
   pincodeId: string | null;
   familyId: string | null;
   contractUrl: string | null;
+  bankName: string;
+  bankAccountNumber: string;
+  ifscCode: string;
   createdAt: string;
   updatedAt: string;
   state: FarmerPlace | null;
@@ -112,9 +115,9 @@ export type Farmer = {
   familyAccountNumber?: string | null;
   contractUrl: string | null;
   contracts?: FarmerContract[];
-  bankName: string | null;
-  ifscCode: string | null;
-  bankAccountNumber: string | null;
+  bankName: string;
+  ifscCode: string;
+  bankAccountNumber: string;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -181,6 +184,9 @@ export type CreateFarmerBody = {
   districtId: string;
   stateId: string;
   pincodeId: string;
+  bankName: string;
+  bankAccountNumber: string;
+  ifscCode: string;
 };
 
 export function toFarmer(row: ApiFarmer): Farmer {
@@ -210,9 +216,9 @@ export function toFarmer(row: ApiFarmer): Farmer {
     areaId: row.stationId ?? '',
     familyId: row.familyId,
     contractUrl: row.contractUrl,
-    bankName: null,
-    ifscCode: null,
-    bankAccountNumber: null,
+    bankName: row.bankName,
+    bankAccountNumber: row.bankAccountNumber,
+    ifscCode: row.ifscCode,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };

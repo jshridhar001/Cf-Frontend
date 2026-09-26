@@ -25,6 +25,13 @@ const formSchema = z.object({
   aadharNumber: z.string().refine((value) => !value || /^\d{12}$/.test(value), {
     message: 'Aadhaar must be 12 digits.',
   }),
+  bankName: z.string().min(2, 'Bank name must be at least 2 characters.').max(64),
+  bankAccountNumber: z
+    .string()
+    .regex(/^\d{8,18}$/, 'Enter a bank account number with 8 to 18 digits.'),
+  ifscCode: z
+    .string()
+    .regex(/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/, 'Enter a valid 11-character IFSC code.'),
   stateId: requiredId('State'),
   districtId: requiredId('District'),
   stationId: requiredId('Station'),
@@ -70,11 +77,7 @@ function AddressSelect({
           if (next) onValueChange(next);
         }}
       >
-        <SelectTrigger
-          aria-invalid={invalid}
-          className="w-full"
-          onBlur={onBlur}
-        >
+        <SelectTrigger aria-invalid={invalid} className="w-full" onBlur={onBlur}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
@@ -106,6 +109,9 @@ export function CreateFarmerForm({ onSuccess, onCancel }: CreateFarmerFormProps)
       accountNumber: '',
       mobileNumber: '',
       aadharNumber: '',
+      bankName: '',
+      bankAccountNumber: '',
+      ifscCode: '',
       stateId: '',
       districtId: '',
       stationId: '',
@@ -129,6 +135,9 @@ export function CreateFarmerForm({ onSuccess, onCancel }: CreateFarmerFormProps)
         districtId: value.districtId,
         stateId: value.stateId,
         pincodeId: value.pincodeId,
+        bankName: value.bankName.trim(),
+        bankAccountNumber: value.bankAccountNumber.trim(),
+        ifscCode: value.ifscCode.trim().toUpperCase(),
         ...(value.aadharNumber.trim() ? { aadharNumber: value.aadharNumber.trim() } : {}),
       });
       form.reset();
@@ -231,6 +240,76 @@ export function CreateFarmerForm({ onSuccess, onCancel }: CreateFarmerFormProps)
                   aria-invalid={isInvalid}
                   placeholder="100000000006"
                   inputMode="numeric"
+                  disabled={isPending}
+                />
+                {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
+              </Field>
+            );
+          }}
+        </form.Field>
+
+        <form.Field name="bankName">
+          {(field) => {
+            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>Bank name</FieldLabel>
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  aria-invalid={isInvalid}
+                  placeholder="State Bank of India"
+                  disabled={isPending}
+                />
+                {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
+              </Field>
+            );
+          }}
+        </form.Field>
+
+        <form.Field name="bankAccountNumber">
+          {(field) => {
+            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>Bank account number</FieldLabel>
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) =>
+                    field.handleChange(e.target.value.replace(/\D/g, '').slice(0, 18))
+                  }
+                  aria-invalid={isInvalid}
+                  placeholder="12345678901"
+                  inputMode="numeric"
+                  disabled={isPending}
+                />
+                {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
+              </Field>
+            );
+          }}
+        </form.Field>
+
+        <form.Field name="ifscCode">
+          {(field) => {
+            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>IFSC code</FieldLabel>
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value.toUpperCase().slice(0, 11))}
+                  aria-invalid={isInvalid}
+                  placeholder="SBIN0001234"
+                  maxLength={11}
                   disabled={isPending}
                 />
                 {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}

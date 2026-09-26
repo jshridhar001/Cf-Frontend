@@ -25,6 +25,13 @@ const formSchema = z.object({
   aadharNumber: z.string().refine((value) => !value || /^\d{12}$/.test(value), {
     message: 'Aadhaar must be 12 digits.',
   }),
+  bankName: z.string().min(2, 'Bank name must be at least 2 characters.').max(64),
+  bankAccountNumber: z
+    .string()
+    .regex(/^\d{8,18}$/, 'Enter a bank account number with 8 to 18 digits.'),
+  ifscCode: z
+    .string()
+    .regex(/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/, 'Enter a valid 11-character IFSC code.'),
   stateId: requiredId('State'),
   districtId: requiredId('District'),
   stationId: requiredId('Station'),
@@ -107,6 +114,9 @@ export function EditFarmerForm({ farmer, onSuccess, onCancel }: EditFarmerFormPr
       accountNumber: farmer.accountNumber,
       mobileNumber: farmer.mobileNumber,
       aadharNumber: farmer.aadharNumber ?? '',
+      bankName: farmer.bankName,
+      bankAccountNumber: farmer.bankAccountNumber,
+      ifscCode: farmer.ifscCode,
       stateId: idOrEmpty(farmer.stateId),
       districtId: idOrEmpty(farmer.districtId),
       stationId: idOrEmpty(farmer.stationId),
@@ -132,6 +142,9 @@ export function EditFarmerForm({ farmer, onSuccess, onCancel }: EditFarmerFormPr
           districtId: value.districtId,
           stateId: value.stateId,
           pincodeId: value.pincodeId,
+          bankName: value.bankName.trim(),
+          bankAccountNumber: value.bankAccountNumber.trim(),
+          ifscCode: value.ifscCode.trim().toUpperCase(),
           ...(value.aadharNumber.trim() ? { aadharNumber: value.aadharNumber.trim() } : {}),
         },
       });
@@ -230,6 +243,73 @@ export function EditFarmerForm({ farmer, onSuccess, onCancel }: EditFarmerFormPr
                   }
                   aria-invalid={isInvalid}
                   inputMode="numeric"
+                  disabled={isPending}
+                />
+                {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
+              </Field>
+            );
+          }}
+        </form.Field>
+
+        <form.Field name="bankName">
+          {(field) => {
+            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={`edit-${field.name}`}>Bank name</FieldLabel>
+                <Input
+                  id={`edit-${field.name}`}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  aria-invalid={isInvalid}
+                  disabled={isPending}
+                />
+                {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
+              </Field>
+            );
+          }}
+        </form.Field>
+
+        <form.Field name="bankAccountNumber">
+          {(field) => {
+            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={`edit-${field.name}`}>Bank account number</FieldLabel>
+                <Input
+                  id={`edit-${field.name}`}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) =>
+                    field.handleChange(e.target.value.replace(/\D/g, '').slice(0, 18))
+                  }
+                  aria-invalid={isInvalid}
+                  inputMode="numeric"
+                  disabled={isPending}
+                />
+                {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
+              </Field>
+            );
+          }}
+        </form.Field>
+
+        <form.Field name="ifscCode">
+          {(field) => {
+            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={`edit-${field.name}`}>IFSC code</FieldLabel>
+                <Input
+                  id={`edit-${field.name}`}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value.toUpperCase().slice(0, 11))}
+                  aria-invalid={isInvalid}
+                  maxLength={11}
                   disabled={isPending}
                 />
                 {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}

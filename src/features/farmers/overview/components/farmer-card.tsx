@@ -1,4 +1,4 @@
-import { MapPin, Phone, SquarePenIcon, Trash2Icon, User } from 'lucide-react';
+import { Landmark, MapPin, Phone, SquarePenIcon, Trash2Icon, User } from 'lucide-react';
 import type { ComponentProps } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -88,6 +88,11 @@ export function FarmerCard({
         <CardContent className="flex flex-col gap-1.5 px-4">
           <FarmerRow icon={Phone} value={farmer.mobileNumber} />
           <FarmerRow icon={MapPin} value={placeLabel} muted />
+          <FarmerRow
+            icon={Landmark}
+            value={`${farmer.bankName} · ${farmer.bankAccountNumber} · ${farmer.ifscCode}`}
+            muted
+          />
         </CardContent>
       </div>
 
