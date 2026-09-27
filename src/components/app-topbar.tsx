@@ -142,7 +142,9 @@ export function AppTopbar() {
   const { mutate: logout, isPending: isLoggingOut } = useLogout();
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const pageTitle = routeTitles[pathname] ?? 'Dashboard';
+  const pageTitle =
+    routeTitles[pathname] ??
+    (pathname.startsWith('/seed-requisition/') ? 'Seed Requisition' : 'Dashboard');
 
   return (
     <header className={cn('flex h-14 shrink-0 items-center border-b bg-background px-4')}>

@@ -63,7 +63,7 @@ function AddressSelect({
   disabled?: boolean;
   options: FarmerAddressOption[];
   invalid?: boolean;
-  errors?: unknown[];
+  errors?: Array<{ message?: string } | undefined>;
   onBlur?: () => void;
   onValueChange: (value: string) => void;
 }) {
