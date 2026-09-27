@@ -62,12 +62,6 @@ export default defineConfig({
               test: /[\\/]node_modules[\\/]date-fns[\\/]/,
               priority: 20,
             },
-            {
-              name: 'vendor',
-              test: /[\\/]node_modules[\\/]/,
-              priority: 0,
-              maxSize: 400_000,
-            },
           ],
         },
       },
