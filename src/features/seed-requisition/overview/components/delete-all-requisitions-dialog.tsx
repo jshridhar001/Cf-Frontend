@@ -1,5 +1,5 @@
 import { MasterConfirmDialog } from '@/features/master/components/master-confirm-dialog';
-import { useRequisitionSampleStore } from '@/features/seed-requisition/overview/components/requisition-sample-store';
+import { useDeleteAllSeedRequisitions } from '@/features/seed-requisition/overview/api/use-delete-all-seed-requisitions';
 
 interface DeleteAllRequisitionsDialogProps {
   open: boolean;
@@ -12,7 +12,7 @@ export function DeleteAllRequisitionsDialog({
   onOpenChange,
   count,
 }: DeleteAllRequisitionsDialogProps) {
-  const { deleteAllRequisitions, isSaving: isPending } = useRequisitionSampleStore();
+  const { mutateAsync: deleteAllRequisitions, isPending } = useDeleteAllSeedRequisitions();
 
   return (
     <MasterConfirmDialog

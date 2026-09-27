@@ -1,3 +1,4 @@
+import { useIsMutating } from '@tanstack/react-query';
 import {
   Drawer,
   DrawerContent,
@@ -27,16 +28,19 @@ export function RequisitionDrawer({ requisition, open, onOpenChange }: Requisiti
   const isMobile = useIsMobile();
   const isEdit = requisition !== null;
   const { isSaving } = useRequisitionSampleStore();
+  const isCreating = useIsMutating({ mutationKey: ['seed-requisitions', 'create'] }) > 0;
+  const isUpdating = useIsMutating({ mutationKey: ['seed-requisitions', 'update'] }) > 0;
+  const isBusy = isSaving || isCreating || isUpdating;
   const formRequisition = requisition;
 
   const handleOpenChange = (nextOpen: boolean) => {
-    if (!nextOpen && isSaving) return;
+    if (!nextOpen && isBusy) return;
     onOpenChange(nextOpen);
   };
 
   const title = isEdit ? 'Edit requisition' : 'Add requisition';
   const description = isEdit
-    ? 'Update quantity, delivery date, or remarks. Farmer and variety cannot be changed.'
+    ? 'Update a seed requisition. Provide either bags or acres, not both.'
     : 'Create a seed requisition. Provide either bags or acres, not both.';
 
   const form = (
@@ -55,7 +59,7 @@ export function RequisitionDrawer({ requisition, open, onOpenChange }: Requisiti
         onOpenChange={handleOpenChange}
         direction="bottom"
         shouldScaleBackground={false}
-        dismissible={!isSaving}
+        dismissible={!isBusy}
       >
         <DrawerContent>
           <DrawerHeader>

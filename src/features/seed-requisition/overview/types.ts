@@ -34,7 +34,6 @@ export type SeedRequisitionFarmer = {
   stateId?: string | null;
   pincodeId?: string | null;
   familyId?: string | null;
-  contractUrl?: string | null;
   createdAt?: string;
   updatedAt?: string;
   state?: SeedRequisitionPlace | null;
@@ -110,9 +109,9 @@ export type SeedRequisition = {
   requestedAcres: string | null;
   fulfilledBags: number;
   fulfilledAcres: string;
-  requisitionDate: string;
+  requisitionDate: string | null;
   contractDate?: string | null;
-  requestedDeliveryDate: string;
+  requestedDeliveryDate: string | null;
   approvedDeliveryDate: string | null;
   remarks: string | null;
   rejectionRemarks: string | null;
@@ -158,7 +157,6 @@ export type ApiSeedRequisitionFarmer = {
   stateId: string | null;
   pincodeId: string | null;
   familyId: string | null;
-  contractUrl: string | null;
   createdAt: string;
   updatedAt: string;
   state: ApiSeedRequisitionPlace | null;
@@ -184,9 +182,9 @@ export type ApiSeedRequisition = {
   requestedAcres: string | null;
   fulfilledBags: number;
   fulfilledAcres: string;
-  requisitionDate: string;
+  requisitionDate: string | null;
   contractDate: string | null;
-  requestedDeliveryDate: string;
+  requestedDeliveryDate: string | null;
   approvedDeliveryDate: string | null;
   remarks: string | null;
   rejectionRemarks: string | null;
@@ -209,6 +207,17 @@ export type SeedRequisitionsResponse = {
 export type SeedRequisitionDecisionResponse = {
   success: boolean;
   data: ApiSeedRequisition;
+};
+
+export type CreateSeedRequisitionBody = {
+  farmerId: string;
+  varietyId: string;
+  contractDate: string;
+  requestedBags?: number;
+  requestedAcres?: number;
+  requisitionDate?: string;
+  requestedDeliveryDate?: string;
+  remarks?: string;
 };
 
 export function toSeedRequisition(row: ApiSeedRequisition): SeedRequisition {
@@ -254,7 +263,6 @@ export function toSeedRequisition(row: ApiSeedRequisition): SeedRequisition {
       stateId: row.farmer.stateId,
       pincodeId: row.farmer.pincodeId,
       familyId: row.farmer.familyId,
-      contractUrl: row.farmer.contractUrl,
       createdAt: row.farmer.createdAt,
       updatedAt: row.farmer.updatedAt,
       state: row.farmer.state,
@@ -346,7 +354,14 @@ export function formatRequestedAcresPayload(value: string) {
   return acres.toFixed(3);
 }
 
-export function toDateInputValue(value: string) {
+export function parseRequestedAcres(value: string) {
+  const acres = Number(value);
+  if (!Number.isFinite(acres)) return Number.NaN;
+  return Number(acres.toFixed(2));
+}
+
+export function toDateInputValue(value: string | null | undefined) {
+  if (!value) return '';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value.slice(0, 10);
   const month = String(date.getUTCMonth() + 1).padStart(2, '0');

@@ -1,6 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { useMe } from '@/features/auth/api/use-me';
+import { BRAND_LOGO_SRC } from '@/lib/brand';
 import { env } from '@/lib/env';
 
 export function StartScreen() {
@@ -20,7 +21,7 @@ export function StartScreen() {
     <div className="flex min-h-dvh w-full flex-col items-center justify-center bg-background px-4 py-8">
       <div className="flex w-full max-w-sm flex-col items-center gap-8">
         <img
-          src="https://res.cloudinary.com/dakh64xhy/image/upload/v1759410800/Bhatti-Agritech_gwqywg.jpg"
+          src={BRAND_LOGO_SRC}
           alt={env.appName}
           className="size-16 shrink-0 rounded-md sm:size-20"
         />

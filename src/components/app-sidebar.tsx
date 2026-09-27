@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/sidebar';
 import { useMe } from '@/features/auth/api/use-me';
 import { canAccessAdminRoutes } from '@/features/auth/lib/authorization';
+import { BRAND_LOGO_SRC } from '@/lib/brand';
 import { env } from '@/lib/env';
 
 type AppPath =
@@ -240,7 +241,7 @@ export function AppSidebar() {
             <SidebarMenuButton size="lg" asChild>
               <Link to="/dashboard">
                 <img
-                  src="https://res.cloudinary.com/dakh64xhy/image/upload/v1759410800/Bhatti-Agritech_gwqywg.jpg"
+                  src={BRAND_LOGO_SRC}
                   alt={env.appName}
                   className="size-8 shrink-0 rounded-md"
                 />

@@ -7,11 +7,7 @@ interface DeleteAllFarmersDialogProps {
   count: number;
 }
 
-export function DeleteAllFarmersDialog({
-  open,
-  onOpenChange,
-  count,
-}: DeleteAllFarmersDialogProps) {
+export function DeleteAllFarmersDialog({ open, onOpenChange, count }: DeleteAllFarmersDialogProps) {
   const { mutateAsync: deleteAllFarmers, isPending } = useDeleteAllFarmers();
 
   return (

@@ -1,0 +1,91 @@
+import { useMemo, useState } from 'react';
+import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
+import { CardAction, CardDescription, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useSeedRequisition } from '@/features/seed-requisition/overview/api/use-seed-requisition';
+import { getApiErrorMessage } from '@/lib/api-client';
+import { englishAgreement } from '../content/en';
+import { hindiAgreement } from '../content/hi';
+import type { AgreementLanguage } from '../content/types';
+import { varietyTermsFor } from '../content/varieties';
+import { PotatoMultiplicationAgreement } from '../document/PotatoMultiplicationAgreement';
+import { agreementFileName, toAgreementFields } from '../lib/agreement-fields';
+import { AgreementDownload, AgreementPreview } from './AgreementPreview';
+
+export function ContractPage({ id }: { id: string }) {
+  const { data, isPending, isError, error } = useSeedRequisition(id);
+  const [language, setLanguage] = useState<AgreementLanguage>('en');
+  const terms = data ? varietyTermsFor(data.variety?.name) : null;
+  const fields = useMemo(
+    () => (data && terms ? toAgreementFields(data, language) : null),
+    [data, language, terms],
+  );
+  const document = useMemo(() => {
+    if (!fields || !terms) return null;
+    const blocks =
+      language === 'hi' ? hindiAgreement(fields, terms) : englishAgreement(fields, terms);
+    return <PotatoMultiplicationAgreement language={language} blocks={blocks} />;
+  }, [fields, language, terms]);
+  const fileName = agreementFileName(fields?.growerName ?? '', language);
+  const varietyName = data?.variety?.name?.trim() || 'this variety';
+
+  return (
+    <PageCard>
+      <PageCardHeader className="has-data-[slot=card-action]:grid-cols-[1fr_auto]">
+        <CardTitle>Potato multiplication agreement</CardTitle>
+        <CardDescription className="hidden sm:block">
+          English and Hindi preview of the potato multiplication agreement for this requisition.
+        </CardDescription>
+        {document ? (
+          <CardAction className="flex items-center gap-1">
+            <AgreementDownload
+              document={document}
+              fileName={fileName}
+              labeled={false}
+              className="min-h-11 min-w-11 md:hidden"
+            />
+            <AgreementDownload
+              document={document}
+              fileName={fileName}
+              labeled
+              className="hidden md:inline-flex"
+            />
+          </CardAction>
+        ) : null}
+      </PageCardHeader>
+      <PageCardContent>
+        {isPending && !data ? (
+          <p className="text-sm text-muted-foreground">Loading requisition…</p>
+        ) : null}
+        {isError && !data ? (
+          <p className="text-sm text-destructive">
+            {getApiErrorMessage(error, 'Failed to load requisition.')}
+          </p>
+        ) : null}
+        {data && !terms ? (
+          <p className="text-sm text-muted-foreground">
+            The agreement for {varietyName} is not available yet.
+          </p>
+        ) : null}
+        {document ? (
+          <Tabs
+            value={language}
+            onValueChange={(value) => setLanguage(value as AgreementLanguage)}
+            className="gap-4"
+          >
+            <TabsList className="w-full sm:w-fit">
+              <TabsTrigger value="en">English</TabsTrigger>
+              <TabsTrigger value="hi">हिन्दी</TabsTrigger>
+            </TabsList>
+            <TabsContent value="en">
+              {language === 'en' ? <AgreementPreview document={document} /> : null}
+            </TabsContent>
+            <TabsContent value="hi">
+              {language === 'hi' ? <AgreementPreview document={document} /> : null}
+            </TabsContent>
+          </Tabs>
+        ) : null}
+      </PageCardContent>
+    </PageCard>
+  );
+}

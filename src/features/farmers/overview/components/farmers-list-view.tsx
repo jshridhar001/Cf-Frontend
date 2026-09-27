@@ -1,5 +1,14 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { Loader2, RefreshCw, Search, Trash2Icon, UserPlus, Users } from 'lucide-react';
+import {
+  LayoutGrid,
+  Loader2,
+  RefreshCw,
+  Search,
+  Table2,
+  Trash2Icon,
+  UserPlus,
+  Users,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,16 +29,24 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { farmersKeys } from '@/features/farmers/overview/api/query-keys';
 import { useFarmers } from '@/features/farmers/overview/api/use-farmers';
 import { DeleteAllFarmersDialog } from '@/features/farmers/overview/components/delete-all-farmers-dialog';
 import { DeleteFarmerDialog } from '@/features/farmers/overview/components/delete-farmer-dialog';
 import { FarmerCard } from '@/features/farmers/overview/components/farmer-card';
 import { FarmerDrawer } from '@/features/farmers/overview/components/farmer-drawer';
+import { FarmersDataTable } from '@/features/farmers/overview/components/farmers-data-table';
+import { useFarmersTable } from '@/features/farmers/overview/components/use-farmers-table';
+import { ViewFiltersSheet } from '@/features/farmers/overview/components/view-filters/ViewFiltersSheet';
+import {
+  emptyGlobalFilter,
+  isAdvancedGlobalFilter,
+} from '@/features/farmers/overview/lib/filter-fns';
 import {
   FARMER_SORT_OPTIONS,
   type FarmerSortValue,
-  farmerHasContracts,
+  farmerHasSeedRequisitions,
   filterAndSortFarmers,
   isFarmerSortValue,
 } from '@/features/farmers/overview/lib/filter-sort';
@@ -37,10 +54,23 @@ import type { Farmer } from '@/features/farmers/overview/types';
 import { getApiErrorMessage } from '@/lib/api-client';
 
 const DEFAULT_SORT: FarmerSortValue = 'account-asc';
+const DESKTOP_LAYOUT_QUERY = '(min-width: 768px)';
+
+type FarmersLayout = 'cards' | 'table';
 
 type FarmersListViewProps = {
-  onlyWithContracts?: boolean;
+  onlyWithSeedRequisitions?: boolean;
+  enableTableLayout?: boolean;
 };
+
+function isFarmersLayout(value: string): value is FarmersLayout {
+  return value === 'cards' || value === 'table';
+}
+
+function getDefaultFarmersLayout(): FarmersLayout {
+  if (typeof window === 'undefined') return 'cards';
+  return window.matchMedia(DESKTOP_LAYOUT_QUERY).matches ? 'table' : 'cards';
+}
 
 function FarmersListSkeleton() {
   return (
@@ -56,11 +86,15 @@ function FarmersListSkeleton() {
   );
 }
 
-export function FarmersListView({ onlyWithContracts = false }: FarmersListViewProps) {
+export function FarmersListView({
+  onlyWithSeedRequisitions = false,
+  enableTableLayout = false,
+}: FarmersListViewProps) {
   const queryClient = useQueryClient();
   const { data: farmers, isPending, isError, error, isFetching } = useFarmers();
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<FarmerSortValue>(DEFAULT_SORT);
+  const [layout, setLayout] = useState<FarmersLayout>(getDefaultFarmersLayout);
   const [createOpen, setCreateOpen] = useState(false);
   const [editingFarmer, setEditingFarmer] = useState<Farmer | null>(null);
   const [deletingFarmer, setDeletingFarmer] = useState<Farmer | null>(null);
@@ -69,8 +103,10 @@ export function FarmersListView({ onlyWithContracts = false }: FarmersListViewPr
   const farmerRecords = farmers ?? [];
 
   const farmerList = useMemo(() => {
-    return onlyWithContracts ? farmerRecords.filter(farmerHasContracts) : farmerRecords;
-  }, [farmerRecords, onlyWithContracts]);
+    return onlyWithSeedRequisitions
+      ? farmerRecords.filter(farmerHasSeedRequisitions)
+      : farmerRecords;
+  }, [farmerRecords, onlyWithSeedRequisitions]);
 
   const allFarmersCount = farmerRecords.length;
   const canDeleteAll = allFarmersCount > 0;
@@ -81,11 +117,26 @@ export function FarmersListView({ onlyWithContracts = false }: FarmersListViewPr
     [farmerList, search, sort],
   );
 
+  const showTable = enableTableLayout && layout === 'table';
+
+  const table = useFarmersTable({
+    data: farmerList,
+    meta: {
+      onEdit: setEditingFarmer,
+      onDelete: setDeletingFarmer,
+    },
+  });
+
   const peopleLabel = `${farmerList.length} ${farmerList.length === 1 ? 'farmer' : 'farmers'}`;
 
   const refreshList = () => {
     setSearch('');
     setSort(DEFAULT_SORT);
+    table.setGlobalFilter(emptyGlobalFilter());
+    table.resetSorting();
+    table.resetColumnFilters();
+    table.resetGrouping();
+    table.setExpanded({});
     void queryClient.invalidateQueries({ queryKey: farmersKeys.list() });
   };
 
@@ -121,24 +172,26 @@ export function FarmersListView({ onlyWithContracts = false }: FarmersListViewPr
           <EmptyTitle>
             {hasSearch
               ? 'No matching farmers'
-              : onlyWithContracts
-                ? 'No farmers with contracts yet'
+              : onlyWithSeedRequisitions
+                ? 'No farmers with seed requisitions yet'
                 : 'No farmers yet'}
           </EmptyTitle>
           <EmptyDescription>
             {hasSearch
               ? 'Try a different name or clear the search.'
-              : onlyWithContracts
-                ? 'Farmers appear here once they have at least one contract.'
+              : onlyWithSeedRequisitions
+                ? 'Farmers appear here once they have at least one seed requisition.'
                 : 'Add a farmer to populate this list.'}
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
     ) : null;
 
-  const cardsGrid =
+  const listBody =
     emptyState ??
-    (visibleFarmers.length > 0 ? (
+    (showTable ? (
+      <FarmersDataTable table={table} />
+    ) : (
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {visibleFarmers.map((farmer) => (
           <FarmerCard
@@ -149,7 +202,7 @@ export function FarmersListView({ onlyWithContracts = false }: FarmersListViewPr
           />
         ))}
       </div>
-    ) : null);
+    ));
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-4 sm:gap-6">
@@ -163,6 +216,25 @@ export function FarmersListView({ onlyWithContracts = false }: FarmersListViewPr
           <ItemTitle>{peopleLabel}</ItemTitle>
         </ItemContent>
         <ItemActions>
+          {enableTableLayout ? (
+            <Tabs
+              value={layout}
+              onValueChange={(value) => {
+                if (isFarmersLayout(value)) setLayout(value);
+              }}
+            >
+              <TabsList className="h-11 min-h-11 w-fit group-data-horizontal/tabs:h-11 md:h-9 md:min-h-9 md:group-data-horizontal/tabs:h-9">
+                <TabsTrigger value="table" aria-label="Table layout" className="gap-1.5 px-2.5">
+                  <Table2 />
+                  <span className="hidden sm:inline">Table</span>
+                </TabsTrigger>
+                <TabsTrigger value="cards" aria-label="Cards layout" className="gap-1.5 px-2.5">
+                  <LayoutGrid />
+                  <span className="hidden sm:inline">Cards</span>
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          ) : null}
           <Button variant="outline" size="sm" onClick={refreshList} disabled={isFetching}>
             {isFetching ? (
               <Loader2 className="size-4 animate-spin" data-icon="inline-start" />
@@ -183,33 +255,49 @@ export function FarmersListView({ onlyWithContracts = false }: FarmersListViewPr
               className="w-full pl-10"
               inputMode="search"
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => {
+                const value = event.target.value;
+                setSearch(value);
+                table.setGlobalFilter((current: unknown) => {
+                  const base = isAdvancedGlobalFilter(current) ? current : emptyGlobalFilter();
+                  return { ...base, manualSearch: value };
+                });
+              }}
             />
           </div>
         </div>
 
         <Separator />
 
-        <div className="flex flex-col gap-3 bg-muted/20 p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-4">
-          <Select
-            value={sort}
-            onValueChange={(value) => {
-              if (value && isFarmerSortValue(value)) setSort(value);
-            }}
-          >
-            <SelectTrigger className="h-11 w-full min-w-0 sm:h-9 sm:w-55">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              {FARMER_SORT_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div
+          className={
+            showTable
+              ? 'flex flex-col gap-3 bg-muted/20 p-3 sm:flex-row sm:items-center sm:justify-end sm:gap-3 sm:p-4'
+              : 'flex flex-col gap-3 bg-muted/20 p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-4'
+          }
+        >
+          {showTable ? null : (
+            <Select
+              value={sort}
+              onValueChange={(value) => {
+                if (value && isFarmerSortValue(value)) setSort(value);
+              }}
+            >
+              <SelectTrigger className="h-11 w-full min-w-0 sm:h-9 sm:w-55">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                {FARMER_SORT_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
 
           <div className="flex min-w-0 items-center gap-2 sm:shrink-0">
+            {showTable ? <ViewFiltersSheet table={table} /> : null}
             <Button
               type="button"
               variant="destructive"
@@ -246,7 +334,7 @@ export function FarmersListView({ onlyWithContracts = false }: FarmersListViewPr
         </div>
       </div>
 
-      {cardsGrid}
+      {listBody}
 
       <FarmerDrawer
         farmer={editingFarmer}

@@ -13,8 +13,8 @@ export function isFarmerSortValue(value: string): value is FarmerSortValue {
   return FARMER_SORT_OPTIONS.some((option) => option.value === value);
 }
 
-export function farmerHasContracts(farmer: Farmer): boolean {
-  return (farmer.contracts ?? []).length > 0;
+export function farmerHasSeedRequisitions(farmer: Farmer): boolean {
+  return farmer.seedRequisitions.length > 0;
 }
 
 function accountSortValue(accountNumber: string) {

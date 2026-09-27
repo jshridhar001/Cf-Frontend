@@ -10,7 +10,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { useRequisitionSampleStore } from '@/features/seed-requisition/overview/components/requisition-sample-store';
+import { useDeleteSeedRequisition } from '@/features/seed-requisition/overview/api/use-delete-seed-requisition';
 import type { SeedRequisition } from '@/features/seed-requisition/overview/types';
 
 interface DeleteRequisitionDialogProps {
@@ -24,7 +24,7 @@ export function DeleteRequisitionDialog({
   open,
   onOpenChange,
 }: DeleteRequisitionDialogProps) {
-  const { deleteRequisition, isSaving: isPending } = useRequisitionSampleStore();
+  const { mutateAsync: deleteRequisition, isPending } = useDeleteSeedRequisition();
   const farmerName = requisition?.farmer?.name ?? 'this farmer';
 
   const handleOpenChange = (nextOpen: boolean) => {

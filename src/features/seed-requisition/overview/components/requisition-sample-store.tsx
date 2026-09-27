@@ -61,10 +61,12 @@ export function filterSampleRequisitions(
     if (params.status && item.status !== params.status) return false;
     if (params.farmerId && item.farmerId !== params.farmerId) return false;
     if (params.varietyId && item.varietyId !== params.varietyId) return false;
-    if (params.requisitionDateFrom && item.requisitionDate < params.requisitionDateFrom) {
-      return false;
+    if (params.requisitionDateFrom) {
+      if (!item.requisitionDate || item.requisitionDate < params.requisitionDateFrom) return false;
     }
-    if (params.requisitionDateTo && item.requisitionDate > params.requisitionDateTo) return false;
+    if (params.requisitionDateTo) {
+      if (!item.requisitionDate || item.requisitionDate > params.requisitionDateTo) return false;
+    }
     return true;
   });
 }

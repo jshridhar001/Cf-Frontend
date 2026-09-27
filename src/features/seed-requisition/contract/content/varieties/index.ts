@@ -1,0 +1,28 @@
+import { B101 } from './b101';
+import { HIMALINI } from './himalini';
+import { SANTANA } from './santana';
+import type { VarietyTerms } from './types';
+
+const VARIETIES: { names: readonly string[]; terms: VarietyTerms }[] = [
+  { names: ['himalini', 'kufri himalini'], terms: HIMALINI },
+  { names: ['b 101', 'b101'], terms: B101 },
+  { names: ['santana'], terms: SANTANA },
+];
+
+export function varietyTermsFor(name: string | null | undefined): VarietyTerms | null {
+  const normalized = name
+    ?.trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!normalized) return null;
+  const compact = normalized.replace(/ /g, '');
+  return (
+    VARIETIES.find(
+      (variety) => variety.names.includes(normalized) || variety.names.includes(compact),
+    )?.terms ?? null
+  );
+}
+
+export type { VarietyTerms } from './types';

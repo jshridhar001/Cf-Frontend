@@ -52,6 +52,38 @@ export type FarmerPlace = {
   updatedAt: string;
 };
 
+export type FarmerSeedRequisitionVariety = {
+  id: string;
+  name: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type FarmerSeedRequisition = {
+  id: string;
+  farmerId: string;
+  varietyId: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  requestedBags: number | null;
+  requestedAcres: string | null;
+  fulfilledBags: number;
+  fulfilledAcres: string;
+  requisitionDate: string | null;
+  contractDate: string | null;
+  requestedDeliveryDate: string | null;
+  approvedDeliveryDate: string | null;
+  remarks: string | null;
+  rejectionRemarks: string | null;
+  createdById: string;
+  approvedById: string | null;
+  rejectedById: string | null;
+  approvedAt: string | null;
+  rejectedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  variety: FarmerSeedRequisitionVariety | null;
+};
+
 export type ApiFarmer = {
   id: string;
   name: string;
@@ -69,7 +101,6 @@ export type ApiFarmer = {
   stateId: string | null;
   pincodeId: string | null;
   familyId: string | null;
-  contractUrl: string | null;
   bankName: string;
   bankAccountNumber: string;
   ifscCode: string;
@@ -82,6 +113,7 @@ export type ApiFarmer = {
   pincode: FarmerPlace | null;
   postOffice: FarmerPlace | null;
   village: FarmerPlace | null;
+  seedRequisitions: FarmerSeedRequisition[];
 };
 
 export type Farmer = {
@@ -113,8 +145,8 @@ export type Farmer = {
   family?: FarmerFamily | null;
   familyName?: string | null;
   familyAccountNumber?: string | null;
-  contractUrl: string | null;
   contracts?: FarmerContract[];
+  seedRequisitions: FarmerSeedRequisition[];
   bankName: string;
   ifscCode: string;
   bankAccountNumber: string;
@@ -215,7 +247,7 @@ export function toFarmer(row: ApiFarmer): Farmer {
     village: row.village,
     areaId: row.stationId ?? '',
     familyId: row.familyId,
-    contractUrl: row.contractUrl,
+    seedRequisitions: row.seedRequisitions ?? [],
     bankName: row.bankName,
     bankAccountNumber: row.bankAccountNumber,
     ifscCode: row.ifscCode,

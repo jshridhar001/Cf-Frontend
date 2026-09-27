@@ -120,16 +120,20 @@ export function RequisitionCard({
         <RequisitionRow icon={Sprout} value={varietyName} />
         <RequisitionRow icon={MapPin} value={placeLabel} />
         <RequisitionRow icon={LandPlot} value={formatRequestedQuantity(requisition)} />
-        <RequisitionRow
-          icon={CalendarDays}
-          value={`Requested ${formatRequisitionDate(requisition.requisitionDate)}`}
-          muted
-        />
-        <RequisitionRow
-          icon={CalendarDays}
-          value={`Delivery ${formatRequisitionDate(requisition.requestedDeliveryDate)}`}
-          muted
-        />
+        {requisition.requisitionDate ? (
+          <RequisitionRow
+            icon={CalendarDays}
+            value={`Requested ${formatRequisitionDate(requisition.requisitionDate)}`}
+            muted
+          />
+        ) : null}
+        {requisition.requestedDeliveryDate ? (
+          <RequisitionRow
+            icon={CalendarDays}
+            value={`Delivery ${formatRequisitionDate(requisition.requestedDeliveryDate)}`}
+            muted
+          />
+        ) : null}
         {requisition.approvedDeliveryDate ? (
           <RequisitionRow
             icon={CalendarDays}

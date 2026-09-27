@@ -1,4 +1,5 @@
 import { useForm } from '@tanstack/react-form';
+import { useEffect } from 'react';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
@@ -12,20 +13,20 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { FarmerCombobox } from '@/features/seed-requisition/overview/components/farmer-combobox';
-import { useRequisitionSampleStore } from '@/features/seed-requisition/overview/components/requisition-sample-store';
+import { useFarmers } from '@/features/farmers/overview/api/use-farmers';
+import { useVarieties } from '@/features/master/api/use-varieties';
+import { useCreateSeedRequisition } from '@/features/seed-requisition/overview/api/use-create-seed-requisition';
+import { useUpdateSeedRequisition } from '@/features/seed-requisition/overview/api/use-update-seed-requisition';
 import {
-  SAMPLE_REQUISITION_FARMERS,
-  SAMPLE_REQUISITION_VARIETIES,
-} from '@/features/seed-requisition/overview/lib/sample-data';
-import {
-  formatRequestedAcresPayload,
+  type CreateSeedRequisitionBody,
+  parseRequestedAcres,
   type SeedRequisition,
+  type SeedRequisitionOption,
   toDateInputValue,
   toRequisitionDateParam,
 } from '@/features/seed-requisition/overview/types';
 
-const ACRES_MAX_DECIMALS = 3;
+const ACRES_MAX_DECIMALS = 2;
 const QUANTITY_TYPES = ['bags', 'acres'] as const;
 
 const QUANTITY_TAB_LIST_CLASS =
@@ -65,8 +66,9 @@ const formSchema = z
     quantityType: z.enum(QUANTITY_TYPES),
     requestedBags: z.string(),
     requestedAcres: z.string(),
-    requisitionDate: z.string().min(1, 'Requisition date is required.'),
-    requestedDeliveryDate: z.string().min(1, 'Delivery date is required.'),
+    contractDate: z.string().min(1, 'Contract date is required.'),
+    requisitionDate: z.string(),
+    requestedDeliveryDate: z.string(),
     remarks: z.string(),
   })
   .superRefine((value, ctx) => {
@@ -105,22 +107,39 @@ interface RequisitionFormProps {
 
 export function RequisitionForm({ requisition, onSuccess, onCancel }: RequisitionFormProps) {
   const isEdit = requisition != null;
-  const { createRequisition, updateRequisition, isSaving } = useRequisitionSampleStore();
-  const farmers = SAMPLE_REQUISITION_FARMERS;
-  const varieties = SAMPLE_REQUISITION_VARIETIES;
-  const isPending = isSaving;
+  const createRequisition = useCreateSeedRequisition();
+  const updateRequisition = useUpdateSeedRequisition();
+  const { data: farmerRecords, isPending: farmersPending } = useFarmers();
+  const { data: varietyRecords, isPending: varietiesPending } = useVarieties();
+  const farmers: SeedRequisitionOption[] = (farmerRecords ?? []).map((farmer) => ({
+    id: farmer.id,
+    name: farmer.name,
+    accountNumber: farmer.accountNumber,
+  }));
+  const varieties: SeedRequisitionOption[] = (varietyRecords ?? []).map((variety) => ({
+    id: variety.id,
+    name: variety.name,
+  }));
+  const optionsPending = farmersPending || varietiesPending;
+  const isSavingForm = createRequisition.isPending || updateRequisition.isPending;
+  const isPending = isSavingForm || optionsPending;
 
   const form = useForm({
     defaultValues: {
-      farmerId: requisition?.farmerId ?? (farmers.length === 1 ? farmers[0].id : ''),
+      farmerId: requisition?.farmerId ?? '',
       varietyId: requisition?.varietyId ?? '',
       quantityType:
-        requisition?.requestedAcres != null && requisition.requestedAcres !== ''
+        !requisition ||
+        (requisition.requestedAcres != null && requisition.requestedAcres !== '') ||
+        requisition.requestedBags == null
           ? ('acres' as const)
           : ('bags' as const),
       requestedBags: requisition?.requestedBags != null ? String(requisition.requestedBags) : '',
       requestedAcres: requisition?.requestedAcres != null ? String(requisition.requestedAcres) : '',
-      requisitionDate: requisition ? toDateInputValue(requisition.requisitionDate) : todayIsoDate(),
+      contractDate: requisition?.contractDate
+        ? toDateInputValue(requisition.contractDate)
+        : todayIsoDate(),
+      requisitionDate: requisition ? toDateInputValue(requisition.requisitionDate) : '',
       requestedDeliveryDate: requisition ? toDateInputValue(requisition.requestedDeliveryDate) : '',
       remarks: requisition?.remarks ?? '',
     },
@@ -128,38 +147,39 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
       onSubmit: formSchema,
     },
     onSubmit: async ({ value }) => {
-      const remarks = value.remarks.trim() || undefined;
-      const quantity =
-        value.quantityType === 'bags'
-          ? { requestedBags: Number(value.requestedBags), requestedAcres: null }
-          : {
-              requestedBags: null,
-              requestedAcres: formatRequestedAcresPayload(value.requestedAcres),
-            };
+      const remarks = value.remarks.trim();
+      const requisitionDate = value.requisitionDate.trim();
+      const requestedDeliveryDate = value.requestedDeliveryDate.trim();
+      const body: CreateSeedRequisitionBody = {
+        farmerId: value.farmerId,
+        varietyId: value.varietyId,
+        contractDate: toRequisitionDateParam(value.contractDate),
+        ...(requisitionDate ? { requisitionDate: toRequisitionDateParam(requisitionDate) } : {}),
+        ...(requestedDeliveryDate
+          ? { requestedDeliveryDate: toRequisitionDateParam(requestedDeliveryDate) }
+          : {}),
+        ...(remarks ? { remarks } : {}),
+        ...(value.quantityType === 'bags'
+          ? { requestedBags: Number(value.requestedBags) }
+          : { requestedAcres: parseRequestedAcres(value.requestedAcres) }),
+      };
 
       if (isEdit) {
-        await updateRequisition({
-          requisitionId: requisition.id,
-          ...quantity,
-          requestedDeliveryDate: toRequisitionDateParam(value.requestedDeliveryDate),
-          remarks: remarks ?? null,
-        });
+        await updateRequisition.mutateAsync({ requisitionId: requisition.id, body });
       } else {
-        await createRequisition({
-          farmerId: value.farmerId,
-          varietyId: value.varietyId,
-          requisitionDate: toRequisitionDateParam(value.requisitionDate),
-          requestedDeliveryDate: toRequisitionDateParam(value.requestedDeliveryDate),
-          remarks,
-          ...(value.quantityType === 'bags'
-            ? { requestedBags: Number(value.requestedBags) }
-            : { requestedAcres: formatRequestedAcresPayload(value.requestedAcres) }),
-        });
+        await createRequisition.mutateAsync(body);
         form.reset();
       }
       onSuccess?.();
     },
   });
+
+  const singleFarmerId = !isEdit && farmers.length === 1 ? farmers[0].id : '';
+
+  useEffect(() => {
+    if (!singleFarmerId || form.state.values.farmerId) return;
+    form.setFieldValue('farmerId', singleFarmerId);
+  }, [form, singleFarmerId]);
 
   return (
     <form
@@ -175,27 +195,30 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
         <form.Field name="farmerId">
           {(field) => {
             const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-            const selectedFarmer = farmers.find((farmer) => farmer.id === field.state.value);
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Farmer</FieldLabel>
-                {isEdit ? (
-                  <Input
-                    id={field.name}
-                    value={requisition.farmer?.name || selectedFarmer?.name || requisition.farmerId}
-                    disabled
-                    readOnly
-                  />
-                ) : (
-                  <FarmerCombobox
-                    id={field.name}
-                    farmers={farmers}
-                    value={field.state.value}
-                    onValueChange={(next) => field.handleChange(next)}
-                    disabled={isPending}
-                    invalid={isInvalid}
-                  />
-                )}
+                <Select
+                  name={field.name}
+                  value={field.state.value}
+                  disabled={isPending}
+                  onValueChange={(next) => {
+                    if (next) field.handleChange(next);
+                  }}
+                >
+                  <SelectTrigger id={field.name} aria-invalid={isInvalid} className="w-full">
+                    <SelectValue placeholder="Select farmer" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {farmers.map((farmer) => (
+                      <SelectItem key={farmer.id} value={farmer.id}>
+                        {farmer.accountNumber
+                          ? `${farmer.name} (#${farmer.accountNumber})`
+                          : farmer.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
               </Field>
             );
@@ -208,34 +231,25 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Variety</FieldLabel>
-                {isEdit ? (
-                  <Input
-                    id={field.name}
-                    value={requisition.variety?.name || requisition.varietyId}
-                    disabled
-                    readOnly
-                  />
-                ) : (
-                  <Select
-                    name={field.name}
-                    value={field.state.value}
-                    disabled={isPending}
-                    onValueChange={(next) => {
-                      if (next) field.handleChange(next);
-                    }}
-                  >
-                    <SelectTrigger id={field.name} aria-invalid={isInvalid} className="w-full">
-                      <SelectValue placeholder="Select variety" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {varieties.map((variety) => (
-                        <SelectItem key={variety.id} value={variety.id}>
-                          {variety.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
+                <Select
+                  name={field.name}
+                  value={field.state.value}
+                  disabled={isPending}
+                  onValueChange={(next) => {
+                    if (next) field.handleChange(next);
+                  }}
+                >
+                  <SelectTrigger id={field.name} aria-invalid={isInvalid} className="w-full">
+                    <SelectValue placeholder="Select variety" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {varieties.map((variety) => (
+                      <SelectItem key={variety.id} value={variety.id}>
+                        {variety.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
               </Field>
             );
@@ -284,7 +298,7 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(sanitizeAcresInput(e.target.value))}
                             aria-invalid={isInvalid}
-                            placeholder="4.000"
+                            placeholder="2.50"
                             disabled={isPending}
                           />
                           {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
@@ -324,12 +338,12 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
           )}
         </form.Field>
 
-        <form.Field name="requisitionDate">
+        <form.Field name="contractDate">
           {(field) => {
             const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Requisition date</FieldLabel>
+                <FieldLabel htmlFor={field.name}>Contract date</FieldLabel>
                 <Input
                   id={field.name}
                   name={field.name}
@@ -338,7 +352,29 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
                   aria-invalid={isInvalid}
-                  disabled={isPending || isEdit}
+                  disabled={isPending}
+                />
+                {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
+              </Field>
+            );
+          }}
+        </form.Field>
+
+        <form.Field name="requisitionDate">
+          {(field) => {
+            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>Requisition date (optional)</FieldLabel>
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  type="date"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  aria-invalid={isInvalid}
+                  disabled={isPending}
                 />
                 {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
               </Field>
@@ -351,7 +387,7 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
             const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Requested delivery date</FieldLabel>
+                <FieldLabel htmlFor={field.name}>Requested delivery date (optional)</FieldLabel>
                 <Input
                   id={field.name}
                   name={field.name}
@@ -386,13 +422,18 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
       </FieldGroup>
 
       <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Button type="button" variant="outline" disabled={isPending} onClick={() => onCancel?.()}>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={isSavingForm}
+          onClick={() => onCancel?.()}
+        >
           Cancel
         </Button>
         <form.Subscribe selector={(state) => state.canSubmit}>
           {(canSubmit) => (
             <Button type="submit" disabled={!canSubmit || isPending}>
-              {isPending ? 'Saving…' : isEdit ? 'Save changes' : 'Create requisition'}
+              {isSavingForm ? 'Saving…' : isEdit ? 'Save changes' : 'Create requisition'}
             </Button>
           )}
         </form.Subscribe>
