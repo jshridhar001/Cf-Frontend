@@ -111,6 +111,8 @@ export type SeedRequisition = {
   fulfilledAcres: string;
   requisitionDate: string | null;
   contractDate?: string | null;
+  engContractUrl: string | null;
+  hindiContractUrl: string | null;
   requestedDeliveryDate: string | null;
   approvedDeliveryDate: string | null;
   remarks: string | null;
@@ -184,6 +186,8 @@ export type ApiSeedRequisition = {
   fulfilledAcres: string;
   requisitionDate: string | null;
   contractDate: string | null;
+  engContractUrl: string | null;
+  hindiContractUrl: string | null;
   requestedDeliveryDate: string | null;
   approvedDeliveryDate: string | null;
   remarks: string | null;
@@ -232,6 +236,8 @@ export function toSeedRequisition(row: ApiSeedRequisition): SeedRequisition {
     fulfilledAcres: row.fulfilledAcres,
     requisitionDate: row.requisitionDate,
     contractDate: row.contractDate,
+    engContractUrl: row.engContractUrl,
+    hindiContractUrl: row.hindiContractUrl,
     requestedDeliveryDate: row.requestedDeliveryDate,
     approvedDeliveryDate: row.approvedDeliveryDate,
     remarks: row.remarks,

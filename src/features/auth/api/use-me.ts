@@ -20,7 +20,7 @@ export function meQueryOptions() {
   return queryOptions({
     queryKey: authKeys.me(),
     queryFn: fetchMe,
-    staleTime: 1000 * 60,
+    staleTime: 1000 * 60 * 5,
     retry: false,
   });
 }

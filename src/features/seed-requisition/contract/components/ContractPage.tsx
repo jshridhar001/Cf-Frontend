@@ -1,5 +1,8 @@
+import { useCanGoBack, useNavigate, useRouter } from '@tanstack/react-router';
+import { ArrowLeftIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
+import { Button } from '@/components/ui/button';
 import { CardAction, CardDescription, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSeedRequisition } from '@/features/seed-requisition/overview/api/use-seed-requisition';
@@ -11,8 +14,12 @@ import { varietyTermsFor } from '../content/varieties';
 import { PotatoMultiplicationAgreement } from '../document/PotatoMultiplicationAgreement';
 import { agreementFileName, toAgreementFields } from '../lib/agreement-fields';
 import { AgreementDownload, AgreementPreview } from './AgreementPreview';
+import { ContractUploadActions } from './ContractDriveUploads';
 
 export function ContractPage({ id }: { id: string }) {
+  const router = useRouter();
+  const navigate = useNavigate();
+  const canGoBack = useCanGoBack();
   const { data, isPending, isError, error } = useSeedRequisition(id);
   const [language, setLanguage] = useState<AgreementLanguage>('en');
   const terms = data ? varietyTermsFor(data.variety?.name) : null;
@@ -32,23 +39,52 @@ export function ContractPage({ id }: { id: string }) {
   return (
     <PageCard>
       <PageCardHeader className="has-data-[slot=card-action]:grid-cols-[1fr_auto]">
-        <CardTitle>Potato multiplication agreement</CardTitle>
-        <CardDescription className="hidden sm:block">
-          English and Hindi preview of the potato multiplication agreement for this requisition.
-        </CardDescription>
-        {document ? (
+        <div className="flex min-w-0 items-center gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="-ml-2 min-h-11 min-w-11 shrink-0 md:min-h-9 md:min-w-9"
+            aria-label="Go back"
+            onClick={() => {
+              if (canGoBack) {
+                router.history.back();
+                return;
+              }
+              void navigate({ to: '/seed-requisition/overview' });
+            }}
+          >
+            <ArrowLeftIcon />
+          </Button>
+          <div className="min-w-0">
+            <CardTitle>Potato multiplication agreement</CardTitle>
+            <CardDescription className="hidden sm:block">
+              English and Hindi preview of the potato multiplication agreement for this requisition.
+            </CardDescription>
+          </div>
+        </div>
+        {data ? (
           <CardAction className="flex items-center gap-1">
-            <AgreementDownload
-              document={document}
-              fileName={fileName}
-              labeled={false}
-              className="min-h-11 min-w-11 md:hidden"
-            />
-            <AgreementDownload
-              document={document}
-              fileName={fileName}
-              labeled
-              className="hidden md:inline-flex"
+            {document ? (
+              <>
+                <AgreementDownload
+                  document={document}
+                  fileName={fileName}
+                  labeled={false}
+                  className="min-h-11 min-w-11 md:hidden"
+                />
+                <AgreementDownload
+                  document={document}
+                  fileName={fileName}
+                  labeled
+                  className="hidden md:inline-flex"
+                />
+              </>
+            ) : null}
+            <ContractUploadActions
+              requisitionId={data.id}
+              engContractUrl={data.engContractUrl}
+              hindiContractUrl={data.hindiContractUrl}
             />
           </CardAction>
         ) : null}

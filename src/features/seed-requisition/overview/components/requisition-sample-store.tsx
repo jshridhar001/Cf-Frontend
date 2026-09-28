@@ -113,6 +113,8 @@ export function RequisitionSampleProvider({ children }: { children: ReactNode })
               approvedDeliveryDate: null,
               remarks: variables.remarks ?? null,
               rejectionRemarks: null,
+              engContractUrl: null,
+              hindiContractUrl: null,
               createdById: 'USER_ID',
               approvedById: null,
               rejectedById: null,
