@@ -1,6 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { useMe } from '@/features/auth/api/use-me';
+import { LegalLinks } from '@/features/legal/components/legal-page';
 import { BRAND_LOGO_SRC } from '@/lib/brand';
 import { env } from '@/lib/env';
 
@@ -31,6 +32,7 @@ export function StartScreen() {
         <Button type="button" size="lg" className="w-full" onClick={handleGetStarted}>
           Get Started
         </Button>
+        <LegalLinks />
       </div>
     </div>
   );

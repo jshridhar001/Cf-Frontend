@@ -9,6 +9,7 @@ import { CardDescription, CardTitle } from '@/components/ui/card';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { useLogin } from '@/features/auth/api/use-login';
+import { LegalLinks } from '@/features/legal/components/legal-page';
 import { env } from '@/lib/env';
 
 const formSchema = z.object({
@@ -40,101 +41,106 @@ export function LoginForm() {
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-background px-4 py-6 sm:py-8">
-      <PageCard className="w-full max-w-sm">
-        <PageCardHeader>
-          <CardTitle className="text-2xl font-semibold tracking-tight">Account Access</CardTitle>
-          <CardDescription>Sign in to {env.appName} with your email and password.</CardDescription>
-        </PageCardHeader>
+      <div className="flex w-full max-w-sm flex-col items-center gap-6">
+        <PageCard className="w-full">
+          <PageCardHeader>
+            <CardTitle className="text-2xl font-semibold tracking-tight">Account Access</CardTitle>
+            <CardDescription>
+              Sign in to {env.appName} with your email and password.
+            </CardDescription>
+          </PageCardHeader>
 
-        <PageCardContent>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              void form.handleSubmit();
-            }}
-            className="space-y-4"
-          >
-            <FieldGroup className="space-y-4">
-              <form.Field name="email">
-                {(field) => (
-                  <Field>
-                    <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      placeholder="you@example.com"
-                      type="email"
-                      autoComplete="email"
-                    />
-                    {field.state.meta.errors.length > 0 && (
-                      <FieldError>{field.state.meta.errors[0]?.message}</FieldError>
-                    )}
-                  </Field>
-                )}
-              </form.Field>
-
-              <form.Field name="password">
-                {(field) => (
-                  <Field>
-                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                    <div className="relative">
+          <PageCardContent>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                void form.handleSubmit();
+              }}
+              className="space-y-4"
+            >
+              <FieldGroup className="space-y-4">
+                <form.Field name="email">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel htmlFor={field.name}>Email</FieldLabel>
                       <Input
                         id={field.name}
                         name={field.name}
                         value={field.state.value}
                         onBlur={field.handleBlur}
                         onChange={(e) => field.handleChange(e.target.value)}
-                        placeholder="••••••••"
-                        type={showPassword ? 'text' : 'password'}
-                        autoComplete="current-password"
-                        className="pr-10"
+                        placeholder="you@example.com"
+                        type="email"
+                        autoComplete="email"
                       />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="absolute top-0 right-0 h-full px-3 py-2 text-muted-foreground hover:bg-transparent"
-                        onClick={() => setShowPassword((prev) => !prev)}
-                        aria-label={showPassword ? 'Hide password' : 'Show password'}
-                      >
-                        {showPassword ? (
-                          <EyeOffIcon className="h-4 w-4" />
-                        ) : (
-                          <EyeIcon className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                    {field.state.meta.errors.length > 0 && (
-                      <FieldError>{field.state.meta.errors[0]?.message}</FieldError>
-                    )}
-                  </Field>
-                )}
-              </form.Field>
-            </FieldGroup>
+                      {field.state.meta.errors.length > 0 && (
+                        <FieldError>{field.state.meta.errors[0]?.message}</FieldError>
+                      )}
+                    </Field>
+                  )}
+                </form.Field>
 
-            <div className="pt-2">
-              <form.Subscribe selector={(state) => state.canSubmit}>
-                {(canSubmit) => (
-                  <Button type="submit" disabled={!canSubmit || isPending} className="w-full">
-                    {isPending ? (
-                      'Authenticating…'
-                    ) : (
-                      <>
-                        <Lock className="mr-2 h-4 w-4" />
-                        Sign In
-                      </>
-                    )}
-                  </Button>
-                )}
-              </form.Subscribe>
-            </div>
-          </form>
-        </PageCardContent>
-      </PageCard>
+                <form.Field name="password">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                      <div className="relative">
+                        <Input
+                          id={field.name}
+                          name={field.name}
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          placeholder="••••••••"
+                          type={showPassword ? 'text' : 'password'}
+                          autoComplete="current-password"
+                          className="pr-10"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="absolute top-0 right-0 h-full px-3 py-2 text-muted-foreground hover:bg-transparent"
+                          onClick={() => setShowPassword((prev) => !prev)}
+                          aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        >
+                          {showPassword ? (
+                            <EyeOffIcon className="h-4 w-4" />
+                          ) : (
+                            <EyeIcon className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                      {field.state.meta.errors.length > 0 && (
+                        <FieldError>{field.state.meta.errors[0]?.message}</FieldError>
+                      )}
+                    </Field>
+                  )}
+                </form.Field>
+              </FieldGroup>
+
+              <div className="pt-2">
+                <form.Subscribe selector={(state) => state.canSubmit}>
+                  {(canSubmit) => (
+                    <Button type="submit" disabled={!canSubmit || isPending} className="w-full">
+                      {isPending ? (
+                        'Authenticating…'
+                      ) : (
+                        <>
+                          <Lock className="mr-2 h-4 w-4" />
+                          Sign In
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </form.Subscribe>
+              </div>
+            </form>
+          </PageCardContent>
+        </PageCard>
+        <LegalLinks />
+      </div>
     </div>
   );
 }

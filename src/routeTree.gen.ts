@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
+import { Route as TermsOfServiceRouteImport } from './routes/terms-of-service'
 import { Route as AuthenticatedAccessControlRouteImport } from './routes/_authenticated/access-control'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedFarmersRouteImport } from './routes/_authenticated/farmers'
@@ -55,6 +57,16 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsOfServiceRoute = TermsOfServiceRouteImport.update({
+  id: '/terms-of-service',
+  path: '/terms-of-service',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAccessControlRoute =
@@ -237,6 +249,8 @@ const AuthenticatedSeedRequisitionIdContractRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/terms-of-service': typeof TermsOfServiceRoute
   '/access-control': typeof AuthenticatedAccessControlRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/farmers': typeof AuthenticatedFarmersRouteWithChildren
@@ -271,6 +285,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/terms-of-service': typeof TermsOfServiceRoute
   '/access-control': typeof AuthenticatedAccessControlRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/farmers': typeof AuthenticatedFarmersRouteWithChildren
@@ -306,6 +322,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/terms-of-service': typeof TermsOfServiceRoute
   '/_authenticated/access-control': typeof AuthenticatedAccessControlRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/farmers': typeof AuthenticatedFarmersRouteWithChildren
@@ -342,6 +360,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/privacy-policy'
+    | '/terms-of-service'
     | '/access-control'
     | '/dashboard'
     | '/farmers'
@@ -376,6 +396,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/privacy-policy'
+    | '/terms-of-service'
     | '/access-control'
     | '/dashboard'
     | '/farmers'
@@ -410,6 +432,8 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/login'
+    | '/privacy-policy'
+    | '/terms-of-service'
     | '/_authenticated/access-control'
     | '/_authenticated/dashboard'
     | '/_authenticated/farmers'
@@ -446,6 +470,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  PrivacyPolicyRoute: typeof PrivacyPolicyRoute
+  TermsOfServiceRoute: typeof TermsOfServiceRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -469,6 +495,20 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy-policy': {
+      id: '/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof PrivacyPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms-of-service': {
+      id: '/terms-of-service'
+      path: '/terms-of-service'
+      fullPath: '/terms-of-service'
+      preLoaderRoute: typeof TermsOfServiceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/access-control': {
@@ -811,6 +851,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
+  PrivacyPolicyRoute: PrivacyPolicyRoute,
+  TermsOfServiceRoute: TermsOfServiceRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
