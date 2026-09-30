@@ -2,6 +2,7 @@ import { DragDropProvider } from '@dnd-kit/react';
 import { isSortable, useSortable } from '@dnd-kit/react/sortable';
 import type { ColumnOrderState, ColumnVisibilityState } from '@tanstack/react-table';
 import { GripVerticalIcon } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import type { RequisitionsTable } from '@/features/seed-requisition/overview/components/use-requisitions-table';
@@ -99,12 +100,13 @@ export function ColumnsTab({
             type="button"
             variant="outline"
             size="sm"
-            onClick={() =>
+            onClick={() => {
               useColumnPreferencesStore.getState().setDefaults({
                 columnVisibility,
                 columnOrder,
-              })
-            }
+              });
+              toast.success('Column defaults saved');
+            }}
           >
             Set default
           </Button>
