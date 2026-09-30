@@ -1,15 +1,9 @@
 import { useForm } from '@tanstack/react-form';
 import * as z from 'zod';
+import { SearchableOptionCombobox } from '@/components/searchable-option-combobox';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCreateFarmer } from '@/features/farmers/overview/api/use-create-farmer';
 import { useFarmerAddressOptions } from '@/features/farmers/overview/api/use-farmer-address-options';
@@ -47,6 +41,7 @@ interface CreateFarmerFormProps {
 }
 
 function AddressSelect({
+  name,
   label,
   value,
   placeholder,
@@ -57,6 +52,7 @@ function AddressSelect({
   onBlur,
   onValueChange,
 }: {
+  name: string;
   label: string;
   value: string;
   placeholder: string;
@@ -69,25 +65,19 @@ function AddressSelect({
 }) {
   return (
     <Field data-invalid={invalid}>
-      <FieldLabel>{label}</FieldLabel>
-      <Select
-        value={value || undefined}
+      <FieldLabel htmlFor={name}>{label}</FieldLabel>
+      <SearchableOptionCombobox
+        id={name}
+        name={name}
+        value={value}
+        onValueChange={onValueChange}
+        onBlur={onBlur ?? (() => undefined)}
+        isInvalid={Boolean(invalid)}
+        placeholder={placeholder}
+        emptyMessage={`No ${label.toLowerCase()} found`}
+        options={options.map((option) => ({ id: option.id, label: option.name }))}
         disabled={disabled || options.length === 0}
-        onValueChange={(next) => {
-          if (next) onValueChange(next);
-        }}
-      >
-        <SelectTrigger aria-invalid={invalid} className="w-full" onBlur={onBlur}>
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent>
-          {options.map((option) => (
-            <SelectItem key={option.id} value={option.id}>
-              {option.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      />
       {invalid ? <FieldError errors={errors} /> : null}
     </Field>
   );
@@ -346,6 +336,7 @@ export function CreateFarmerForm({ onSuccess, onCancel }: CreateFarmerFormProps)
                 const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <AddressSelect
+                    name={field.name}
                     label="State"
                     value={field.state.value}
                     placeholder="Select a state"
@@ -364,6 +355,7 @@ export function CreateFarmerForm({ onSuccess, onCancel }: CreateFarmerFormProps)
                 const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <AddressSelect
+                    name={field.name}
                     label="District"
                     value={field.state.value}
                     placeholder="Select a district"
@@ -382,6 +374,7 @@ export function CreateFarmerForm({ onSuccess, onCancel }: CreateFarmerFormProps)
                 const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <AddressSelect
+                    name={field.name}
                     label="Station"
                     value={field.state.value}
                     placeholder="Select a station"
@@ -400,6 +393,7 @@ export function CreateFarmerForm({ onSuccess, onCancel }: CreateFarmerFormProps)
                 const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <AddressSelect
+                    name={field.name}
                     label="Village"
                     value={field.state.value}
                     placeholder="Select a village"
@@ -418,6 +412,7 @@ export function CreateFarmerForm({ onSuccess, onCancel }: CreateFarmerFormProps)
                 const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <AddressSelect
+                    name={field.name}
                     label="Post office"
                     value={field.state.value}
                     placeholder="Select a post office"
@@ -436,6 +431,7 @@ export function CreateFarmerForm({ onSuccess, onCancel }: CreateFarmerFormProps)
                 const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <AddressSelect
+                    name={field.name}
                     label="Police station"
                     value={field.state.value}
                     placeholder="Select a police station"
@@ -454,6 +450,7 @@ export function CreateFarmerForm({ onSuccess, onCancel }: CreateFarmerFormProps)
                 const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <AddressSelect
+                    name={field.name}
                     label="Pincode"
                     value={field.state.value}
                     placeholder="Select a pincode"

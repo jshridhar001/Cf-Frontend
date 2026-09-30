@@ -39,7 +39,6 @@ type AppPath =
   | '/farmers/overview'
   | '/farmers/analytics'
   | '/farmers/report'
-  | '/farmers/contract'
   | '/messages'
   | '/notifications'
   | '/seed-requisition/overview'
@@ -78,7 +77,6 @@ const platformNavItems: NavItem[] = [
       { title: 'Overview', url: '/farmers/overview' },
       { title: 'Analytics', url: '/farmers/analytics' },
       { title: 'Report', url: '/farmers/report' },
-      { title: 'Contract', url: '/farmers/contract' },
     ],
   },
   {

@@ -1,5 +1,6 @@
 import { PlusIcon, Trash2Icon } from 'lucide-react';
 import { useState } from 'react';
+import { DataTableSkeleton } from '@/components/data-table-skeleton';
 import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
 import { Button } from '@/components/ui/button';
 import { CardAction, CardDescription, CardTitle } from '@/components/ui/card';
@@ -57,9 +58,7 @@ export function VarietiesTabContent({ createOpen, onCreateOpenChange }: Varietie
         </CardAction>
       </PageCardHeader>
       <PageCardContent>
-        {isPending && varieties === undefined ? (
-          <p className="text-sm text-muted-foreground">Loading varieties…</p>
-        ) : null}
+        {isPending && varieties === undefined ? <DataTableSkeleton /> : null}
 
         {isError && varieties === undefined ? (
           <p className="text-sm text-destructive">{getApiErrorMessage(error)}</p>

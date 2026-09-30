@@ -1,5 +1,6 @@
 import { Trash2Icon, UserPlusIcon } from 'lucide-react';
 import { useState } from 'react';
+import { DataTableSkeleton } from '@/components/data-table-skeleton';
 import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
 import { Button } from '@/components/ui/button';
 import { CardAction, CardDescription, CardTitle } from '@/components/ui/card';
@@ -57,9 +58,7 @@ export function UsersTabContent({ createOpen, onCreateOpenChange }: UsersTabCont
         </CardAction>
       </PageCardHeader>
       <PageCardContent>
-        {isPending && users === undefined ? (
-          <p className="text-sm text-muted-foreground">Loading users…</p>
-        ) : null}
+        {isPending && users === undefined ? <DataTableSkeleton /> : null}
 
         {isError && users === undefined ? (
           <p className="text-sm text-destructive">{getApiErrorMessage(error)}</p>

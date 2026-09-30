@@ -1,16 +1,10 @@
 import { useForm } from '@tanstack/react-form';
 import { useEffect } from 'react';
 import * as z from 'zod';
+import { SearchableOptionCombobox } from '@/components/searchable-option-combobox';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useFarmers } from '@/features/farmers/overview/api/use-farmers';
@@ -198,27 +192,23 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Farmer</FieldLabel>
-                <Select
+                <SearchableOptionCombobox
+                  id={field.name}
                   name={field.name}
                   value={field.state.value}
+                  onValueChange={field.handleChange}
+                  onBlur={field.handleBlur}
+                  isInvalid={isInvalid}
+                  placeholder="Select farmer"
+                  emptyMessage="No farmers found"
                   disabled={isPending}
-                  onValueChange={(next) => {
-                    if (next) field.handleChange(next);
-                  }}
-                >
-                  <SelectTrigger id={field.name} aria-invalid={isInvalid} className="w-full">
-                    <SelectValue placeholder="Select farmer" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {farmers.map((farmer) => (
-                      <SelectItem key={farmer.id} value={farmer.id}>
-                        {farmer.accountNumber
-                          ? `${farmer.name} (#${farmer.accountNumber})`
-                          : farmer.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  options={farmers.map((farmer) => ({
+                    id: farmer.id,
+                    label: farmer.accountNumber
+                      ? `${farmer.name} (#${farmer.accountNumber})`
+                      : farmer.name,
+                  }))}
+                />
                 {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
               </Field>
             );
@@ -231,25 +221,21 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Variety</FieldLabel>
-                <Select
+                <SearchableOptionCombobox
+                  id={field.name}
                   name={field.name}
                   value={field.state.value}
+                  onValueChange={field.handleChange}
+                  onBlur={field.handleBlur}
+                  isInvalid={isInvalid}
+                  placeholder="Select variety"
+                  emptyMessage="No varieties found"
                   disabled={isPending}
-                  onValueChange={(next) => {
-                    if (next) field.handleChange(next);
-                  }}
-                >
-                  <SelectTrigger id={field.name} aria-invalid={isInvalid} className="w-full">
-                    <SelectValue placeholder="Select variety" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {varieties.map((variety) => (
-                      <SelectItem key={variety.id} value={variety.id}>
-                        {variety.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  options={varieties.map((variety) => ({
+                    id: variety.id,
+                    label: variety.name,
+                  }))}
+                />
                 {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
               </Field>
             );

@@ -1,15 +1,9 @@
 import { useForm } from '@tanstack/react-form';
 import * as z from 'zod';
+import { SearchableOptionCombobox } from '@/components/searchable-option-combobox';
 import { Button } from '@/components/ui/button';
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useUpdateUser } from '@/features/access-control/api/use-update-user';
 import type { AccessControlUser } from '@/features/types';
 import { formatRoleLabel } from './columns';
@@ -147,27 +141,23 @@ export function EditUserForm({ user, onSuccess, onCancel }: EditUserFormProps) {
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={`edit-${field.name}`}>Role</FieldLabel>
-                <Select
+                <SearchableOptionCombobox
+                  id={`edit-${field.name}`}
                   name={field.name}
-                  value={field.state.value || undefined}
-                  onValueChange={(value) => field.handleChange(value ?? '')}
+                  value={field.state.value}
+                  onValueChange={(next) => {
+                    if (isEditUserRole(next, user.role)) field.handleChange(next);
+                  }}
+                  onBlur={field.handleBlur}
+                  isInvalid={isInvalid}
+                  placeholder="Select a role"
+                  emptyMessage="No roles found"
                   disabled={isPending}
-                >
-                  <SelectTrigger
-                    id={`edit-${field.name}`}
-                    aria-invalid={isInvalid}
-                    className="w-full"
-                  >
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roleOptions.map((role) => (
-                      <SelectItem key={role.value} value={role.value}>
-                        {role.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  options={roleOptions.map((role) => ({
+                    id: role.value,
+                    label: role.label,
+                  }))}
+                />
                 <FieldDescription>
                   Determines what this user can access on the platform.
                 </FieldDescription>

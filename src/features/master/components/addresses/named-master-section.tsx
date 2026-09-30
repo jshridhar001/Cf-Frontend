@@ -1,5 +1,6 @@
 import { PlusIcon, Trash2Icon } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { DataTableSkeleton } from '@/components/data-table-skeleton';
 import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
 import { Button } from '@/components/ui/button';
 import { CardAction, CardDescription, CardTitle } from '@/components/ui/card';
@@ -60,9 +61,7 @@ export function NamedMasterSection({ resourceId }: NamedMasterSectionProps) {
         </CardAction>
       </PageCardHeader>
       <PageCardContent>
-        {isPending && items === undefined ? (
-          <p className="text-sm text-muted-foreground">Loading {resource.plural}…</p>
-        ) : null}
+        {isPending && items === undefined ? <DataTableSkeleton /> : null}
 
         {isError && items === undefined ? (
           <p className="text-sm text-destructive">{getApiErrorMessage(error)}</p>

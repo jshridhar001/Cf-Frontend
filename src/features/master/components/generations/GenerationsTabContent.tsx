@@ -1,5 +1,6 @@
 import { PlusIcon, Trash2Icon } from 'lucide-react';
 import { useState } from 'react';
+import { DataTableSkeleton } from '@/components/data-table-skeleton';
 import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
 import { Button } from '@/components/ui/button';
 import { CardAction, CardDescription, CardTitle } from '@/components/ui/card';
@@ -59,9 +60,7 @@ export function GenerationsTabContent({
         </CardAction>
       </PageCardHeader>
       <PageCardContent>
-        {isPending && generations === undefined ? (
-          <p className="text-sm text-muted-foreground">Loading generations…</p>
-        ) : null}
+        {isPending && generations === undefined ? <DataTableSkeleton /> : null}
 
         {isError && generations === undefined ? (
           <p className="text-sm text-destructive">{getApiErrorMessage(error)}</p>

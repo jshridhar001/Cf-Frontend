@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { meQueryOptions } from '@/features/auth/api/use-me';
-import { AuthenticatedLayout } from './_authenticated/-layout';
+import { AuthenticatedLayout, AuthenticatedPending } from './_authenticated/-layout';
 
 export const Route = createFileRoute('/_authenticated')({
   beforeLoad: async ({ context, location }) => {
@@ -18,4 +18,5 @@ export const Route = createFileRoute('/_authenticated')({
     return { me };
   },
   component: AuthenticatedLayout,
+  pendingComponent: AuthenticatedPending,
 });

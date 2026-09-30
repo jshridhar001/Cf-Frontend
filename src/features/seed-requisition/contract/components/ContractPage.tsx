@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
 import { Button } from '@/components/ui/button';
 import { CardAction, CardDescription, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSeedRequisition } from '@/features/seed-requisition/overview/api/use-seed-requisition';
 import { getApiErrorMessage } from '@/lib/api-client';
@@ -90,9 +91,7 @@ export function ContractPage({ id }: { id: string }) {
         ) : null}
       </PageCardHeader>
       <PageCardContent>
-        {isPending && !data ? (
-          <p className="text-sm text-muted-foreground">Loading requisition…</p>
-        ) : null}
+        {isPending && !data ? <Skeleton className="h-96 w-full rounded-xl" /> : null}
         {isError && !data ? (
           <p className="text-sm text-destructive">
             {getApiErrorMessage(error, 'Failed to load requisition.')}

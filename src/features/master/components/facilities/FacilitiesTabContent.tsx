@@ -1,5 +1,6 @@
 import { PlusIcon, Trash2Icon } from 'lucide-react';
 import { useState } from 'react';
+import { DataTableSkeleton } from '@/components/data-table-skeleton';
 import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
 import { Button } from '@/components/ui/button';
 import { CardAction, CardDescription, CardTitle } from '@/components/ui/card';
@@ -59,9 +60,7 @@ export function FacilitiesTabContent({
         </CardAction>
       </PageCardHeader>
       <PageCardContent>
-        {isPending && facilities === undefined ? (
-          <p className="text-sm text-muted-foreground">Loading facilities…</p>
-        ) : null}
+        {isPending && facilities === undefined ? <DataTableSkeleton /> : null}
 
         {isError && facilities === undefined ? (
           <p className="text-sm text-destructive">{getApiErrorMessage(error)}</p>

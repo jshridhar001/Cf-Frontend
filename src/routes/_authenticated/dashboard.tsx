@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useMe } from '@/features/auth/api/use-me';
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
@@ -19,7 +20,12 @@ function DashboardPage() {
         </p>
       </div>
 
-      {isPending ? <p className="text-sm text-muted-foreground">Loading session…</p> : null}
+      {isPending ? (
+        <div className="grid gap-3 sm:gap-4 lg:grid-cols-2">
+          <Skeleton className="h-48 rounded-md" />
+          <Skeleton className="h-48 rounded-md" />
+        </div>
+      ) : null}
 
       {isError ? (
         <p className="text-sm text-destructive">

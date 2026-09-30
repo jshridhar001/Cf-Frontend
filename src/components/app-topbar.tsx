@@ -1,7 +1,7 @@
 import { useRouterState } from '@tanstack/react-router';
 import { Loader2, LogOut, Moon, Sun, User } from 'lucide-react';
-import { useTheme } from 'next-themes';
 import { useSyncExternalStore } from 'react';
+import { useTheme } from '@/components/theme-provider';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -121,7 +121,12 @@ function ThemeToggle() {
       <DropdownMenuContent align="end" className="w-40">
         <DropdownMenuLabel>Appearance</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuRadioGroup value={resolvedMode} onValueChange={(value) => setTheme(value)}>
+        <DropdownMenuRadioGroup
+          value={resolvedMode}
+          onValueChange={(value) => {
+            if (value === 'light' || value === 'dark') setTheme(value);
+          }}
+        >
           <DropdownMenuRadioItem value="light">
             <Sun className="mr-2 h-4 w-4" />
             Light

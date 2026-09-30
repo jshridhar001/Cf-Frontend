@@ -3,16 +3,10 @@
 import { useForm } from '@tanstack/react-form';
 import * as z from 'zod';
 
+import { SearchableOptionCombobox } from '@/components/searchable-option-combobox';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useUpdateFacility } from '@/features/master/api/use-update-facility';
 import { FACILITY_USED_IN_OPTIONS, isFacilityUsedIn } from '@/features/master/lib/facility-used-in';
 import type { Facility, FacilityUsedIn } from '@/features/master/types';
@@ -105,23 +99,23 @@ export function EditFacilityForm({ facility, onSuccess, onCancel }: EditFacility
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Used In</FieldLabel>
-                <Select
+                <SearchableOptionCombobox
+                  id={field.name}
                   name={field.name}
                   value={field.state.value}
-                  onValueChange={(value) => field.handleChange(value ?? '')}
+                  onValueChange={(next) => {
+                    if (isFacilityUsedIn(next)) field.handleChange(next);
+                  }}
+                  onBlur={field.handleBlur}
+                  isInvalid={isInvalid}
+                  placeholder="Select where this facility is used"
+                  emptyMessage="No uses found"
                   disabled={isPending}
-                >
-                  <SelectTrigger id={field.name} aria-invalid={isInvalid} className="w-full">
-                    <SelectValue placeholder="Select where this facility is used" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {FACILITY_USED_IN_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  options={FACILITY_USED_IN_OPTIONS.map((option) => ({
+                    id: option.value,
+                    label: option.label,
+                  }))}
+                />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
             );

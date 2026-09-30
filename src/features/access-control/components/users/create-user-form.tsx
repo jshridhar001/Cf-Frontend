@@ -1,15 +1,9 @@
 import { useForm } from '@tanstack/react-form';
 import * as z from 'zod';
+import { SearchableOptionCombobox } from '@/components/searchable-option-combobox';
 import { Button } from '@/components/ui/button';
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useCreateUser } from '@/features/access-control/api/use-create-user';
 
 const CREATE_USER_ROLES = [
@@ -168,23 +162,23 @@ export function CreateUserForm({ onSuccess, onCancel }: CreateUserFormProps) {
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Role</FieldLabel>
-                <Select
+                <SearchableOptionCombobox
+                  id={field.name}
                   name={field.name}
-                  value={field.state.value || undefined}
-                  onValueChange={(value) => field.handleChange(value ?? '')}
+                  value={field.state.value}
+                  onValueChange={(next) => {
+                    if (isCreateUserRole(next)) field.handleChange(next);
+                  }}
+                  onBlur={field.handleBlur}
+                  isInvalid={isInvalid}
+                  placeholder="Select a role"
+                  emptyMessage="No roles found"
                   disabled={isPending}
-                >
-                  <SelectTrigger id={field.name} aria-invalid={isInvalid} className="w-full">
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CREATE_USER_ROLES.map((role) => (
-                      <SelectItem key={role.value} value={role.value}>
-                        {role.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  options={CREATE_USER_ROLES.map((role) => ({
+                    id: role.value,
+                    label: role.label,
+                  }))}
+                />
                 <FieldDescription>
                   Determines what this user can access on the platform.
                 </FieldDescription>

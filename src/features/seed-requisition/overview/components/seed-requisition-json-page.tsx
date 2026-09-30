@@ -1,3 +1,4 @@
+import { Skeleton } from '@/components/ui/skeleton';
 import { useSeedRequisition } from '@/features/seed-requisition/overview/api/use-seed-requisition';
 import { getApiErrorMessage } from '@/lib/api-client';
 
@@ -11,7 +12,7 @@ export function SeedRequisitionJsonPage({ id, title }: { id: string; title: stri
       {json ? (
         <pre className="overflow-auto rounded-lg bg-muted p-4 text-sm">{json}</pre>
       ) : isPending ? (
-        <p className="text-sm text-muted-foreground">Loading requisition…</p>
+        <Skeleton className="h-64 w-full rounded-lg" />
       ) : isError ? (
         <p className="text-sm text-destructive">
           {getApiErrorMessage(error, 'Failed to load requisition.')}
