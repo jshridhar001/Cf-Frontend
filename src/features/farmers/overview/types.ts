@@ -40,6 +40,7 @@ export type FarmerFamily = {
   name: string;
   accountNumber: string;
   areaId: string;
+  stationId?: string | null;
   area?: FarmerArea | null;
   createdAt?: string;
   updatedAt?: string;
@@ -101,6 +102,16 @@ export type ApiFarmer = {
   stateId: string | null;
   pincodeId: string | null;
   familyId: string | null;
+  family?: {
+    id: string;
+    name: string;
+    accountNumber: string;
+    stationId?: string | null;
+    areaId?: string;
+    area?: FarmerArea | null;
+  } | null;
+  familyName?: string | null;
+  familyAccountNumber?: string | null;
   bankName: string;
   bankAccountNumber: string;
   ifscCode: string;
@@ -209,6 +220,8 @@ export type CreateFarmerBody = {
   accountNumber: string;
   mobileNumber: string;
   aadharNumber?: string;
+  panNumber?: string;
+  accountType: FarmerAccountType;
   stationId: string;
   villageId: string;
   postOfficeId: string;
@@ -219,9 +232,13 @@ export type CreateFarmerBody = {
   bankName: string;
   bankAccountNumber: string;
   ifscCode: string;
+  familyName?: string;
+  familyAccountNumber?: string;
+  familyId?: string;
 };
 
 export function toFarmer(row: ApiFarmer): Farmer {
+  const family = familyFromApi(row);
   return {
     id: row.id,
     name: row.name,
@@ -246,7 +263,10 @@ export function toFarmer(row: ApiFarmer): Farmer {
     postOffice: row.postOffice,
     village: row.village,
     areaId: row.stationId ?? '',
-    familyId: row.familyId,
+    familyId: row.familyId ?? family?.id ?? null,
+    family,
+    familyName: family?.name ?? row.familyName ?? null,
+    familyAccountNumber: family?.accountNumber ?? row.familyAccountNumber ?? null,
     seedRequisitions: row.seedRequisitions ?? [],
     bankName: row.bankName,
     bankAccountNumber: row.bankAccountNumber,
@@ -263,7 +283,7 @@ export type FarmerResponse = {
 
 export type FarmerFamiliesResponse = {
   success: boolean;
-  data: unknown;
+  data: unknown[];
 };
 
 export type FarmerMessageResponse = {
@@ -330,6 +350,40 @@ export function farmerAreaCascade(area?: FarmerArea | null): FarmerAddressValues
   };
 }
 
+function optionalId(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() ? value : null;
+}
+
+function nestedStationId(value: unknown): string | null {
+  if (!value || typeof value !== 'object' || !('id' in value)) return null;
+  return optionalId(value.id);
+}
+
+export function familyFromApi(row: {
+  family?: ApiFarmer['family'] | FarmerFamily | null;
+  familyId?: string | null;
+  familyName?: string | null;
+  familyAccountNumber?: string | null;
+  stationId?: string | null;
+}): FarmerFamily | null {
+  if (row.family && typeof row.family === 'object') {
+    const family = normalizeFarmerFamily(row.family as unknown as Record<string, unknown>);
+    return family.id ? family : null;
+  }
+  if (!row.familyId) return null;
+  return {
+    id: row.familyId,
+    name: row.familyName?.trim() || 'Current family',
+    accountNumber: row.familyAccountNumber?.trim() || '',
+    areaId: '',
+    stationId: row.stationId,
+  };
+}
+
+export function getFarmerFamilyLabel(farmer: Pick<Farmer, 'family' | 'familyName'>): string {
+  return farmer.family?.name?.trim() || farmer.familyName?.trim() || 'Independent';
+}
+
 export function normalizeFarmerFamily(raw: Record<string, unknown>): FarmerFamily {
   const area = (raw.area as FarmerArea | undefined) ?? null;
   return {
@@ -337,6 +391,7 @@ export function normalizeFarmerFamily(raw: Record<string, unknown>): FarmerFamil
     name: String(raw.name ?? raw.familyName ?? ''),
     accountNumber: String(raw.accountNumber ?? raw.familyAccountNumber ?? ''),
     areaId: String(raw.areaId ?? area?.id ?? ''),
+    stationId: optionalId(raw.stationId) ?? nestedStationId(raw.station),
     area,
   };
 }

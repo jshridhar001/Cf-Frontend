@@ -6,6 +6,7 @@ import {
   type FarmerPlace,
   formatFarmerAccountType,
   formatFarmerStatus,
+  getFarmerFamilyLabel,
   isFarmerAccountType,
   isFarmerStatus,
 } from '@/features/farmers/overview/types';
@@ -23,6 +24,12 @@ function blank(value: string | null | undefined) {
   const text = value?.trim();
   if (!text) return <span className="text-muted-foreground">—</span>;
   return text;
+}
+
+export function renderUniqueCount({ getValue }: { getValue: () => unknown }) {
+  const count = getValue();
+  const amount = typeof count === 'number' ? count : 0;
+  return <span className="text-muted-foreground tabular-nums">{amount} unique</span>;
 }
 
 function placeName(place: FarmerPlace | null | undefined) {
@@ -46,6 +53,20 @@ function placeColumn(
 }
 
 export const farmerColumns = columnHelper.columns([
+  columnHelper.accessor((row) => getFarmerFamilyLabel(row), {
+    id: 'family',
+    header: 'Family',
+    sortFn: 'text',
+    meta: { filterLabel: 'Family' },
+    cell: ({ getValue }) => {
+      const label = getValue();
+      return label === 'Independent' ? (
+        <span className="text-muted-foreground">{label}</span>
+      ) : (
+        <span className="font-medium">{label}</span>
+      );
+    },
+  }),
   columnHelper.accessor('name', {
     header: 'Name',
     sortFn: 'text',

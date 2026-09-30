@@ -1,4 +1,5 @@
 import { ChevronDownIcon } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   TableBody,
@@ -90,13 +91,26 @@ export function FarmersDataTable({ table }: { table: FarmersTable }) {
                           <span className="min-w-0 truncate font-medium">
                             <table.FlexRender cell={cell} />
                           </span>
+                          <Badge
+                            variant="outline"
+                            className="border-primary/25 bg-primary/10 text-primary tabular-nums"
+                          >
+                            {row.getLeafRows().length}
+                          </Badge>
                         </div>
                       </TableCell>
                     );
                   }
 
                   if (row.getIsGrouped()) {
-                    return <TableCell key={cell.id} />;
+                    if (cell.column.id === 'actions' || !cell.getIsAggregated()) {
+                      return <TableCell key={cell.id} />;
+                    }
+                    return (
+                      <TableCell key={cell.id} className="whitespace-nowrap">
+                        <table.FlexRender cell={cell} />
+                      </TableCell>
+                    );
                   }
 
                   return (

@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import {
   LayoutGrid,
+  ListTree,
   Loader2,
   RefreshCw,
   Search,
@@ -128,6 +129,17 @@ export function FarmersListView({
   });
 
   const peopleLabel = `${farmerList.length} ${farmerList.length === 1 ? 'farmer' : 'farmers'}`;
+  const groupedByFamily = table.state.grouping.length === 1 && table.state.grouping[0] === 'family';
+
+  const toggleFamilyGrouping = () => {
+    if (groupedByFamily) {
+      table.setGrouping([]);
+      table.setExpanded({});
+      return;
+    }
+    table.setGrouping(['family']);
+    table.setExpanded(true);
+  };
 
   const refreshList = () => {
     setSearch('');
@@ -297,7 +309,33 @@ export function FarmersListView({
           )}
 
           <div className="flex min-w-0 items-center gap-2 sm:shrink-0">
-            {showTable ? <ViewFiltersSheet table={table} /> : null}
+            {showTable ? (
+              <>
+                <Button
+                  type="button"
+                  variant={groupedByFamily ? 'secondary' : 'outline'}
+                  size="icon"
+                  className="size-11 shrink-0 rounded-full md:hidden"
+                  aria-label={groupedByFamily ? 'Ungroup families' : 'Group by family'}
+                  aria-pressed={groupedByFamily}
+                  onClick={toggleFamilyGrouping}
+                >
+                  <ListTree />
+                </Button>
+                <Button
+                  type="button"
+                  variant={groupedByFamily ? 'secondary' : 'outline'}
+                  size="sm"
+                  className="hidden md:inline-flex"
+                  aria-pressed={groupedByFamily}
+                  onClick={toggleFamilyGrouping}
+                >
+                  <ListTree data-icon="inline-start" />
+                  {groupedByFamily ? 'Ungroup' : 'Group families'}
+                </Button>
+                <ViewFiltersSheet table={table} />
+              </>
+            ) : null}
             <Button
               type="button"
               variant="destructive"

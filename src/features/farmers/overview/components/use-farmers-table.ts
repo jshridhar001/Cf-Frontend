@@ -11,6 +11,7 @@ import { useState } from 'react';
 import {
   type FarmersTableMeta,
   farmerColumns,
+  renderUniqueCount,
 } from '@/features/farmers/overview/components/farmer-columns';
 import { getColumnPreferences } from '@/features/farmers/overview/lib/column-preferences';
 import {
@@ -40,6 +41,8 @@ export function useFarmersTable({ data, meta }: { data: Farmer[]; meta: FarmersT
     getRowId: (row) => row.id,
     defaultColumn: {
       filterFn: 'selectedValues',
+      aggregationFn: 'uniqueCount',
+      aggregatedCell: renderUniqueCount,
     },
     globalFilterFn: 'advanced',
     groupedColumnMode: 'reorder',

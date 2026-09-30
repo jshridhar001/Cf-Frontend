@@ -1,5 +1,4 @@
 import { useForm } from '@tanstack/react-form';
-import * as z from 'zod';
 import { SearchableOptionCombobox } from '@/components/searchable-option-combobox';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
@@ -7,33 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCreateFarmer } from '@/features/farmers/overview/api/use-create-farmer';
 import { useFarmerAddressOptions } from '@/features/farmers/overview/api/use-farmer-address-options';
+import { FarmerTypeFields } from '@/features/farmers/overview/components/farmer-type-fields';
+import {
+  createFarmerFormDefaults,
+  farmerFormSchema,
+  toFarmerApiPayload,
+} from '@/features/farmers/overview/lib/farmer-form-schema';
 import type { FarmerAddressOption } from '@/features/farmers/overview/types';
 import { getApiErrorMessage } from '@/lib/api-client';
-
-const requiredId = (label: string) => z.string().min(1, `${label} is required.`);
-
-const formSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters.').max(64),
-  accountNumber: z.string().min(1, 'Account number is required.').max(32),
-  mobileNumber: z.string().min(8, 'Enter a valid mobile number.').max(20),
-  aadharNumber: z.string().refine((value) => !value || /^\d{12}$/.test(value), {
-    message: 'Aadhaar must be 12 digits.',
-  }),
-  bankName: z.string().min(2, 'Bank name must be at least 2 characters.').max(64),
-  bankAccountNumber: z
-    .string()
-    .regex(/^\d{8,18}$/, 'Enter a bank account number with 8 to 18 digits.'),
-  ifscCode: z
-    .string()
-    .regex(/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/, 'Enter a valid 11-character IFSC code.'),
-  stateId: requiredId('State'),
-  districtId: requiredId('District'),
-  stationId: requiredId('Station'),
-  villageId: requiredId('Village'),
-  postOfficeId: requiredId('Post office'),
-  policeStationId: requiredId('Police station'),
-  pincodeId: requiredId('Pincode'),
-});
 
 interface CreateFarmerFormProps {
   onSuccess?: () => void;
@@ -94,42 +74,12 @@ export function CreateFarmerForm({ onSuccess, onCancel }: CreateFarmerFormProps)
   } = useFarmerAddressOptions();
 
   const form = useForm({
-    defaultValues: {
-      name: '',
-      accountNumber: '',
-      mobileNumber: '',
-      aadharNumber: '',
-      bankName: '',
-      bankAccountNumber: '',
-      ifscCode: '',
-      stateId: '',
-      districtId: '',
-      stationId: '',
-      villageId: '',
-      postOfficeId: '',
-      policeStationId: '',
-      pincodeId: '',
-    },
+    defaultValues: createFarmerFormDefaults(),
     validators: {
-      onSubmit: formSchema,
+      onSubmit: farmerFormSchema,
     },
     onSubmit: async ({ value }) => {
-      await createFarmer({
-        name: value.name.trim(),
-        accountNumber: value.accountNumber.trim(),
-        mobileNumber: value.mobileNumber.trim(),
-        stationId: value.stationId,
-        villageId: value.villageId,
-        postOfficeId: value.postOfficeId,
-        policeStationId: value.policeStationId,
-        districtId: value.districtId,
-        stateId: value.stateId,
-        pincodeId: value.pincodeId,
-        bankName: value.bankName.trim(),
-        bankAccountNumber: value.bankAccountNumber.trim(),
-        ifscCode: value.ifscCode.trim().toUpperCase(),
-        ...(value.aadharNumber.trim() ? { aadharNumber: value.aadharNumber.trim() } : {}),
-      });
+      await createFarmer(toFarmerApiPayload(value));
       form.reset();
       onSuccess?.();
     },
@@ -145,6 +95,7 @@ export function CreateFarmerForm({ onSuccess, onCancel }: CreateFarmerFormProps)
       }}
     >
       <FieldGroup>
+        <FarmerTypeFields form={form} disabled={isPending} />
         <form.Field name="name">
           {(field) => {
             const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
@@ -230,6 +181,36 @@ export function CreateFarmerForm({ onSuccess, onCancel }: CreateFarmerFormProps)
                   aria-invalid={isInvalid}
                   placeholder="100000000006"
                   inputMode="numeric"
+                  disabled={isPending}
+                />
+                {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
+              </Field>
+            );
+          }}
+        </form.Field>
+
+        <form.Field name="panNumber">
+          {(field) => {
+            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>PAN (optional)</FieldLabel>
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) =>
+                    field.handleChange(
+                      e.target.value
+                        .toUpperCase()
+                        .replace(/[^A-Z0-9]/g, '')
+                        .slice(0, 10),
+                    )
+                  }
+                  aria-invalid={isInvalid}
+                  placeholder="ABCDE1234F"
+                  maxLength={10}
                   disabled={isPending}
                 />
                 {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
@@ -383,7 +364,10 @@ export function CreateFarmerForm({ onSuccess, onCancel }: CreateFarmerFormProps)
                     invalid={isInvalid}
                     errors={field.state.meta.errors}
                     onBlur={field.handleBlur}
-                    onValueChange={field.handleChange}
+                    onValueChange={(stationId) => {
+                      field.handleChange(stationId);
+                      form.setFieldValue('familyId', '');
+                    }}
                   />
                 );
               }}

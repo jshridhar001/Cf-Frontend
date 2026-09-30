@@ -1,4 +1,4 @@
-import { Landmark, MapPin, Phone, SquarePenIcon, Trash2Icon, User } from 'lucide-react';
+import { Landmark, MapPin, Phone, SquarePenIcon, Trash2Icon, User, Users } from 'lucide-react';
 import type { ComponentProps } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,9 @@ import {
 import { Separator } from '@/components/ui/separator';
 import {
   type Farmer,
+  formatFarmerAccountType,
   formatFarmerStatus,
+  getFarmerFamilyLabel,
   getFarmerPlacePath,
 } from '@/features/farmers/overview/types';
 import { cn } from '@/lib/utils';
@@ -86,6 +88,11 @@ export function FarmerCard({
           </CardAction>
         </CardHeader>
         <CardContent className="flex flex-col gap-1.5 px-4">
+          <FarmerRow
+            icon={Users}
+            value={`${formatFarmerAccountType(farmer.accountType)} · ${getFarmerFamilyLabel(farmer)}`}
+            muted
+          />
           <FarmerRow icon={Phone} value={farmer.mobileNumber} />
           <FarmerRow icon={MapPin} value={placeLabel} muted />
           <FarmerRow

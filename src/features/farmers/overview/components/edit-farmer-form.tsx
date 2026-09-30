@@ -1,5 +1,4 @@
 import { useForm } from '@tanstack/react-form';
-import * as z from 'zod';
 import { SearchableOptionCombobox } from '@/components/searchable-option-combobox';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
@@ -7,42 +6,23 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useFarmerAddressOptions } from '@/features/farmers/overview/api/use-farmer-address-options';
 import { useUpdateFarmer } from '@/features/farmers/overview/api/use-update-farmer';
-import type { Farmer, FarmerAddressOption } from '@/features/farmers/overview/types';
+import { FarmerTypeFields } from '@/features/farmers/overview/components/farmer-type-fields';
+import {
+  editFarmerFormDefaults,
+  farmerFormSchema,
+  toFarmerApiPayload,
+} from '@/features/farmers/overview/lib/farmer-form-schema';
+import {
+  type Farmer,
+  type FarmerAddressOption,
+  familyFromApi,
+} from '@/features/farmers/overview/types';
 import { getApiErrorMessage } from '@/lib/api-client';
-
-const requiredId = (label: string) => z.string().min(1, `${label} is required.`);
-
-const formSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters.').max(64),
-  accountNumber: z.string().min(1, 'Account number is required.').max(32),
-  mobileNumber: z.string().min(8, 'Enter a valid mobile number.').max(20),
-  aadharNumber: z.string().refine((value) => !value || /^\d{12}$/.test(value), {
-    message: 'Aadhaar must be 12 digits.',
-  }),
-  bankName: z.string().min(2, 'Bank name must be at least 2 characters.').max(64),
-  bankAccountNumber: z
-    .string()
-    .regex(/^\d{8,18}$/, 'Enter a bank account number with 8 to 18 digits.'),
-  ifscCode: z
-    .string()
-    .regex(/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/, 'Enter a valid 11-character IFSC code.'),
-  stateId: requiredId('State'),
-  districtId: requiredId('District'),
-  stationId: requiredId('Station'),
-  villageId: requiredId('Village'),
-  postOfficeId: requiredId('Post office'),
-  policeStationId: requiredId('Police station'),
-  pincodeId: requiredId('Pincode'),
-});
 
 interface EditFarmerFormProps {
   farmer: Farmer;
   onSuccess?: () => void;
   onCancel?: () => void;
-}
-
-function idOrEmpty(value?: string | null) {
-  return value ?? '';
 }
 
 function AddressSelect({
@@ -99,44 +79,14 @@ export function EditFarmerForm({ farmer, onSuccess, onCancel }: EditFarmerFormPr
   } = useFarmerAddressOptions();
 
   const form = useForm({
-    defaultValues: {
-      name: farmer.name,
-      accountNumber: farmer.accountNumber,
-      mobileNumber: farmer.mobileNumber,
-      aadharNumber: farmer.aadharNumber ?? '',
-      bankName: farmer.bankName,
-      bankAccountNumber: farmer.bankAccountNumber,
-      ifscCode: farmer.ifscCode,
-      stateId: idOrEmpty(farmer.stateId),
-      districtId: idOrEmpty(farmer.districtId),
-      stationId: idOrEmpty(farmer.stationId),
-      villageId: idOrEmpty(farmer.villageId),
-      postOfficeId: idOrEmpty(farmer.postOfficeId),
-      policeStationId: idOrEmpty(farmer.policeStationId),
-      pincodeId: idOrEmpty(farmer.pincodeId),
-    },
+    defaultValues: editFarmerFormDefaults(farmer),
     validators: {
-      onSubmit: formSchema,
+      onSubmit: farmerFormSchema,
     },
     onSubmit: async ({ value }) => {
       await updateFarmer({
         id: farmer.id,
-        body: {
-          name: value.name.trim(),
-          accountNumber: value.accountNumber.trim(),
-          mobileNumber: value.mobileNumber.trim(),
-          stationId: value.stationId,
-          villageId: value.villageId,
-          postOfficeId: value.postOfficeId,
-          policeStationId: value.policeStationId,
-          districtId: value.districtId,
-          stateId: value.stateId,
-          pincodeId: value.pincodeId,
-          bankName: value.bankName.trim(),
-          bankAccountNumber: value.bankAccountNumber.trim(),
-          ifscCode: value.ifscCode.trim().toUpperCase(),
-          ...(value.aadharNumber.trim() ? { aadharNumber: value.aadharNumber.trim() } : {}),
-        },
+        body: toFarmerApiPayload(value),
       });
       onSuccess?.();
     },
@@ -152,6 +102,12 @@ export function EditFarmerForm({ farmer, onSuccess, onCancel }: EditFarmerFormPr
       }}
     >
       <FieldGroup>
+        <FarmerTypeFields
+          form={form}
+          idPrefix="edit-"
+          disabled={isPending}
+          savedFamily={familyFromApi(farmer)}
+        />
         <form.Field name="name">
           {(field) => {
             const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
@@ -233,6 +189,35 @@ export function EditFarmerForm({ farmer, onSuccess, onCancel }: EditFarmerFormPr
                   }
                   aria-invalid={isInvalid}
                   inputMode="numeric"
+                  disabled={isPending}
+                />
+                {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
+              </Field>
+            );
+          }}
+        </form.Field>
+
+        <form.Field name="panNumber">
+          {(field) => {
+            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={`edit-${field.name}`}>PAN (optional)</FieldLabel>
+                <Input
+                  id={`edit-${field.name}`}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) =>
+                    field.handleChange(
+                      e.target.value
+                        .toUpperCase()
+                        .replace(/[^A-Z0-9]/g, '')
+                        .slice(0, 10),
+                    )
+                  }
+                  aria-invalid={isInvalid}
+                  maxLength={10}
                   disabled={isPending}
                 />
                 {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
@@ -383,7 +368,10 @@ export function EditFarmerForm({ farmer, onSuccess, onCancel }: EditFarmerFormPr
                     invalid={isInvalid}
                     errors={field.state.meta.errors}
                     onBlur={field.handleBlur}
-                    onValueChange={field.handleChange}
+                    onValueChange={(stationId) => {
+                      field.handleChange(stationId);
+                      form.setFieldValue('familyId', '');
+                    }}
                   />
                 );
               }}

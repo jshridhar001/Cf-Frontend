@@ -17,7 +17,10 @@ export function useCreateFarmer() {
     retry: false,
     meta: { suppressGlobalError: true },
     onSuccess: async (farmer) => {
-      await queryClient.invalidateQueries({ queryKey: farmersKeys.list() });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: farmersKeys.list() }),
+        queryClient.invalidateQueries({ queryKey: farmersKeys.families() }),
+      ]);
       toast.success('Farmer created successfully', {
         description: `${farmer.name} was added.`,
         position: 'bottom-right',

@@ -1,4 +1,5 @@
 import {
+  aggregationFn_uniqueCount,
   columnFacetingFeature,
   columnFilteringFeature,
   columnGroupingFeature,
@@ -12,6 +13,7 @@ import {
   createSortedRowModel,
   globalFilteringFeature,
   metaHelper,
+  rowAggregationFeature,
   rowExpandingFeature,
   rowSortingFeature,
   sortFn_alphanumeric,
@@ -35,6 +37,7 @@ export const farmerTableFeatures = tableFeatures({
   columnVisibilityFeature,
   columnOrderingFeature,
   columnGroupingFeature,
+  rowAggregationFeature,
   rowExpandingFeature,
   rowSortingFeature,
   columnMeta: metaHelper<FarmerColumnMeta>(),
@@ -49,6 +52,9 @@ export const farmerTableFeatures = tableFeatures({
     advanced: advancedGlobalFilterFn,
   },
   sortFns: { alphanumeric: sortFn_alphanumeric, text: sortFn_text },
+  aggregationFns: {
+    uniqueCount: aggregationFn_uniqueCount,
+  },
 });
 
 export type FarmerTableFeatures = typeof farmerTableFeatures;
