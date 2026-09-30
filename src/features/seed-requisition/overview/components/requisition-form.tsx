@@ -46,6 +46,15 @@ function acresHasAtMostDecimals(value: string, maxDecimals: number): boolean {
   return !fraction || fraction.length <= maxDecimals;
 }
 
+function isHttpUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 function todayIsoDate() {
   const now = new Date();
   const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -64,8 +73,24 @@ const formSchema = z
     requisitionDate: z.string(),
     requestedDeliveryDate: z.string(),
     remarks: z.string(),
+    engContractUrl: z.string(),
+    hindiContractUrl: z.string(),
   })
   .superRefine((value, ctx) => {
+    if (value.engContractUrl.trim() && !isHttpUrl(value.engContractUrl.trim())) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['engContractUrl'],
+        message: 'Enter a valid URL.',
+      });
+    }
+    if (value.hindiContractUrl.trim() && !isHttpUrl(value.hindiContractUrl.trim())) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['hindiContractUrl'],
+        message: 'Enter a valid URL.',
+      });
+    }
     if (value.quantityType === 'bags') {
       const bags = Number(value.requestedBags);
       if (!value.requestedBags.trim() || !Number.isInteger(bags) || bags <= 0) {
@@ -136,6 +161,8 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
       requisitionDate: requisition ? toDateInputValue(requisition.requisitionDate) : '',
       requestedDeliveryDate: requisition ? toDateInputValue(requisition.requestedDeliveryDate) : '',
       remarks: requisition?.remarks ?? '',
+      engContractUrl: requisition?.engContractUrl ?? '',
+      hindiContractUrl: requisition?.hindiContractUrl ?? '',
     },
     validators: {
       onSubmit: formSchema,
@@ -156,6 +183,12 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
         ...(value.quantityType === 'bags'
           ? { requestedBags: Number(value.requestedBags) }
           : { requestedAcres: parseRequestedAcres(value.requestedAcres) }),
+        ...(isEdit
+          ? {
+              engContractUrl: value.engContractUrl.trim() || null,
+              hindiContractUrl: value.hindiContractUrl.trim() || null,
+            }
+          : {}),
       };
 
       if (isEdit) {
@@ -389,6 +422,55 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
             );
           }}
         </form.Field>
+
+        {isEdit ? (
+          <>
+            <form.Field name="engContractUrl">
+              {(field) => {
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>English contract URL</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      type="url"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      placeholder="https://"
+                      disabled={isPending}
+                    />
+                    {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
+                  </Field>
+                );
+              }}
+            </form.Field>
+            <form.Field name="hindiContractUrl">
+              {(field) => {
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Hindi contract URL</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      type="url"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      placeholder="https://"
+                      disabled={isPending}
+                    />
+                    {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
+                  </Field>
+                );
+              }}
+            </form.Field>
+          </>
+        ) : null}
 
         <form.Field name="remarks">
           {(field) => (

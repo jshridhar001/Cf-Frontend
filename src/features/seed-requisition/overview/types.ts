@@ -222,6 +222,8 @@ export type CreateSeedRequisitionBody = {
   requisitionDate?: string;
   requestedDeliveryDate?: string;
   remarks?: string;
+  engContractUrl?: string | null;
+  hindiContractUrl?: string | null;
 };
 
 export function toSeedRequisition(row: ApiSeedRequisition): SeedRequisition {

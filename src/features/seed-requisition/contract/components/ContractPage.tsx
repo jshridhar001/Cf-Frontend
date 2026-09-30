@@ -1,6 +1,7 @@
+import { type DocumentProps } from '@react-pdf/renderer';
 import { useCanGoBack, useNavigate, useRouter } from '@tanstack/react-router';
 import { ArrowLeftIcon } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { type ReactElement, useMemo, useState } from 'react';
 import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
 import { Button } from '@/components/ui/button';
 import { CardAction, CardDescription, CardTitle } from '@/components/ui/card';
@@ -14,8 +15,38 @@ import type { AgreementLanguage } from '../content/types';
 import { varietyTermsFor } from '../content/varieties';
 import { PotatoMultiplicationAgreement } from '../document/PotatoMultiplicationAgreement';
 import { agreementFileName, toAgreementFields } from '../lib/agreement-fields';
-import { AgreementDownload, AgreementPreview } from './AgreementPreview';
+import {
+  AgreementDownload,
+  AgreementPreview,
+  StoredContractDownload,
+  StoredContractPreview,
+} from './AgreementPreview';
 import { ContractUploadActions } from './ContractDriveUploads';
+
+function storedContractUrl(url: string | null | undefined) {
+  const trimmed = url?.trim();
+  return trimmed ? trimmed : null;
+}
+
+function ContractLanguagePreview({
+  url,
+  title,
+  document,
+  varietyName,
+}: {
+  url: string | null;
+  title: string;
+  document: ReactElement<DocumentProps> | null;
+  varietyName: string;
+}) {
+  if (url) return <StoredContractPreview url={url} title={title} />;
+  if (document) return <AgreementPreview document={document} />;
+  return (
+    <p className="text-sm text-muted-foreground">
+      The agreement for {varietyName} is not available yet.
+    </p>
+  );
+}
 
 export function ContractPage({ id }: { id: string }) {
   const router = useRouter();
@@ -24,18 +55,22 @@ export function ContractPage({ id }: { id: string }) {
   const { data, isPending, isError, error } = useSeedRequisition(id);
   const [language, setLanguage] = useState<AgreementLanguage>('en');
   const terms = data ? varietyTermsFor(data.variety?.name) : null;
-  const fields = useMemo(
-    () => (data && terms ? toAgreementFields(data, language) : null),
-    [data, language, terms],
-  );
+  const englishUrl = storedContractUrl(data?.engContractUrl);
+  const hindiUrl = storedContractUrl(data?.hindiContractUrl);
+  const activeUrl = language === 'hi' ? hindiUrl : englishUrl;
+  const fields = useMemo(() => {
+    if (!data || !terms || activeUrl) return null;
+    return toAgreementFields(data, language);
+  }, [activeUrl, data, language, terms]);
   const document = useMemo(() => {
-    if (!fields || !terms) return null;
+    if (!fields || !terms || activeUrl) return null;
     const blocks =
       language === 'hi' ? hindiAgreement(fields, terms) : englishAgreement(fields, terms);
     return <PotatoMultiplicationAgreement language={language} blocks={blocks} />;
-  }, [fields, language, terms]);
+  }, [activeUrl, fields, language, terms]);
   const fileName = agreementFileName(fields?.growerName ?? '', language);
   const varietyName = data?.variety?.name?.trim() || 'this variety';
+  const canPreview = Boolean(englishUrl || hindiUrl || terms);
 
   return (
     <PageCard>
@@ -66,7 +101,16 @@ export function ContractPage({ id }: { id: string }) {
         </div>
         {data ? (
           <CardAction className="flex items-center gap-1">
-            {document ? (
+            {activeUrl ? (
+              <>
+                <StoredContractDownload
+                  url={activeUrl}
+                  labeled={false}
+                  className="min-h-11 min-w-11 md:hidden"
+                />
+                <StoredContractDownload url={activeUrl} labeled className="hidden md:inline-flex" />
+              </>
+            ) : document ? (
               <>
                 <AgreementDownload
                   document={document}
@@ -97,12 +141,12 @@ export function ContractPage({ id }: { id: string }) {
             {getApiErrorMessage(error, 'Failed to load requisition.')}
           </p>
         ) : null}
-        {data && !terms ? (
+        {data && !canPreview ? (
           <p className="text-sm text-muted-foreground">
             The agreement for {varietyName} is not available yet.
           </p>
         ) : null}
-        {document ? (
+        {data && canPreview ? (
           <Tabs
             value={language}
             onValueChange={(value) => setLanguage(value as AgreementLanguage)}
@@ -113,10 +157,24 @@ export function ContractPage({ id }: { id: string }) {
               <TabsTrigger value="hi">हिन्दी</TabsTrigger>
             </TabsList>
             <TabsContent value="en">
-              {language === 'en' ? <AgreementPreview document={document} /> : null}
+              {language === 'en' ? (
+                <ContractLanguagePreview
+                  url={englishUrl}
+                  title="English contract"
+                  document={language === 'en' ? document : null}
+                  varietyName={varietyName}
+                />
+              ) : null}
             </TabsContent>
             <TabsContent value="hi">
-              {language === 'hi' ? <AgreementPreview document={document} /> : null}
+              {language === 'hi' ? (
+                <ContractLanguagePreview
+                  url={hindiUrl}
+                  title="Hindi contract"
+                  document={language === 'hi' ? document : null}
+                  varietyName={varietyName}
+                />
+              ) : null}
             </TabsContent>
           </Tabs>
         ) : null}

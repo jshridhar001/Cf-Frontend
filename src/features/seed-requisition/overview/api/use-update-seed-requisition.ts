@@ -29,7 +29,11 @@ export function useUpdateSeedRequisition() {
     retry: false,
     meta: { suppressGlobalError: true },
     onSuccess: async (requisition) => {
-      await queryClient.invalidateQueries({ queryKey: seedRequisitionKeys.list() });
+      queryClient.setQueryData(seedRequisitionKeys.detail(requisition.id), requisition);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: seedRequisitionKeys.list() }),
+        queryClient.invalidateQueries({ queryKey: seedRequisitionKeys.detail(requisition.id) }),
+      ]);
       const farmerName = requisition.farmer?.name;
       toast.success('Requisition updated successfully', {
         description: farmerName ? `${farmerName} was updated.` : undefined,

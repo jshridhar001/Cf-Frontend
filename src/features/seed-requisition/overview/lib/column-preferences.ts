@@ -191,6 +191,25 @@ function withAddressColumns(columnOrder: string[]): string[] {
   return next;
 }
 
+const CONTRACT_URL_COLUMN_IDS = ['engContractUrl', 'hindiContractUrl'] as const;
+
+function withContractUrlColumns(columnOrder: string[]): string[] {
+  if (columnOrder.length === 0) return columnOrder;
+  const missing = CONTRACT_URL_COLUMN_IDS.filter((id) => !columnOrder.includes(id));
+  if (missing.length === 0) return columnOrder;
+  const next = [...columnOrder];
+  const contractDateIndex = next.indexOf('contractDate');
+  const requisitionDateIndex = next.indexOf('requisitionDate');
+  const insertAt =
+    contractDateIndex >= 0
+      ? contractDateIndex + 1
+      : requisitionDateIndex >= 0
+        ? requisitionDateIndex
+        : next.length;
+  next.splice(insertAt, 0, ...missing);
+  return next;
+}
+
 function withContractDateColumn(columnOrder: string[]): string[] {
   if (columnOrder.length === 0 || columnOrder.includes('contractDate')) return columnOrder;
   const next = [...columnOrder];
@@ -212,7 +231,7 @@ export function getColumnPreferences(): ColumnPreferences {
     columnVisibility: customized
       ? visibilityFromHiddenIds(hiddenColumnIds)
       : builtInColumnVisibility(),
-    columnOrder: withContractDateColumn(withAddressColumns(columnOrder)),
+    columnOrder: withContractUrlColumns(withContractDateColumn(withAddressColumns(columnOrder))),
   };
 }
 

@@ -145,6 +145,30 @@ type FarmerPlaceKey =
   | 'postOffice'
   | 'village';
 
+function contractUrlColumn(id: 'engContractUrl' | 'hindiContractUrl', header: string) {
+  return columnHelper.accessor((row) => row[id] ?? '', {
+    id,
+    header,
+    sortFn: 'text',
+    meta: { filterLabel: header },
+    cell: ({ getValue }) => {
+      const url = getValue().trim();
+      if (!url) return <span className="text-muted-foreground">—</span>;
+      return (
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          title={url}
+          className="block max-w-48 truncate font-medium text-primary underline underline-offset-4"
+        >
+          {url}
+        </a>
+      );
+    },
+  });
+}
+
 function farmerPlaceColumn(id: FarmerPlaceKey, header: string) {
   return columnHelper.accessor((row) => getRequisitionPlaceName(row.farmer?.[id]), {
     id,
@@ -233,6 +257,8 @@ export const columns = columnHelper.columns([
       </span>
     ),
   }),
+  contractUrlColumn('engContractUrl', 'English contract'),
+  contractUrlColumn('hindiContractUrl', 'Hindi contract'),
   columnHelper.accessor('requisitionDate', {
     header: 'Requisition date',
     sortFn: 'alphanumeric',

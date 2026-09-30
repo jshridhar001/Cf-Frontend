@@ -124,6 +124,10 @@ function leafCellForColumn(requisition: SeedRequisition, columnId: string): Expo
       return textCell(
         requisition.contractDate ? formatRequisitionDate(requisition.contractDate) : '—',
       );
+    case 'engContractUrl':
+      return textCell(requisition.engContractUrl?.trim() || '—');
+    case 'hindiContractUrl':
+      return textCell(requisition.hindiContractUrl?.trim() || '—');
     case 'requisitionDate':
       return textCell(
         requisition.requisitionDate ? formatRequisitionDate(requisition.requisitionDate) : '—',
