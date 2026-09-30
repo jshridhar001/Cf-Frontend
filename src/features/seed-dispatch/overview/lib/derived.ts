@@ -19,6 +19,13 @@ export function getTotalBags(dispatch: SeedDispatch): number {
   );
 }
 
+export function getRequestedAcres(dispatch: SeedDispatch): number {
+  return dispatch.dispatchRequisitions.reduce((sum, stop) => {
+    const acres = Number(stop.requisition.requestedAcres);
+    return Number.isFinite(acres) ? sum + acres : sum;
+  }, 0);
+}
+
 export function getFarmersReceived(dispatch: SeedDispatch): FarmersReceived {
   const total = dispatch.dispatchRequisitions.length;
   const received = dispatch.dispatchRequisitions.filter(
@@ -43,7 +50,7 @@ export function getFacilitySummary(dispatch: SeedDispatch): FacilitySummary {
   const bags = getTotalBags(dispatch);
   for (const requisition of dispatch.dispatchRequisitions) {
     for (const line of requisition.sizeLines) {
-      const name = line.facilityName?.trim();
+      const name = line.facility.name.trim();
       if (name) {
         return { name, bags };
       }

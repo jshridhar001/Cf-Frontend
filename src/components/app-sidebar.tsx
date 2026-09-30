@@ -138,9 +138,15 @@ function isPathActive(pathname: string, url?: string) {
   return current === target || current.startsWith(`${target}/`);
 }
 
+function sectionRoot(url: string) {
+  const [section] = url.split('/').filter(Boolean);
+  return section ? `/${section}` : url;
+}
+
 function isItemActive(pathname: string, item: NavItem) {
   if (item.items?.length) {
-    return item.items.some((subItem) => isPathActive(pathname, subItem.url));
+    if (item.items.some((subItem) => isPathActive(pathname, subItem.url))) return true;
+    if (item.url && pathname.startsWith(`${sectionRoot(item.url)}/`)) return true;
   }
   return isPathActive(pathname, item.url);
 }

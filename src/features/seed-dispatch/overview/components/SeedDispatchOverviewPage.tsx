@@ -12,7 +12,6 @@ import {
   Truck,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   Empty,
@@ -46,7 +45,7 @@ import {
   isActiveCondition,
   isAdvancedGlobalFilter,
 } from '@/features/seed-dispatch/overview/lib/filter-fns';
-import { hasActiveFilters, toListParams } from '@/features/seed-dispatch/overview/lib/search';
+import { hasActiveFilters } from '@/features/seed-dispatch/overview/lib/search';
 import { summarizeDispatches } from '@/features/seed-dispatch/overview/lib/summary';
 import type { SeedDispatchStatus } from '@/features/seed-dispatch/overview/types';
 import {
@@ -96,8 +95,7 @@ export default function SeedDispatchOverviewPage() {
   const queryClient = useQueryClient();
   const searchParams = overviewRoute.useSearch();
   const navigate = overviewRoute.useNavigate();
-  const listParams = toListParams(searchParams);
-  const { data, isPending, isError, error, isFetching } = useSeedDispatches(listParams);
+  const { data, isPending, isError, error, isFetching } = useSeedDispatches();
   const [search, setSearch] = useState('');
   const [layout, setLayout] = useState<OverviewLayout>(getDefaultOverviewLayout);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -105,7 +103,7 @@ export default function SeedDispatchOverviewPage() {
     pageSize: SEED_DISPATCH_PAGE_SIZE,
   });
 
-  const dispatchList = data?.items ?? [];
+  const dispatchList = data ?? [];
   const hasSearch = search.trim().length > 0;
 
   const summary = useMemo(() => summarizeDispatches(dispatchList), [dispatchList]);
@@ -294,11 +292,13 @@ export default function SeedDispatchOverviewPage() {
             <Button
               type="button"
               className="h-11 min-w-0 flex-1 gap-1.5 sm:h-9 sm:flex-none sm:w-auto"
-              onClick={() => toast.message('Add dispatch coming soon')}
               aria-label="Add dispatch"
+              asChild
             >
-              <Plus className="size-4 shrink-0" />
-              <span className="hidden sm:inline">Add Dispatch</span>
+              <Link to="/seed-dispatches/create">
+                <Plus className="size-4 shrink-0" />
+                <span className="hidden sm:inline">Add Dispatch</span>
+              </Link>
             </Button>
           </div>
         </div>

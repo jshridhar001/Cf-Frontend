@@ -36,6 +36,7 @@ import { Route as AuthenticatedMasterSeedSizesRouteImport } from './routes/_auth
 import { Route as AuthenticatedMasterTuberSizesRouteImport } from './routes/_authenticated/master.tuber-sizes'
 import { Route as AuthenticatedMasterVarietiesRouteImport } from './routes/_authenticated/master.varieties'
 import { Route as AuthenticatedSeedDispatchesAnalyticsRouteImport } from './routes/_authenticated/seed-dispatches.analytics'
+import { Route as AuthenticatedSeedDispatchesCreateRouteImport } from './routes/_authenticated/seed-dispatches.create'
 import { Route as AuthenticatedSeedDispatchesOverviewRouteImport } from './routes/_authenticated/seed-dispatches.overview'
 import { Route as AuthenticatedSeedDispatchesReportRouteImport } from './routes/_authenticated/seed-dispatches.report'
 import { Route as AuthenticatedSeedDispatchesSettingsRouteImport } from './routes/_authenticated/seed-dispatches.settings'
@@ -198,6 +199,12 @@ const AuthenticatedSeedDispatchesAnalyticsRoute =
     path: '/seed-dispatches/analytics',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedSeedDispatchesCreateRoute =
+  AuthenticatedSeedDispatchesCreateRouteImport.update({
+    id: '/seed-dispatches/create',
+    path: '/seed-dispatches/create',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedSeedDispatchesOverviewRoute =
   AuthenticatedSeedDispatchesOverviewRouteImport.update({
     id: '/seed-dispatches/overview',
@@ -280,6 +287,7 @@ export interface FileRoutesByFullPath {
   '/master/tuber-sizes': typeof AuthenticatedMasterTuberSizesRoute
   '/master/varieties': typeof AuthenticatedMasterVarietiesRoute
   '/seed-dispatches/analytics': typeof AuthenticatedSeedDispatchesAnalyticsRoute
+  '/seed-dispatches/create': typeof AuthenticatedSeedDispatchesCreateRoute
   '/seed-dispatches/overview': typeof AuthenticatedSeedDispatchesOverviewRoute
   '/seed-dispatches/report': typeof AuthenticatedSeedDispatchesReportRoute
   '/seed-dispatches/settings': typeof AuthenticatedSeedDispatchesSettingsRoute
@@ -317,6 +325,7 @@ export interface FileRoutesByTo {
   '/master/tuber-sizes': typeof AuthenticatedMasterTuberSizesRoute
   '/master/varieties': typeof AuthenticatedMasterVarietiesRoute
   '/seed-dispatches/analytics': typeof AuthenticatedSeedDispatchesAnalyticsRoute
+  '/seed-dispatches/create': typeof AuthenticatedSeedDispatchesCreateRoute
   '/seed-dispatches/overview': typeof AuthenticatedSeedDispatchesOverviewRoute
   '/seed-dispatches/report': typeof AuthenticatedSeedDispatchesReportRoute
   '/seed-dispatches/settings': typeof AuthenticatedSeedDispatchesSettingsRoute
@@ -355,6 +364,7 @@ export interface FileRoutesById {
   '/_authenticated/master/tuber-sizes': typeof AuthenticatedMasterTuberSizesRoute
   '/_authenticated/master/varieties': typeof AuthenticatedMasterVarietiesRoute
   '/_authenticated/seed-dispatches/analytics': typeof AuthenticatedSeedDispatchesAnalyticsRoute
+  '/_authenticated/seed-dispatches/create': typeof AuthenticatedSeedDispatchesCreateRoute
   '/_authenticated/seed-dispatches/overview': typeof AuthenticatedSeedDispatchesOverviewRoute
   '/_authenticated/seed-dispatches/report': typeof AuthenticatedSeedDispatchesReportRoute
   '/_authenticated/seed-dispatches/settings': typeof AuthenticatedSeedDispatchesSettingsRoute
@@ -394,6 +404,7 @@ export interface FileRouteTypes {
     | '/master/tuber-sizes'
     | '/master/varieties'
     | '/seed-dispatches/analytics'
+    | '/seed-dispatches/create'
     | '/seed-dispatches/overview'
     | '/seed-dispatches/report'
     | '/seed-dispatches/settings'
@@ -431,6 +442,7 @@ export interface FileRouteTypes {
     | '/master/tuber-sizes'
     | '/master/varieties'
     | '/seed-dispatches/analytics'
+    | '/seed-dispatches/create'
     | '/seed-dispatches/overview'
     | '/seed-dispatches/report'
     | '/seed-dispatches/settings'
@@ -468,6 +480,7 @@ export interface FileRouteTypes {
     | '/_authenticated/master/tuber-sizes'
     | '/_authenticated/master/varieties'
     | '/_authenticated/seed-dispatches/analytics'
+    | '/_authenticated/seed-dispatches/create'
     | '/_authenticated/seed-dispatches/overview'
     | '/_authenticated/seed-dispatches/report'
     | '/_authenticated/seed-dispatches/settings'
@@ -678,6 +691,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSeedDispatchesAnalyticsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/seed-dispatches/create': {
+      id: '/_authenticated/seed-dispatches/create'
+      path: '/seed-dispatches/create'
+      fullPath: '/seed-dispatches/create'
+      preLoaderRoute: typeof AuthenticatedSeedDispatchesCreateRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/seed-dispatches/overview': {
       id: '/_authenticated/seed-dispatches/overview'
       path: '/seed-dispatches/overview'
@@ -831,6 +851,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedTransferStockRoute: typeof AuthenticatedTransferStockRoute
   AuthenticatedSeedDispatchesAnalyticsRoute: typeof AuthenticatedSeedDispatchesAnalyticsRoute
+  AuthenticatedSeedDispatchesCreateRoute: typeof AuthenticatedSeedDispatchesCreateRoute
   AuthenticatedSeedDispatchesOverviewRoute: typeof AuthenticatedSeedDispatchesOverviewRoute
   AuthenticatedSeedDispatchesReportRoute: typeof AuthenticatedSeedDispatchesReportRoute
   AuthenticatedSeedDispatchesSettingsRoute: typeof AuthenticatedSeedDispatchesSettingsRoute
@@ -850,6 +871,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedTransferStockRoute: AuthenticatedTransferStockRoute,
   AuthenticatedSeedDispatchesAnalyticsRoute:
     AuthenticatedSeedDispatchesAnalyticsRoute,
+  AuthenticatedSeedDispatchesCreateRoute:
+    AuthenticatedSeedDispatchesCreateRoute,
   AuthenticatedSeedDispatchesOverviewRoute:
     AuthenticatedSeedDispatchesOverviewRoute,
   AuthenticatedSeedDispatchesReportRoute:

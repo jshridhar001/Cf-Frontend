@@ -1,8 +1,5 @@
-import { getTotalBags } from '@/features/seed-dispatch/overview/lib/derived';
-import type {
-  SeedDispatch,
-  SeedDispatchStatus,
-} from '@/features/seed-dispatch/overview/types';
+import { getRequestedAcres, getTotalBags } from '@/features/seed-dispatch/overview/lib/derived';
+import type { SeedDispatch, SeedDispatchStatus } from '@/features/seed-dispatch/overview/types';
 
 export type DispatchQuantitySummary = {
   count: number;
@@ -21,9 +18,7 @@ function emptyQuantity(): DispatchQuantitySummary {
 function addQuantity(bucket: DispatchQuantitySummary, dispatch: SeedDispatch) {
   bucket.count += 1;
   bucket.bags += getTotalBags(dispatch);
-  if (dispatch.acres != null && Number.isFinite(dispatch.acres)) {
-    bucket.acres += dispatch.acres;
-  }
+  bucket.acres += getRequestedAcres(dispatch);
 }
 
 export function summarizeDispatches(dispatches: SeedDispatch[]): DispatchOverviewSummary {
