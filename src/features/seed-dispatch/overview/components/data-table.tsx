@@ -8,11 +8,11 @@ import {
   TableRow,
   Table as UiTable,
 } from '@/components/ui/table';
-import type { DispatchesTable } from '@/features/seed-dispatch/overview/components/use-dispatches-table';
 import {
   ariaSortValue,
   MasterTableSortHeader,
 } from '@/features/master/components/master-table-sort-header';
+import type { DispatchesTable } from '@/features/seed-dispatch/overview/components/use-dispatches-table';
 import { cn } from '@/lib/utils';
 
 const SUM_AGGREGATED_COLUMN_IDS = new Set(['netWeight']);

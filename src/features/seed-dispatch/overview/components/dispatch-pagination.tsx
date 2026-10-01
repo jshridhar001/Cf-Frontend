@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import type { AwaitingRequisitionsTable as AwaitingTable } from '@/features/seed-dispatch/overview/components/use-awaiting-requisitions-table';
 import type { DispatchesTable } from '@/features/seed-dispatch/overview/components/use-dispatches-table';
 import { getPaginationItems } from '@/features/seed-dispatch/overview/lib/pagination';
 import {
@@ -23,7 +24,7 @@ import {
 } from '@/features/seed-dispatch/overview/types';
 import { cn } from '@/lib/utils';
 
-export function DispatchPagination({ table }: { table: DispatchesTable }) {
+export function DispatchPagination({ table }: { table: DispatchesTable | AwaitingTable }) {
   const { pageIndex, pageSize } = table.state.pagination;
   const page = pageIndex + 1;
   const totalPages = Math.max(1, table.getPageCount());

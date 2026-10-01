@@ -1,6 +1,11 @@
 export const SEED_DISPATCH_OVERVIEW_TITLE = 'Seed Dispatches — Overview';
 
-export const SEED_DISPATCH_STATUSES = ['IN_TRANSIT', 'DELIVERED', 'AWAITING_DISPATCH'] as const;
+export const SEED_DISPATCH_STATUSES = [
+  'IN_TRANSIT',
+  'DELIVERED',
+  'NULL',
+  'AWAITING_DISPATCH',
+] as const;
 export const SEED_DISPATCH_PAGE_SIZES = [10, 50, 100] as const;
 export const SEED_DISPATCH_PAGE_SIZE = SEED_DISPATCH_PAGE_SIZES[0];
 
@@ -157,6 +162,8 @@ export function formatSeedDispatchStatus(status: SeedDispatchStatus) {
       return 'In Transit';
     case 'DELIVERED':
       return 'Delivered';
+    case 'NULL':
+      return 'Null';
     case 'AWAITING_DISPATCH':
       return 'Awaiting Dispatch';
   }

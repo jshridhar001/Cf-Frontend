@@ -26,11 +26,13 @@ export function summarizeDispatches(dispatches: SeedDispatch[]): DispatchOvervie
     total: emptyQuantity(),
     IN_TRANSIT: emptyQuantity(),
     DELIVERED: emptyQuantity(),
+    NULL: emptyQuantity(),
     AWAITING_DISPATCH: emptyQuantity(),
   };
 
   for (const dispatch of dispatches) {
     addQuantity(summary.total, dispatch);
+    if (dispatch.status === 'AWAITING_DISPATCH') continue;
     addQuantity(summary[dispatch.status], dispatch);
   }
 

@@ -23,10 +23,7 @@ import {
   type AdvancedGlobalFilter,
   emptyGlobalFilter,
 } from '@/features/seed-dispatch/overview/lib/filter-fns';
-import type {
-  SeedDispatch,
-  SeedDispatchStatus,
-} from '@/features/seed-dispatch/overview/types';
+import type { SeedDispatch, SeedDispatchStatus } from '@/features/seed-dispatch/overview/types';
 
 function statusColumnFilters(
   prev: ColumnFiltersState,
@@ -54,9 +51,7 @@ export function useDispatchesTable({
   meta?: DispatchesTableMeta;
   status?: SeedDispatchStatus;
 }) {
-  const [sorting, setSorting] = useState<SortingState>([
-    { id: 'dispatchDate', desc: true },
-  ]);
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'dispatchDate', desc: true }]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(() =>
     status ? [{ id: 'status', value: [status] }] : [],
   );

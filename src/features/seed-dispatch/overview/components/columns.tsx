@@ -1,18 +1,9 @@
+import { Link } from '@tanstack/react-router';
 import { createColumnHelper } from '@tanstack/react-table';
-import { EyeIcon, MoreHorizontalIcon } from 'lucide-react';
-import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Progress } from '@/components/ui/progress';
 import type { DataTableFeatures } from '@/features/seed-dispatch/overview/components/data-table-features';
+import { DispatchActions } from '@/features/seed-dispatch/overview/components/dispatch-actions';
 import {
   getDeliveredOn,
   getFacilitySummary,
@@ -37,40 +28,10 @@ function statusBadgeClass(status: SeedDispatch['status']) {
   if (status === 'IN_TRANSIT') {
     return 'border-sky-500/25 bg-sky-500/10 text-sky-700 dark:text-sky-400';
   }
+  if (status === 'NULL') {
+    return 'border-border bg-muted text-muted-foreground';
+  }
   return 'border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-400';
-}
-
-function DispatchRowActions({ dispatch }: { dispatch: SeedDispatch }) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="size-8 min-h-11 min-w-11 md:min-h-8 md:min-w-8"
-        >
-          <span className="sr-only">Open menu</span>
-          <MoreHorizontalIcon />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-44">
-        <DropdownMenuLabel className="font-semibold tracking-wide text-muted-foreground uppercase">
-          Actions
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => {
-            toast.message('Dispatch details coming soon', {
-              description: dispatch.toLocation,
-            });
-          }}
-        >
-          <EyeIcon />
-          View details
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
 }
 
 const columnHelper = createColumnHelper<DataTableFeatures, SeedDispatch>();
@@ -196,13 +157,13 @@ export const columns = columnHelper.columns([
       const truck = row.original.truckNumber?.trim();
       if (!truck) return <span className="text-muted-foreground">—</span>;
       return (
-        <button
-          type="button"
+        <Link
+          to="/seed-dispatches/$id"
+          params={{ id: row.original.id }}
           className="font-medium text-primary underline-offset-4 hover:underline"
-          onClick={() => toast.message('Truck details coming soon', { description: truck })}
         >
           {truck}
-        </button>
+        </Link>
       );
     },
   }),
@@ -226,7 +187,7 @@ export const columns = columnHelper.columns([
     header: () => <div className="text-right">Actions</div>,
     cell: ({ row }) => (
       <div className="flex justify-end">
-        <DispatchRowActions dispatch={row.original} />
+        <DispatchActions dispatch={row.original} />
       </div>
     ),
     enableSorting: false,

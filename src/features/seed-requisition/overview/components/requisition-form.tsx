@@ -3,6 +3,11 @@ import { useEffect } from 'react';
 import * as z from 'zod';
 import { SearchableOptionCombobox } from '@/components/searchable-option-combobox';
 import { Button } from '@/components/ui/button';
+import {
+  DatePickerInput,
+  formatDateOnlyString,
+  parseDateOnlyString,
+} from '@/components/ui/date-picker';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -362,16 +367,15 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
             const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Contract date</FieldLabel>
-                <Input
+                <DatePickerInput
                   id={field.name}
-                  name={field.name}
-                  type="date"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
+                  label="Contract date"
+                  placeholder="Select date"
+                  value={field.state.value ? parseDateOnlyString(field.state.value) : undefined}
                   aria-invalid={isInvalid}
                   disabled={isPending}
+                  onChange={(date) => field.handleChange(date ? formatDateOnlyString(date) : '')}
+                  onBlur={field.handleBlur}
                 />
                 {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
               </Field>
@@ -384,16 +388,15 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
             const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Requisition date (optional)</FieldLabel>
-                <Input
+                <DatePickerInput
                   id={field.name}
-                  name={field.name}
-                  type="date"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
+                  label="Requisition date (optional)"
+                  placeholder="Select date"
+                  value={field.state.value ? parseDateOnlyString(field.state.value) : undefined}
                   aria-invalid={isInvalid}
                   disabled={isPending}
+                  onChange={(date) => field.handleChange(date ? formatDateOnlyString(date) : '')}
+                  onBlur={field.handleBlur}
                 />
                 {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
               </Field>
@@ -406,16 +409,15 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
             const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Requested delivery date (optional)</FieldLabel>
-                <Input
+                <DatePickerInput
                   id={field.name}
-                  name={field.name}
-                  type="date"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
+                  label="Requested delivery date (optional)"
+                  placeholder="Select date"
+                  value={field.state.value ? parseDateOnlyString(field.state.value) : undefined}
                   aria-invalid={isInvalid}
                   disabled={isPending}
+                  onChange={(date) => field.handleChange(date ? formatDateOnlyString(date) : '')}
+                  onBlur={field.handleBlur}
                 />
                 {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
               </Field>

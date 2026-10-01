@@ -34,12 +34,20 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { seedDispatchKeys } from '@/features/seed-dispatch/overview/api/query-keys';
 import { useSeedDispatches } from '@/features/seed-dispatch/overview/api/use-seed-dispatches';
+import { AwaitingRequisitionCard } from '@/features/seed-dispatch/overview/components/awaiting-requisition-card';
+import { AwaitingRequisitionsTable } from '@/features/seed-dispatch/overview/components/awaiting-requisitions-table';
 import { DataTable } from '@/features/seed-dispatch/overview/components/data-table';
 import { DispatchCard } from '@/features/seed-dispatch/overview/components/dispatch-card';
 import { DispatchPagination } from '@/features/seed-dispatch/overview/components/dispatch-pagination';
 import { DispatchSummaryCards } from '@/features/seed-dispatch/overview/components/dispatch-summary-cards';
+import { useAwaitingRequisitionsTable } from '@/features/seed-dispatch/overview/components/use-awaiting-requisitions-table';
 import { useDispatchesTable } from '@/features/seed-dispatch/overview/components/use-dispatches-table';
 import { ViewFiltersSheet } from '@/features/seed-dispatch/overview/components/view-filters/ViewFiltersSheet';
+import {
+  isApprovedRequisition,
+  matchesAwaitingSearch,
+  summarizeApprovedRequisitions,
+} from '@/features/seed-dispatch/overview/lib/awaiting-requisitions';
 import {
   emptyGlobalFilter,
   isActiveCondition,
@@ -54,6 +62,8 @@ import {
   SEED_DISPATCH_PAGE_SIZE,
   SEED_DISPATCH_STATUSES,
 } from '@/features/seed-dispatch/overview/types';
+import { seedRequisitionKeys } from '@/features/seed-requisition/overview/api/query-keys';
+import { useSeedRequisitions } from '@/features/seed-requisition/overview/api/use-seed-requisitions';
 import { getApiErrorMessage } from '@/lib/api-client';
 
 const ALL_STATUSES = 'all';
@@ -96,6 +106,13 @@ export default function SeedDispatchOverviewPage() {
   const searchParams = overviewRoute.useSearch();
   const navigate = overviewRoute.useNavigate();
   const { data, isPending, isError, error, isFetching } = useSeedDispatches();
+  const {
+    data: requisitions,
+    isPending: isRequisitionsPending,
+    isError: isRequisitionsError,
+    error: requisitionsError,
+    isFetching: isRequisitionsFetching,
+  } = useSeedRequisitions();
   const [search, setSearch] = useState('');
   const [layout, setLayout] = useState<OverviewLayout>(getDefaultOverviewLayout);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -105,20 +122,45 @@ export default function SeedDispatchOverviewPage() {
 
   const dispatchList = data ?? [];
   const hasSearch = search.trim().length > 0;
+  const isAwaiting = searchParams.status === 'AWAITING_DISPATCH';
+  const searchQuery = search.trim().toLowerCase();
 
-  const summary = useMemo(() => summarizeDispatches(dispatchList), [dispatchList]);
+  const approvedRequisitions = useMemo(
+    () => (requisitions ?? []).filter(isApprovedRequisition),
+    [requisitions],
+  );
+  const filteredAwaiting = useMemo(() => {
+    if (!searchQuery) return approvedRequisitions;
+    return approvedRequisitions.filter((requisition) =>
+      matchesAwaitingSearch(requisition, searchQuery),
+    );
+  }, [approvedRequisitions, searchQuery]);
+
+  const summary = useMemo(() => {
+    const dispatchSummary = summarizeDispatches(dispatchList);
+    return {
+      ...dispatchSummary,
+      AWAITING_DISPATCH: summarizeApprovedRequisitions(requisitions ?? []),
+    };
+  }, [dispatchList, requisitions]);
 
   const table = useDispatchesTable({
     data: dispatchList,
     pagination,
     onPaginationChange: setPagination,
-    status: searchParams.status,
+    status: isAwaiting ? undefined : searchParams.status,
+  });
+  const awaitingTable = useAwaitingRequisitionsTable({
+    data: filteredAwaiting,
+    pagination,
+    onPaginationChange: setPagination,
   });
 
   const pagedDispatches = table
     .getRowModel()
     .rows.filter((row) => !row.getIsGrouped())
     .map((row) => row.original);
+  const pagedAwaiting = awaitingTable.getRowModel().rows.map((row) => row.original);
   const tableFiltersActive =
     table.state.columnFilters.length > 0 ||
     table.state.grouping.length > 0 ||
@@ -146,9 +188,14 @@ export default function SeedDispatchOverviewPage() {
     });
     table.resetSorting();
     void queryClient.invalidateQueries({ queryKey: seedDispatchKeys.lists() });
+    if (isAwaiting) {
+      void queryClient.invalidateQueries({ queryKey: seedRequisitionKeys.list() });
+    }
   };
 
-  if (isPending && data === undefined) {
+  const listFetching = isFetching || (isAwaiting && isRequisitionsFetching);
+
+  if ((isPending && data === undefined) || (isRequisitionsPending && requisitions === undefined)) {
     return <SeedDispatchOverviewSkeleton />;
   }
 
@@ -187,7 +234,7 @@ export default function SeedDispatchOverviewPage() {
           </div>
         </ItemMedia>
         <ItemContent>
-          <ItemTitle>Dispatches</ItemTitle>
+          <ItemTitle>{isAwaiting ? 'Requisitions' : 'Dispatches'}</ItemTitle>
         </ItemContent>
         <ItemActions>
           <TabsList className="h-11 min-h-11 w-fit group-data-horizontal/tabs:h-11 md:h-9 md:min-h-9 md:group-data-horizontal/tabs:h-9">
@@ -200,8 +247,8 @@ export default function SeedDispatchOverviewPage() {
               <span className="hidden sm:inline">Cards</span>
             </TabsTrigger>
           </TabsList>
-          <Button variant="outline" size="sm" onClick={refreshList} disabled={isFetching}>
-            {isFetching ? (
+          <Button variant="outline" size="sm" onClick={refreshList} disabled={listFetching}>
+            {listFetching ? (
               <Loader2 className="size-4 animate-spin" data-icon="inline-start" />
             ) : (
               <RefreshCw data-icon="inline-start" />
@@ -216,7 +263,7 @@ export default function SeedDispatchOverviewPage() {
           <div className="relative w-full">
             <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search dispatches..."
+              placeholder={isAwaiting ? 'Search awaiting requisitions...' : 'Search dispatches...'}
               className="w-full pl-10"
               inputMode="search"
               value={search}
@@ -262,7 +309,7 @@ export default function SeedDispatchOverviewPage() {
           </div>
 
           <div className="flex min-w-0 items-center gap-2 sm:shrink-0">
-            {layout === 'table' ? (
+            {layout === 'table' && !isAwaiting ? (
               <ViewFiltersSheet table={table} onAppliedStatus={setStatusFilter} />
             ) : null}
             <Button
@@ -304,7 +351,59 @@ export default function SeedDispatchOverviewPage() {
         </div>
       </div>
 
-      {isError && data === undefined ? (
+      {isAwaiting ? (
+        isRequisitionsError && requisitions === undefined ? (
+          <Empty className="rounded-xl border bg-muted/10">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Truck />
+              </EmptyMedia>
+              <EmptyTitle>Could not load requisitions</EmptyTitle>
+              <EmptyDescription>{getApiErrorMessage(requisitionsError)}</EmptyDescription>
+            </EmptyHeader>
+            <Button
+              variant="outline"
+              className="mt-4"
+              onClick={refreshList}
+              disabled={listFetching}
+            >
+              {listFetching ? (
+                <Loader2 className="size-4 animate-spin" data-icon="inline-start" />
+              ) : (
+                <RefreshCw data-icon="inline-start" />
+              )}
+              Try again
+            </Button>
+          </Empty>
+        ) : filteredAwaiting.length === 0 ? (
+          <Empty className="rounded-xl border bg-muted/10">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Truck />
+              </EmptyMedia>
+              <EmptyTitle>
+                {hasSearch ? 'No matching requisitions' : 'No requisitions awaiting dispatch'}
+              </EmptyTitle>
+              <EmptyDescription>
+                {hasSearch ? 'Try a different search.' : 'Approved requisitions will appear here.'}
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          <>
+            <TabsContent value="table" className="min-w-0">
+              <AwaitingRequisitionsTable table={awaitingTable} />
+            </TabsContent>
+            <TabsContent value="cards">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {pagedAwaiting.map((requisition) => (
+                  <AwaitingRequisitionCard key={requisition.id} requisition={requisition} />
+                ))}
+              </div>
+            </TabsContent>
+          </>
+        )
+      ) : isError && data === undefined ? (
         <Empty className="rounded-xl border bg-muted/10">
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -313,8 +412,8 @@ export default function SeedDispatchOverviewPage() {
             <EmptyTitle>Could not load dispatches</EmptyTitle>
             <EmptyDescription>{getApiErrorMessage(error)}</EmptyDescription>
           </EmptyHeader>
-          <Button variant="outline" className="mt-4" onClick={refreshList} disabled={isFetching}>
-            {isFetching ? (
+          <Button variant="outline" className="mt-4" onClick={refreshList} disabled={listFetching}>
+            {listFetching ? (
               <Loader2 className="size-4 animate-spin" data-icon="inline-start" />
             ) : (
               <RefreshCw data-icon="inline-start" />
@@ -351,7 +450,13 @@ export default function SeedDispatchOverviewPage() {
         </>
       )}
 
-      {data !== undefined && !isError ? <DispatchPagination table={table} /> : null}
+      {isAwaiting ? (
+        requisitions !== undefined && !isRequisitionsError && filteredAwaiting.length > 0 ? (
+          <DispatchPagination table={awaitingTable} />
+        ) : null
+      ) : data !== undefined && !isError ? (
+        <DispatchPagination table={table} />
+      ) : null}
     </Tabs>
   );
 }

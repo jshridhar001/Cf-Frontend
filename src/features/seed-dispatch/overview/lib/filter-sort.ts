@@ -1,10 +1,5 @@
-import {
-  getFacilitySummary,
-} from '@/features/seed-dispatch/overview/lib/derived';
-import type {
-  SeedDispatch,
-  SeedDispatchStatus,
-} from '@/features/seed-dispatch/overview/types';
+import { getFacilitySummary } from '@/features/seed-dispatch/overview/lib/derived';
+import type { SeedDispatch, SeedDispatchStatus } from '@/features/seed-dispatch/overview/types';
 
 export function filterAndSortDispatches(
   dispatches: SeedDispatch[],

@@ -1,8 +1,5 @@
 import { constructFilterFn } from '@tanstack/react-table';
-import {
-  getDeliveredOn,
-  getFacilitySummary,
-} from '@/features/seed-dispatch/overview/lib/derived';
+import { getDeliveredOn, getFacilitySummary } from '@/features/seed-dispatch/overview/lib/derived';
 import type { SeedDispatch } from '@/features/seed-dispatch/overview/types';
 
 export type AdvancedFilterOperator =

@@ -3,9 +3,9 @@ import type { ComponentType } from 'react';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import {
+  type DispatchOverviewSummary,
   formatSummaryAcres,
   formatSummaryCount,
-  type DispatchOverviewSummary,
 } from '@/features/seed-dispatch/overview/lib/summary';
 import type { SeedDispatchStatus } from '@/features/seed-dispatch/overview/types';
 import { cn } from '@/lib/utils';
@@ -92,7 +92,9 @@ export function DispatchSummaryCards({
             <button
               type="button"
               aria-pressed={selected}
-              aria-label={`${card.label}: ${formatSummaryCount(quantities.count)} dispatches`}
+              aria-label={`${card.label}: ${formatSummaryCount(quantities.count)} ${
+                card.key === 'AWAITING_DISPATCH' ? 'requisitions' : 'dispatches'
+              }`}
               className="flex min-h-11 w-full flex-col gap-2 p-3 text-left"
               onClick={() => {
                 if (card.key === 'total') {

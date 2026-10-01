@@ -1,16 +1,5 @@
-import {
-  CalendarDays,
-  EyeIcon,
-  MapPin,
-  Package,
-  Phone,
-  Truck,
-  Warehouse,
-} from 'lucide-react';
-import type { ComponentProps } from 'react';
-import { toast } from 'sonner';
+import { CalendarDays, MapPin, Package, Phone, Truck, Warehouse } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
   Card,
   CardAction,
@@ -21,6 +10,7 @@ import {
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
+import { DispatchActions } from '@/features/seed-dispatch/overview/components/dispatch-actions';
 import {
   getDeliveredOn,
   getFacilitySummary,
@@ -59,27 +49,15 @@ function DispatchRow({
   );
 }
 
-function CardIconButton({ className, ...props }: ComponentProps<typeof Button>) {
-  return (
-    <Button
-      type="button"
-      variant="ghost"
-      size="icon-sm"
-      className={cn(
-        'relative size-8 text-muted-foreground after:absolute after:-inset-1.5 after:content-[""] hover:text-foreground sm:after:hidden',
-        className,
-      )}
-      {...props}
-    />
-  );
-}
-
 function statusBadgeClass(status: SeedDispatch['status']) {
   if (status === 'DELIVERED') {
     return 'border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400';
   }
   if (status === 'IN_TRANSIT') {
     return 'border-sky-500/25 bg-sky-500/10 text-sky-700 dark:text-sky-400';
+  }
+  if (status === 'NULL') {
+    return 'border-border bg-muted text-muted-foreground';
   }
   return 'border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-400';
 }
@@ -141,16 +119,7 @@ export function DispatchCard({ dispatch }: { dispatch: SeedDispatch }) {
         <Badge variant="outline" className={statusBadgeClass(dispatch.status)}>
           {formatSeedDispatchStatus(dispatch.status)}
         </Badge>
-        <CardIconButton
-          aria-label={`View dispatch to ${dispatch.toLocation}`}
-          onClick={() =>
-            toast.message('Dispatch details coming soon', {
-              description: dispatch.toLocation,
-            })
-          }
-        >
-          <EyeIcon />
-        </CardIconButton>
+        <DispatchActions dispatch={dispatch} />
       </CardFooter>
     </Card>
   );
