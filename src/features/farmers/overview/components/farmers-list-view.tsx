@@ -204,7 +204,7 @@ export function FarmersListView({
     (showTable ? (
       <FarmersDataTable table={table} />
     ) : (
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {visibleFarmers.map((farmer) => (
           <FarmerCard
             key={farmer.id}

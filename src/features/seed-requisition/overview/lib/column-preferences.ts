@@ -210,6 +210,21 @@ function withContractUrlColumns(columnOrder: string[]): string[] {
   return next;
 }
 
+function withRemarksColumn(columnOrder: string[]): string[] {
+  if (columnOrder.length === 0 || columnOrder.includes('remarks')) return columnOrder;
+  const next = [...columnOrder];
+  const statusIndex = next.indexOf('status');
+  const approvedDeliveryIndex = next.indexOf('approvedDeliveryDate');
+  const insertAt =
+    statusIndex >= 0
+      ? statusIndex
+      : approvedDeliveryIndex >= 0
+        ? approvedDeliveryIndex + 1
+        : next.length;
+  next.splice(insertAt, 0, 'remarks');
+  return next;
+}
+
 function withContractDateColumn(columnOrder: string[]): string[] {
   if (columnOrder.length === 0 || columnOrder.includes('contractDate')) return columnOrder;
   const next = [...columnOrder];
@@ -231,7 +246,9 @@ export function getColumnPreferences(): ColumnPreferences {
     columnVisibility: customized
       ? visibilityFromHiddenIds(hiddenColumnIds)
       : builtInColumnVisibility(),
-    columnOrder: withContractUrlColumns(withContractDateColumn(withAddressColumns(columnOrder))),
+    columnOrder: withRemarksColumn(
+      withContractUrlColumns(withContractDateColumn(withAddressColumns(columnOrder))),
+    ),
   };
 }
 

@@ -144,6 +144,8 @@ function leafCellForColumn(requisition: SeedRequisition, columnId: string): Expo
           ? formatRequisitionDate(requisition.approvedDeliveryDate)
           : '—',
       );
+    case 'remarks':
+      return textCell(requisition.remarks?.trim() || '—');
     case 'status':
       return textCell(formatSeedRequisitionStatus(requisition.status));
     default:

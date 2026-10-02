@@ -1,5 +1,14 @@
-import { Landmark, MapPin, Phone, SquarePenIcon, Trash2Icon, User, Users } from 'lucide-react';
-import type { ComponentProps } from 'react';
+import {
+  ChevronDown,
+  Landmark,
+  MapPin,
+  Phone,
+  SquarePenIcon,
+  Trash2Icon,
+  User,
+  Users,
+} from 'lucide-react';
+import { type ComponentProps, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -59,6 +68,15 @@ function CardIconButton({ className, ...props }: ComponentProps<typeof Button>) 
   );
 }
 
+function farmerRemarkLines(farmer: Farmer) {
+  return farmer.seedRequisitions.flatMap((requisition) => {
+    const remarks = requisition.remarks?.trim();
+    if (!remarks) return [];
+    const variety = requisition.variety?.name?.trim();
+    return [{ id: requisition.id, text: variety ? `${variety}: ${remarks}` : remarks }];
+  });
+}
+
 export function FarmerCard({
   farmer,
   onEdit,
@@ -68,14 +86,19 @@ export function FarmerCard({
   onEdit: (farmer: Farmer) => void;
   onDelete: (farmer: Farmer) => void;
 }) {
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const placeLabel = getFarmerPlacePath(farmer) || '—';
   const isActive = farmer.status === 'ACTIVE';
+  const familyName = getFarmerFamilyLabel(farmer);
+  const familyAccount =
+    farmer.family?.accountNumber?.trim() || farmer.familyAccountNumber?.trim() || '';
+  const remarks = farmerRemarkLines(farmer);
 
   return (
-    <Card className="gap-3 py-4">
-      <div className="flex flex-col gap-3 rounded-t-4xl">
+    <Card className="h-full gap-3 py-4">
+      <div className="flex flex-1 flex-col gap-3 rounded-t-4xl">
         <CardHeader className="px-4">
-          <CardTitle className="pr-2 font-heading text-base font-semibold tracking-tight">
+          <CardTitle className="line-clamp-2 min-h-12 pr-2 font-heading text-base leading-6 font-semibold tracking-tight">
             {farmer.name}{' '}
             <span className="text-sm font-normal text-muted-foreground">
               (#{farmer.accountNumber})
@@ -87,10 +110,10 @@ export function FarmerCard({
             </div>
           </CardAction>
         </CardHeader>
-        <CardContent className="flex flex-col gap-1.5 px-4">
+        <CardContent className="flex flex-1 flex-col gap-1.5 px-4">
           <FarmerRow
             icon={Users}
-            value={`${formatFarmerAccountType(farmer.accountType)} · ${getFarmerFamilyLabel(farmer)}`}
+            value={`${formatFarmerAccountType(farmer.accountType)} · ${familyName}`}
             muted
           />
           <FarmerRow icon={Phone} value={farmer.mobileNumber} />
@@ -100,6 +123,41 @@ export function FarmerCard({
             value={`${farmer.bankName} · ${farmer.bankAccountNumber} · ${farmer.ifscCode}`}
             muted
           />
+          {detailsOpen ? (
+            <div className="flex flex-col gap-2 pt-1">
+              <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                Family
+              </p>
+              <p className="text-sm">{formatFarmerAccountType(farmer.accountType)}</p>
+              <p className="text-sm whitespace-normal">
+                {familyName}
+                {familyAccount ? ` · #${familyAccount}` : ''}
+              </p>
+              <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                Remarks
+              </p>
+              {remarks.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No remarks</p>
+              ) : (
+                remarks.map((remark) => (
+                  <p key={remark.id} className="text-sm whitespace-normal text-muted-foreground">
+                    {remark.text}
+                  </p>
+                ))
+              )}
+            </div>
+          ) : null}
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="mt-auto h-8 w-fit px-2 text-muted-foreground"
+            aria-expanded={detailsOpen}
+            onClick={() => setDetailsOpen((open) => !open)}
+          >
+            {detailsOpen ? 'View less' : 'View more'}
+            <ChevronDown data-icon="inline-end" className={cn(detailsOpen && 'rotate-180')} />
+          </Button>
         </CardContent>
       </div>
 

@@ -305,6 +305,21 @@ export const columns = columnHelper.columns([
       </span>
     ),
   }),
+  columnHelper.accessor((row) => row.remarks ?? '', {
+    id: 'remarks',
+    header: 'Remarks',
+    sortFn: 'text',
+    meta: { filterLabel: 'Remarks' },
+    cell: ({ getValue }) => {
+      const remarks = getValue().trim();
+      if (!remarks) return <span className="text-muted-foreground">—</span>;
+      return (
+        <span className="block max-w-xs line-clamp-2" title={remarks}>
+          {remarks}
+        </span>
+      );
+    },
+  }),
   columnHelper.accessor('status', {
     header: 'Status',
     sortFn: 'text',

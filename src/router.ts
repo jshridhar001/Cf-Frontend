@@ -1,4 +1,5 @@
 import { createRouter } from '@tanstack/react-router';
+import { RouteErrorFallback } from '@/components/connection-status';
 import { queryClient } from '@/lib/queryClient';
 import { routeTree } from './routeTree.gen';
 
@@ -9,6 +10,7 @@ export const router = createRouter({
     queryClient,
   },
   defaultPreload: false,
+  defaultErrorComponent: RouteErrorFallback,
 });
 
 declare module '@tanstack/react-router' {

@@ -6,6 +6,7 @@ import {
   FileSignatureIcon,
   LandPlot,
   MapPin,
+  MessageSquare,
   Package,
   Sprout,
   SquarePenIcon,
@@ -140,6 +141,14 @@ export function RequisitionCard({
             value={`Approved ${formatRequisitionDate(requisition.approvedDeliveryDate)}`}
             muted
           />
+        ) : null}
+        {requisition.remarks?.trim() ? (
+          <div className="flex min-w-0 items-start gap-2">
+            <MessageSquare className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+            <p className="text-sm whitespace-normal text-muted-foreground">
+              {requisition.remarks.trim()}
+            </p>
+          </div>
         ) : null}
       </CardContent>
 

@@ -1,5 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { z } from 'zod';
+import { ConnectionLoader } from '@/components/connection-status';
 import { meQueryOptions } from '@/features/auth/api/use-me';
 import { LoginForm } from '@/features/auth/components/login-form';
 
@@ -9,6 +10,9 @@ const loginSearchSchema = z.object({
 
 export const Route = createFileRoute('/login')({
   validateSearch: loginSearchSchema,
+  pendingComponent: ConnectionLoader,
+  pendingMs: 0,
+  pendingMinMs: 400,
   beforeLoad: async ({ context, search }) => {
     const me = await context.queryClient.ensureQueryData(meQueryOptions());
 
