@@ -20,11 +20,17 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 interface RequisitionDrawerProps {
   requisition: SeedRequisition | null;
+  lockedFarmerId?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function RequisitionDrawer({ requisition, open, onOpenChange }: RequisitionDrawerProps) {
+export function RequisitionDrawer({
+  requisition,
+  lockedFarmerId,
+  open,
+  onOpenChange,
+}: RequisitionDrawerProps) {
   const isMobile = useIsMobile();
   const isEdit = requisition !== null;
   const { isSaving } = useRequisitionSampleStore();
@@ -47,6 +53,7 @@ export function RequisitionDrawer({ requisition, open, onOpenChange }: Requisiti
     <RequisitionForm
       key={isEdit ? (formRequisition?.id ?? 'edit') : 'create'}
       requisition={formRequisition}
+      lockedFarmerId={isEdit ? undefined : lockedFarmerId}
       onSuccess={() => onOpenChange(false)}
       onCancel={() => onOpenChange(false)}
     />

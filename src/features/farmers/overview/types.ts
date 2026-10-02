@@ -75,6 +75,8 @@ export type FarmerSeedRequisition = {
   approvedDeliveryDate: string | null;
   remarks: string | null;
   rejectionRemarks: string | null;
+  engContractUrl: string | null;
+  hindiContractUrl: string | null;
   createdById: string;
   approvedById: string | null;
   rejectedById: string | null;

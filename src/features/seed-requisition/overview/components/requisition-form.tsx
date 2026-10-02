@@ -125,12 +125,19 @@ const formSchema = z
 
 interface RequisitionFormProps {
   requisition?: SeedRequisition | null;
+  lockedFarmerId?: string;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
-export function RequisitionForm({ requisition, onSuccess, onCancel }: RequisitionFormProps) {
+export function RequisitionForm({
+  requisition,
+  lockedFarmerId,
+  onSuccess,
+  onCancel,
+}: RequisitionFormProps) {
   const isEdit = requisition != null;
+  const lockFarmer = !isEdit && Boolean(lockedFarmerId);
   const createRequisition = useCreateSeedRequisition();
   const updateRequisition = useUpdateSeedRequisition();
   const { data: farmerRecords, isPending: farmersPending } = useFarmers();
@@ -150,7 +157,7 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
 
   const form = useForm({
     defaultValues: {
-      farmerId: requisition?.farmerId ?? '',
+      farmerId: requisition?.farmerId ?? lockedFarmerId ?? '',
       varietyId: requisition?.varietyId ?? '',
       quantityType:
         !requisition ||
@@ -206,12 +213,16 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
     },
   });
 
-  const singleFarmerId = !isEdit && farmers.length === 1 ? farmers[0].id : '';
+  const singleFarmerId = !isEdit && !lockedFarmerId && farmers.length === 1 ? farmers[0].id : '';
 
   useEffect(() => {
+    if (lockedFarmerId && !isEdit && form.state.values.farmerId !== lockedFarmerId) {
+      form.setFieldValue('farmerId', lockedFarmerId);
+      return;
+    }
     if (!singleFarmerId || form.state.values.farmerId) return;
     form.setFieldValue('farmerId', singleFarmerId);
-  }, [form, singleFarmerId]);
+  }, [form, isEdit, lockedFarmerId, singleFarmerId]);
 
   return (
     <form
@@ -239,7 +250,7 @@ export function RequisitionForm({ requisition, onSuccess, onCancel }: Requisitio
                   isInvalid={isInvalid}
                   placeholder="Select farmer"
                   emptyMessage="No farmers found"
-                  disabled={isPending}
+                  disabled={isPending || lockFarmer}
                   options={farmers.map((farmer) => ({
                     id: farmer.id,
                     label: farmer.accountNumber

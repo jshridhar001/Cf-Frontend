@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { farmersKeys } from '@/features/farmers/overview/api/query-keys';
 import { seedRequisitionKeys } from '@/features/seed-requisition/overview/api/query-keys';
 import type { SeedRequisitionMessageResponse } from '@/features/seed-requisition/overview/types';
 import apiClient, { getApiErrorMessage } from '@/lib/api-client';
@@ -18,7 +19,10 @@ export function useDeleteSeedRequisition() {
     retry: false,
     meta: { suppressGlobalError: true },
     onSuccess: async (data) => {
-      await queryClient.invalidateQueries({ queryKey: seedRequisitionKeys.list() });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: seedRequisitionKeys.list() }),
+        queryClient.invalidateQueries({ queryKey: farmersKeys.list() }),
+      ]);
       toast.success(data.message || 'Seed requisition deleted successfully.', {
         position: 'bottom-right',
       });

@@ -21,6 +21,9 @@ export function seedRequisitionsQueryOptions() {
   });
 }
 
-export function useSeedRequisitions() {
-  return useQuery(seedRequisitionsQueryOptions());
+export function useSeedRequisitions(options?: { enabled?: boolean }) {
+  return useQuery({
+    ...seedRequisitionsQueryOptions(),
+    enabled: options?.enabled ?? true,
+  });
 }

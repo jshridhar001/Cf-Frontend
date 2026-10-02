@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { farmersKeys } from '@/features/farmers/overview/api/query-keys';
 import { seedRequisitionKeys } from '@/features/seed-requisition/overview/api/query-keys';
 import type { SeedRequisitionDecisionResponse } from '@/features/seed-requisition/overview/types';
 import { toSeedRequisition } from '@/features/seed-requisition/overview/types';
@@ -42,7 +43,10 @@ export function useSeedRequisitionDecision() {
     retry: false,
     meta: { suppressGlobalError: true },
     onSuccess: async (requisition, variables) => {
-      await queryClient.invalidateQueries({ queryKey: seedRequisitionKeys.list() });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: seedRequisitionKeys.list() }),
+        queryClient.invalidateQueries({ queryKey: farmersKeys.list() }),
+      ]);
       const farmerName = requisition.farmer?.name;
       toast.success(
         variables.decision === 'APPROVED' ? 'Requisition approved' : 'Requisition rejected',

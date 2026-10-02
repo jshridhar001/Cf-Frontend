@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router';
 import {
   ChevronDown,
   Landmark,
@@ -95,8 +96,14 @@ export function FarmerCard({
   const remarks = farmerRemarkLines(farmer);
 
   return (
-    <Card className="h-full gap-3 py-4">
-      <div className="flex flex-1 flex-col gap-3 rounded-t-4xl">
+    <Card className="relative h-full gap-3 py-4 transition-colors hover:bg-muted/40">
+      <Link
+        to="/farmers/$id"
+        params={{ id: farmer.id }}
+        aria-label={`Open profile for ${farmer.name}`}
+        className="absolute inset-0 z-0 rounded-[inherit]"
+      />
+      <div className="pointer-events-none flex flex-1 flex-col gap-3 rounded-t-4xl">
         <CardHeader className="px-4">
           <CardTitle className="line-clamp-2 min-h-12 pr-2 font-heading text-base leading-6 font-semibold tracking-tight">
             {farmer.name}{' '}
@@ -151,7 +158,7 @@ export function FarmerCard({
             type="button"
             variant="ghost"
             size="sm"
-            className="mt-auto h-8 w-fit px-2 text-muted-foreground"
+            className="pointer-events-auto relative z-10 mt-auto h-8 w-fit px-2 text-muted-foreground"
             aria-expanded={detailsOpen}
             onClick={() => setDetailsOpen((open) => !open)}
           >
@@ -174,7 +181,7 @@ export function FarmerCard({
         >
           {formatFarmerStatus(farmer.status)}
         </Badge>
-        <div className="flex items-center gap-0.5">
+        <div className="pointer-events-auto relative z-10 flex items-center gap-0.5">
           <CardIconButton aria-label={`Edit ${farmer.name}`} onClick={() => onEdit(farmer)}>
             <SquarePenIcon />
           </CardIconButton>

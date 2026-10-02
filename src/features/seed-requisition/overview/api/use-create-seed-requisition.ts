@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { farmersKeys } from '@/features/farmers/overview/api/query-keys';
 import { seedRequisitionKeys } from '@/features/seed-requisition/overview/api/query-keys';
 import type {
   CreateSeedRequisitionBody,
@@ -23,7 +24,10 @@ export function useCreateSeedRequisition() {
     retry: false,
     meta: { suppressGlobalError: true },
     onSuccess: async (requisition) => {
-      await queryClient.invalidateQueries({ queryKey: seedRequisitionKeys.list() });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: seedRequisitionKeys.list() }),
+        queryClient.invalidateQueries({ queryKey: farmersKeys.list() }),
+      ]);
       const farmerName = requisition.farmer?.name;
       toast.success('Requisition created successfully', {
         description: farmerName ? `${farmerName} was added.` : undefined,

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { farmersKeys } from '@/features/farmers/overview/api/query-keys';
 import { seedRequisitionKeys } from '@/features/seed-requisition/overview/api/query-keys';
 import type {
   CreateSeedRequisitionBody,
@@ -33,6 +34,7 @@ export function useUpdateSeedRequisition() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: seedRequisitionKeys.list() }),
         queryClient.invalidateQueries({ queryKey: seedRequisitionKeys.detail(requisition.id) }),
+        queryClient.invalidateQueries({ queryKey: farmersKeys.list() }),
       ]);
       const farmerName = requisition.farmer?.name;
       toast.success('Requisition updated successfully', {

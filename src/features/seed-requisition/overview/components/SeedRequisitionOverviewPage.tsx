@@ -1,4 +1,4 @@
-import { useQueryClient } from '@tanstack/react-query';
+import { useIsFetching, useQueryClient } from '@tanstack/react-query';
 import { getRouteApi } from '@tanstack/react-router';
 import { type PaginationState } from '@tanstack/react-table';
 import {
@@ -35,6 +35,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { farmersKeys } from '@/features/farmers/overview/api/query-keys';
 import { seedRequisitionKeys } from '@/features/seed-requisition/overview/api/query-keys';
 import { useSeedRequisitions } from '@/features/seed-requisition/overview/api/use-seed-requisitions';
 import { ApproveRequisitionDialog } from '@/features/seed-requisition/overview/components/approve-requisition-dialog';
@@ -57,7 +58,11 @@ import {
   isActiveCondition,
   isAdvancedGlobalFilter,
 } from '@/features/seed-requisition/overview/lib/filter-fns';
-import { hasActiveFilters, toListParams } from '@/features/seed-requisition/overview/lib/search';
+import {
+  hasActiveFilters,
+  type SeedRequisitionSearch,
+  toListParams,
+} from '@/features/seed-requisition/overview/lib/search';
 import { summarizeRequisitions } from '@/features/seed-requisition/overview/lib/summary';
 import type {
   SeedRequisition,
@@ -93,12 +98,27 @@ function getDefaultOverviewLayout(): OverviewLayout {
 }
 
 export default function SeedRequisitionOverviewPage() {
+  const search = overviewRoute.useSearch();
+  const navigate = overviewRoute.useNavigate();
+
   return (
     <RequisitionSampleProvider>
-      <SeedRequisitionOverview />
+      <SeedRequisitionList
+        search={search}
+        onSearchChange={(updater) => {
+          void navigate({ search: updater });
+        }}
+      />
     </RequisitionSampleProvider>
   );
 }
+
+type SeedRequisitionListProps = {
+  search: SeedRequisitionSearch;
+  onSearchChange: (updater: (prev: SeedRequisitionSearch) => SeedRequisitionSearch) => void;
+  lockedFarmerId?: string;
+  requisitions?: SeedRequisition[];
+};
 
 function RequisitionsOverviewSkeleton() {
   return (
@@ -115,13 +135,28 @@ function RequisitionsOverviewSkeleton() {
   );
 }
 
-function SeedRequisitionOverview() {
+export function SeedRequisitionList({
+  search: listSearch,
+  onSearchChange,
+  lockedFarmerId,
+  requisitions: providedRequisitions,
+}: SeedRequisitionListProps) {
   const queryClient = useQueryClient();
-  const searchParams = overviewRoute.useSearch();
-  const navigate = overviewRoute.useNavigate();
-  const { data: requisitions, isPending, isError, error, isFetching } = useSeedRequisitions();
-  const requisitionRecords = requisitions ?? [];
-  const listParams = toListParams(searchParams);
+  const usingProvided = providedRequisitions !== undefined;
+  const fetched = useSeedRequisitions({ enabled: !usingProvided });
+  const farmersFetching = useIsFetching({ queryKey: farmersKeys.list() });
+  const requisitionRecords = providedRequisitions ?? fetched.data ?? [];
+  const isPending = !usingProvided && fetched.isPending;
+  const isError = !usingProvided && fetched.isError;
+  const error = usingProvided ? undefined : fetched.error;
+  const isFetching = usingProvided ? farmersFetching > 0 : fetched.isFetching;
+  const listParams = toListParams(
+    usingProvided
+      ? { ...listSearch, farmerId: undefined }
+      : lockedFarmerId
+        ? { ...listSearch, farmerId: lockedFarmerId }
+        : listSearch,
+  );
   const requisitionList = filterSampleRequisitions(requisitionRecords, listParams);
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
@@ -138,7 +173,8 @@ function SeedRequisitionOverview() {
   });
 
   const total = requisitionRecords.length;
-  const canDeleteAll = total > 0;
+  const showDeleteAll = !lockedFarmerId;
+  const canDeleteAll = showDeleteAll && total > 0;
   const hasSearch = search.trim().length > 0;
 
   const summary = useMemo(() => summarizeRequisitions(requisitionList), [requisitionList]);
@@ -147,7 +183,7 @@ function SeedRequisitionOverview() {
     data: requisitionList,
     pagination,
     onPaginationChange: setPagination,
-    status: searchParams.status,
+    status: listSearch.status,
     meta: {
       onEdit: setEditingRequisition,
       onDelete: setDeletingRequisition,
@@ -165,17 +201,18 @@ function SeedRequisitionOverview() {
     table.state.grouping.length > 0 ||
     (isAdvancedGlobalFilter(table.state.globalFilter) &&
       table.state.globalFilter.conditions.some(isActiveCondition));
-  const hasFilters = hasSearch || hasActiveFilters(searchParams) || tableFiltersActive;
+  const hasFilters =
+    hasSearch ||
+    hasActiveFilters(lockedFarmerId ? { ...listSearch, farmerId: undefined } : listSearch) ||
+    tableFiltersActive;
 
   const setStatusFilter = (status: SeedRequisitionStatus | undefined) => {
-    void navigate({
-      search: (prev) => {
-        if (!status) {
-          const { status: _status, ...rest } = prev;
-          return rest;
-        }
-        return { ...prev, status };
-      },
+    onSearchChange((prev) => {
+      if (!status) {
+        const { status: _status, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, status };
     });
   };
 
@@ -188,11 +225,15 @@ function SeedRequisitionOverview() {
     table.resetSorting();
     table.resetColumnFilters();
     table.resetGrouping();
-    void queryClient.invalidateQueries({ queryKey: seedRequisitionKeys.list() });
+    void queryClient.invalidateQueries({
+      queryKey: usingProvided ? farmersKeys.list() : seedRequisitionKeys.list(),
+    });
   };
 
   const retryList = () => {
-    void queryClient.invalidateQueries({ queryKey: seedRequisitionKeys.list() });
+    void queryClient.invalidateQueries({
+      queryKey: usingProvided ? farmersKeys.list() : seedRequisitionKeys.list(),
+    });
   };
 
   const handleExportError = (error: unknown, fallback: string) => {
@@ -227,11 +268,11 @@ function SeedRequisitionOverview() {
       });
   };
 
-  if (isPending && requisitions === undefined) {
+  if (isPending) {
     return <RequisitionsOverviewSkeleton />;
   }
 
-  if (isError && requisitions === undefined) {
+  if (isError) {
     return (
       <Empty className="rounded-xl border bg-muted/10">
         <EmptyHeader>
@@ -263,7 +304,7 @@ function SeedRequisitionOverview() {
     >
       <RequisitionSummaryCards
         summary={summary}
-        selectedStatus={searchParams.status}
+        selectedStatus={listSearch.status}
         onSelect={setStatusFilter}
       />
 
@@ -324,7 +365,7 @@ function SeedRequisitionOverview() {
         <div className="flex flex-col gap-3 bg-muted/20 p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-4">
           <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
             <Select
-              value={searchParams.status ?? ALL_STATUSES}
+              value={listSearch.status ?? ALL_STATUSES}
               onValueChange={(value) => {
                 if (!value) return;
                 if (value === ALL_STATUSES) {
@@ -388,28 +429,32 @@ function SeedRequisitionOverview() {
               )}
               Excel
             </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              size="icon"
-              className="size-11 shrink-0 rounded-full md:hidden"
-              aria-label="Delete all requisitions"
-              disabled={!canDeleteAll}
-              onClick={() => setDeleteAllOpen(true)}
-            >
-              <Trash2Icon />
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              size="sm"
-              className="hidden md:inline-flex"
-              disabled={!canDeleteAll}
-              onClick={() => setDeleteAllOpen(true)}
-            >
-              <Trash2Icon data-icon="inline-start" />
-              Delete All
-            </Button>
+            {showDeleteAll ? (
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                className="size-11 shrink-0 rounded-full md:hidden"
+                aria-label="Delete all requisitions"
+                disabled={!canDeleteAll}
+                onClick={() => setDeleteAllOpen(true)}
+              >
+                <Trash2Icon />
+              </Button>
+            ) : null}
+            {showDeleteAll ? (
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                className="hidden md:inline-flex"
+                disabled={!canDeleteAll}
+                onClick={() => setDeleteAllOpen(true)}
+              >
+                <Trash2Icon data-icon="inline-start" />
+                Delete All
+              </Button>
+            ) : null}
             <Button
               type="button"
               className="h-11 min-w-0 flex-1 gap-1.5 sm:h-9 sm:flex-none sm:w-auto"
@@ -465,6 +510,7 @@ function SeedRequisitionOverview() {
 
       <RequisitionDrawer
         requisition={editingRequisition}
+        lockedFarmerId={lockedFarmerId}
         open={createOpen || editingRequisition !== null}
         onOpenChange={(open) => {
           if (!open) {
@@ -494,11 +540,13 @@ function SeedRequisitionOverview() {
           if (!open) setRejectingRequisition(null);
         }}
       />
-      <DeleteAllRequisitionsDialog
-        open={deleteAllOpen}
-        onOpenChange={setDeleteAllOpen}
-        count={total}
-      />
+      {showDeleteAll ? (
+        <DeleteAllRequisitionsDialog
+          open={deleteAllOpen}
+          onOpenChange={setDeleteAllOpen}
+          count={total}
+        />
+      ) : null}
     </Tabs>
   );
 }

@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
 import type { FarmerTableFeatures } from '@/features/farmers/overview/lib/table-features';
@@ -71,7 +72,15 @@ export const farmerColumns = columnHelper.columns([
     header: 'Name',
     sortFn: 'text',
     meta: { filterLabel: 'Name' },
-    cell: ({ getValue }) => <span className="font-medium">{getValue()}</span>,
+    cell: ({ row, getValue }) => (
+      <Link
+        to="/farmers/$id"
+        params={{ id: row.original.id }}
+        className="font-medium text-primary underline-offset-4 hover:underline"
+      >
+        {getValue()}
+      </Link>
+    ),
   }),
   columnHelper.accessor('accountNumber', {
     header: 'Account number',
