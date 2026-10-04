@@ -109,7 +109,7 @@ export function StationDemand({
   return (
     <PageCard>
       <PageCardHeader>
-        <CardTitle>Demand by {levelLabel}</CardTitle>
+        <CardTitle>Demand by {levelLabel} (in acres)</CardTitle>
         <CardDescription>
           {varietyName ? `Showing ${varietyName}. ` : null}
           {canDrill ? 'Select a bar to drill in.' : 'Select a bar to open requisitions.'}
