@@ -53,6 +53,19 @@ function toProfileSeedRequisition(farmer: Farmer, row: FarmerSeedRequisition): S
       stateId: farmer.stateId,
       pincodeId: farmer.pincodeId,
       familyId: farmer.familyId,
+      family: farmer.family
+        ? {
+            id: farmer.family.id,
+            name: farmer.family.name,
+            accountNumber: farmer.family.accountNumber,
+          }
+        : farmer.familyName?.trim()
+          ? {
+              id: farmer.familyId ?? '',
+              name: farmer.familyName.trim(),
+              accountNumber: farmer.familyAccountNumber?.trim() ?? '',
+            }
+          : null,
       createdAt: farmer.createdAt,
       updatedAt: farmer.updatedAt,
       state: farmer.state,

@@ -1,6 +1,9 @@
 import { constructFilterFn } from '@tanstack/react-table';
 import type { SeedRequisition } from '@/features/seed-requisition/overview/types';
-import { getRequisitionPlaceLabel } from '@/features/seed-requisition/overview/types';
+import {
+  getRequisitionFamilyLabel,
+  getRequisitionPlaceLabel,
+} from '@/features/seed-requisition/overview/types';
 
 export type AdvancedFilterOperator =
   | 'contains'
@@ -106,6 +109,7 @@ function evaluateCondition(raw: unknown, condition: AdvancedFilterCondition): bo
 
 function searchHaystack(requisition: SeedRequisition): string {
   return [
+    getRequisitionFamilyLabel(requisition.farmer),
     requisition.farmer?.name,
     requisition.farmer?.accountNumber,
     getRequisitionPlaceLabel(requisition.farmer),

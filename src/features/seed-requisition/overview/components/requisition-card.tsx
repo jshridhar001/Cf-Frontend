@@ -11,6 +11,7 @@ import {
   Sprout,
   SquarePenIcon,
   Trash2Icon,
+  Users,
   XIcon,
 } from 'lucide-react';
 import type { ComponentProps } from 'react';
@@ -29,6 +30,7 @@ import {
   formatRequestedQuantity,
   formatRequisitionDate,
   formatSeedRequisitionStatus,
+  getRequisitionFamilyLabel,
   getRequisitionPlaceLabel,
   type SeedRequisition,
 } from '@/features/seed-requisition/overview/types';
@@ -98,6 +100,7 @@ export function RequisitionCard({
 }) {
   const farmerName = requisition.farmer?.name ?? 'Unknown farmer';
   const accountNumber = requisition.farmer?.accountNumber;
+  const familyLabel = getRequisitionFamilyLabel(requisition.farmer);
   const placeLabel = getRequisitionPlaceLabel(requisition.farmer);
   const varietyName = requisition.variety?.name ?? 'Unknown variety';
   const isPending = requisition.status === 'PENDING';
@@ -118,6 +121,7 @@ export function RequisitionCard({
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-1.5 px-4">
+        <RequisitionRow icon={Users} value={familyLabel} muted={familyLabel === 'Independent'} />
         <RequisitionRow icon={Sprout} value={varietyName} />
         <RequisitionRow icon={MapPin} value={placeLabel} />
         <RequisitionRow icon={LandPlot} value={formatRequestedQuantity(requisition)} />

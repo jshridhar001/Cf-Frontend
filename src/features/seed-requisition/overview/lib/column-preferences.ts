@@ -240,14 +240,25 @@ function withContractDateColumn(columnOrder: string[]): string[] {
   return next;
 }
 
+function withFamilyColumn(columnOrder: string[]): string[] {
+  if (columnOrder.length === 0 || columnOrder.includes('family')) return columnOrder;
+  const next = [...columnOrder];
+  const farmerIndex = next.indexOf('farmer');
+  const insertAt = farmerIndex >= 0 ? farmerIndex : 0;
+  next.splice(insertAt, 0, 'family');
+  return next;
+}
+
 export function getColumnPreferences(): ColumnPreferences {
   const { hiddenColumnIds, columnOrder, customized } = useColumnPreferencesStore.getState();
   return {
     columnVisibility: customized
       ? visibilityFromHiddenIds(hiddenColumnIds)
       : builtInColumnVisibility(),
-    columnOrder: withRemarksColumn(
-      withContractUrlColumns(withContractDateColumn(withAddressColumns(columnOrder))),
+    columnOrder: withFamilyColumn(
+      withRemarksColumn(
+        withContractUrlColumns(withContractDateColumn(withAddressColumns(columnOrder))),
+      ),
     ),
   };
 }

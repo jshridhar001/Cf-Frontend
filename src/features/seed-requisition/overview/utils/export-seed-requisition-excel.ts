@@ -25,6 +25,7 @@ const SHEET_NAME = 'Seed Requisitions';
 const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
 const COLUMN_WIDTHS: Record<string, number> = {
+  family: 24,
   farmer: 28,
   state: 16,
   district: 16,

@@ -27,6 +27,7 @@ import {
 import {
   formatRequisitionDate,
   formatSeedRequisitionStatus,
+  getRequisitionFamilyLabel,
   getRequisitionPlaceName,
   type SeedRequisition,
 } from '@/features/seed-requisition/overview/types';
@@ -183,6 +184,20 @@ function farmerPlaceColumn(id: FarmerPlaceKey, header: string) {
 }
 
 export const columns = columnHelper.columns([
+  columnHelper.accessor((row) => getRequisitionFamilyLabel(row.farmer), {
+    id: 'family',
+    header: 'Family',
+    sortFn: 'text',
+    meta: { filterLabel: 'Family' },
+    cell: ({ getValue }) => {
+      const label = getValue();
+      return label === 'Independent' ? (
+        <span className="text-muted-foreground">{label}</span>
+      ) : (
+        <span className="font-medium">{label}</span>
+      );
+    },
+  }),
   columnHelper.accessor((row) => row.farmer?.name ?? 'Unknown farmer', {
     id: 'farmer',
     header: 'Farmer',

@@ -14,6 +14,12 @@ export type SeedRequisitionPlace = {
   pincode?: string | null;
 };
 
+export type SeedRequisitionFamily = {
+  id: string;
+  name: string;
+  accountNumber: string;
+};
+
 export type SeedRequisitionFarmer = {
   id?: string;
   name: string;
@@ -34,6 +40,7 @@ export type SeedRequisitionFarmer = {
   stateId?: string | null;
   pincodeId?: string | null;
   familyId?: string | null;
+  family?: SeedRequisitionFamily | null;
   createdAt?: string;
   updatedAt?: string;
   state?: SeedRequisitionPlace | null;
@@ -91,6 +98,10 @@ export function getRequisitionPlaceLabel(farmer?: SeedRequisitionFarmer | null):
   );
 }
 
+export function getRequisitionFamilyLabel(farmer?: SeedRequisitionFarmer | null): string {
+  return farmer?.family?.name?.trim() || 'Independent';
+}
+
 export type SeedRequisitionVariety = {
   id?: string;
   name: string;
@@ -139,6 +150,12 @@ export type ApiSeedRequisitionPlace = {
   updatedAt: string;
 };
 
+export type ApiSeedRequisitionFamily = {
+  id: string;
+  name: string;
+  accountNumber: string;
+};
+
 export type ApiSeedRequisitionFarmer = {
   id: string;
   name: string;
@@ -159,6 +176,7 @@ export type ApiSeedRequisitionFarmer = {
   stateId: string | null;
   pincodeId: string | null;
   familyId: string | null;
+  family: ApiSeedRequisitionFamily | null;
   createdAt: string;
   updatedAt: string;
   state: ApiSeedRequisitionPlace | null;
@@ -271,6 +289,13 @@ export function toSeedRequisition(row: ApiSeedRequisition): SeedRequisition {
       stateId: row.farmer.stateId,
       pincodeId: row.farmer.pincodeId,
       familyId: row.farmer.familyId,
+      family: row.farmer.family
+        ? {
+            id: row.farmer.family.id,
+            name: row.farmer.family.name,
+            accountNumber: row.farmer.family.accountNumber,
+          }
+        : null,
       createdAt: row.farmer.createdAt,
       updatedAt: row.farmer.updatedAt,
       state: row.farmer.state,

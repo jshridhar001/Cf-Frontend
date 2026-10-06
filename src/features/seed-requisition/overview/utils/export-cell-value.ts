@@ -4,6 +4,7 @@ import type { SeedRequisition } from '@/features/seed-requisition/overview/types
 import {
   formatRequisitionDate,
   formatSeedRequisitionStatus,
+  getRequisitionFamilyLabel,
   getRequisitionPlaceName,
   type SeedRequisitionPlace,
 } from '@/features/seed-requisition/overview/types';
@@ -95,6 +96,8 @@ function leafCellForColumn(requisition: SeedRequisition, columnId: string): Expo
       const accountNumber = requisition.farmer?.accountNumber;
       return textCell(accountNumber ? `${name} (#${accountNumber})` : name);
     }
+    case 'family':
+      return textCell(getRequisitionFamilyLabel(requisition.farmer));
     case 'state':
       return placeCell(requisition.farmer?.state);
     case 'district':
