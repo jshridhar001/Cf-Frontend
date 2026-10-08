@@ -67,61 +67,66 @@ function todayIsoDate() {
   return `${now.getFullYear()}-${month}-${day}`;
 }
 
-const formSchema = z
-  .object({
-    farmerId: z.string().min(1, 'Select a farmer.'),
-    varietyId: z.string().min(1, 'Select a variety.'),
-    quantityType: z.enum(QUANTITY_TYPES),
-    requestedBags: z.string(),
-    requestedAcres: z.string(),
-    contractDate: z.string().min(1, 'Contract date is required.'),
-    requisitionDate: z.string(),
-    requestedDeliveryDate: z.string(),
-    remarks: z.string(),
-    engContractUrl: z.string(),
-    hindiContractUrl: z.string(),
-  })
-  .superRefine((value, ctx) => {
-    if (value.engContractUrl.trim() && !isHttpUrl(value.engContractUrl.trim())) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['engContractUrl'],
-        message: 'Enter a valid URL.',
-      });
-    }
-    if (value.hindiContractUrl.trim() && !isHttpUrl(value.hindiContractUrl.trim())) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['hindiContractUrl'],
-        message: 'Enter a valid URL.',
-      });
-    }
-    if (value.quantityType === 'bags') {
-      const bags = Number(value.requestedBags);
-      if (!value.requestedBags.trim() || !Number.isInteger(bags) || bags <= 0) {
+function createFormSchema(allowZero: boolean) {
+  const isBelowMin = (quantity: number) => (allowZero ? quantity < 0 : quantity <= 0);
+  return z
+    .object({
+      farmerId: z.string().min(1, 'Select a farmer.'),
+      varietyId: z.string().min(1, 'Select a variety.'),
+      quantityType: z.enum(QUANTITY_TYPES),
+      requestedBags: z.string(),
+      requestedAcres: z.string(),
+      contractDate: z.string().min(1, 'Contract date is required.'),
+      requisitionDate: z.string(),
+      requestedDeliveryDate: z.string(),
+      remarks: z.string(),
+      engContractUrl: z.string(),
+      hindiContractUrl: z.string(),
+    })
+    .superRefine((value, ctx) => {
+      if (value.engContractUrl.trim() && !isHttpUrl(value.engContractUrl.trim())) {
         ctx.addIssue({
           code: 'custom',
-          path: ['requestedBags'],
-          message: 'Enter a whole number of bags greater than 0.',
+          path: ['engContractUrl'],
+          message: 'Enter a valid URL.',
         });
       }
-    } else {
-      const acres = Number(value.requestedAcres);
-      if (!value.requestedAcres.trim() || !Number.isFinite(acres) || acres <= 0) {
+      if (value.hindiContractUrl.trim() && !isHttpUrl(value.hindiContractUrl.trim())) {
         ctx.addIssue({
           code: 'custom',
-          path: ['requestedAcres'],
-          message: 'Enter acres greater than 0.',
-        });
-      } else if (!acresHasAtMostDecimals(value.requestedAcres, ACRES_MAX_DECIMALS)) {
-        ctx.addIssue({
-          code: 'custom',
-          path: ['requestedAcres'],
-          message: `Enter acres with up to ${ACRES_MAX_DECIMALS} decimal places.`,
+          path: ['hindiContractUrl'],
+          message: 'Enter a valid URL.',
         });
       }
-    }
-  });
+      if (value.quantityType === 'bags') {
+        const bags = Number(value.requestedBags);
+        if (!value.requestedBags.trim() || !Number.isInteger(bags) || isBelowMin(bags)) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['requestedBags'],
+            message: allowZero
+              ? 'Enter a whole number of bags, 0 or greater.'
+              : 'Enter a whole number of bags greater than 0.',
+          });
+        }
+      } else {
+        const acres = Number(value.requestedAcres);
+        if (!value.requestedAcres.trim() || !Number.isFinite(acres) || isBelowMin(acres)) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['requestedAcres'],
+            message: allowZero ? 'Enter acres, 0 or greater.' : 'Enter acres greater than 0.',
+          });
+        } else if (!acresHasAtMostDecimals(value.requestedAcres, ACRES_MAX_DECIMALS)) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['requestedAcres'],
+            message: `Enter acres with up to ${ACRES_MAX_DECIMALS} decimal places.`,
+          });
+        }
+      }
+    });
+}
 
 interface RequisitionFormProps {
   requisition?: SeedRequisition | null;
@@ -177,7 +182,7 @@ export function RequisitionForm({
       hindiContractUrl: requisition?.hindiContractUrl ?? '',
     },
     validators: {
-      onSubmit: formSchema,
+      onSubmit: createFormSchema(isEdit),
     },
     onSubmit: async ({ value }) => {
       const remarks = value.remarks.trim();
