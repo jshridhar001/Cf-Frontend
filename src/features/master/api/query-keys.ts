@@ -6,6 +6,10 @@ export const masterKeys = {
   generations: () => [...masterKeys.all, 'generations'] as const,
   seedSizes: () => [...masterKeys.all, 'seed-sizes'] as const,
   facilities: () => [...masterKeys.all, 'facilities'] as const,
+  facilityStock: (facilityId?: string) =>
+    facilityId
+      ? ([...masterKeys.all, 'facility-stock', facilityId] as const)
+      : ([...masterKeys.all, 'facility-stock'] as const),
   tuberSizes: () => [...masterKeys.all, 'tuber-sizes'] as const,
   addressMasters: (id: AddressMasterId) => [...masterKeys.all, 'addresses', id] as const,
 };

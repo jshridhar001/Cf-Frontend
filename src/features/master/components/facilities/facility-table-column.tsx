@@ -9,6 +9,7 @@ import type { Facility } from '@/features/master/types';
 export type FacilitiesTableRow = Facility;
 
 export type FacilitiesTableMeta = {
+  onView?: (facility: FacilitiesTableRow) => void;
   onEdit?: (facility: FacilitiesTableRow) => void;
   onDelete?: (facility: FacilitiesTableRow) => void;
 };
@@ -50,6 +51,7 @@ export const columns = columnHelper.columns([
       return (
         <div className="flex justify-end">
           <MasterRowActions
+            onView={() => meta?.onView?.(row.original)}
             onEdit={() => meta?.onEdit?.(row.original)}
             onDelete={() => meta?.onDelete?.(row.original)}
           />

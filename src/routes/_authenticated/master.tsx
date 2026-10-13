@@ -39,10 +39,18 @@ type TabValue = (typeof tabs)[number]['value'];
 function MasterLayout() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isFacilityPage = useRouterState({
+    select: (s) =>
+      s.matches.some((match) => match.routeId === '/_authenticated/master/facilities_/$id'),
+  });
 
   const activeTab =
     tabs.find((tab) => pathname === tab.to || pathname.startsWith(`${tab.to}/`))?.value ??
     'farmers';
+
+  if (isFacilityPage) {
+    return <Outlet />;
+  }
 
   return (
     <Tabs

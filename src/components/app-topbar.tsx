@@ -20,6 +20,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLogout } from '@/features/auth/api/use-logout';
 import { useMe } from '@/features/auth/api/use-me';
+import { env } from '@/lib/env';
 import { cn } from '@/lib/utils';
 
 const routeTitles: Record<string, string> = {
@@ -167,6 +168,11 @@ export function AppTopbar() {
         <h1 className="truncate text-lg font-semibold tracking-tight" title={pageTitle}>
           {pageTitle}
         </h1>
+        {env.isDevelopment ? (
+          <Badge className="ml-2 shrink-0 border-transparent bg-amber-500 font-medium text-white dark:bg-amber-400 dark:text-amber-950">
+            Development
+          </Badge>
+        ) : null}
       </div>
 
       <div className="ml-3 flex shrink-0 items-center gap-2">

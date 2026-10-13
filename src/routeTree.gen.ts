@@ -46,6 +46,7 @@ import { Route as AuthenticatedSeedRequisitionIdRouteImport } from './routes/_au
 import { Route as AuthenticatedSeedRequisitionAnalyticsRouteImport } from './routes/_authenticated/seed-requisition.analytics'
 import { Route as AuthenticatedSeedRequisitionOverviewRouteImport } from './routes/_authenticated/seed-requisition.overview'
 import { Route as AuthenticatedSeedRequisitionSettingsRouteImport } from './routes/_authenticated/seed-requisition.settings'
+import { Route as AuthenticatedMasterFacilitiesIdRouteImport } from './routes/_authenticated/master.facilities_.$id'
 import { Route as AuthenticatedSeedRequisitionIdIndexRouteImport } from './routes/_authenticated/seed-requisition.$id.index'
 import { Route as AuthenticatedSeedRequisitionIdContractRouteImport } from './routes/_authenticated/seed-requisition.$id.contract'
 
@@ -260,6 +261,12 @@ const AuthenticatedSeedRequisitionSettingsRoute =
     path: '/seed-requisition/settings',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedMasterFacilitiesIdRoute =
+  AuthenticatedMasterFacilitiesIdRouteImport.update({
+    id: '/facilities_/$id',
+    path: '/facilities/$id',
+    getParentRoute: () => AuthenticatedMasterRoute,
+  } as any)
 const AuthenticatedSeedRequisitionIdIndexRoute =
   AuthenticatedSeedRequisitionIdIndexRouteImport.update({
     id: '/',
@@ -310,6 +317,7 @@ export interface FileRoutesByFullPath {
   '/seed-requisition/analytics': typeof AuthenticatedSeedRequisitionAnalyticsRoute
   '/seed-requisition/overview': typeof AuthenticatedSeedRequisitionOverviewRoute
   '/seed-requisition/settings': typeof AuthenticatedSeedRequisitionSettingsRoute
+  '/master/facilities/$id': typeof AuthenticatedMasterFacilitiesIdRoute
   '/seed-requisition/$id/contract': typeof AuthenticatedSeedRequisitionIdContractRoute
   '/seed-requisition/$id/': typeof AuthenticatedSeedRequisitionIdIndexRoute
 }
@@ -349,6 +357,7 @@ export interface FileRoutesByTo {
   '/seed-requisition/analytics': typeof AuthenticatedSeedRequisitionAnalyticsRoute
   '/seed-requisition/overview': typeof AuthenticatedSeedRequisitionOverviewRoute
   '/seed-requisition/settings': typeof AuthenticatedSeedRequisitionSettingsRoute
+  '/master/facilities/$id': typeof AuthenticatedMasterFacilitiesIdRoute
   '/seed-requisition/$id/contract': typeof AuthenticatedSeedRequisitionIdContractRoute
   '/seed-requisition/$id': typeof AuthenticatedSeedRequisitionIdIndexRoute
 }
@@ -391,6 +400,7 @@ export interface FileRoutesById {
   '/_authenticated/seed-requisition/analytics': typeof AuthenticatedSeedRequisitionAnalyticsRoute
   '/_authenticated/seed-requisition/overview': typeof AuthenticatedSeedRequisitionOverviewRoute
   '/_authenticated/seed-requisition/settings': typeof AuthenticatedSeedRequisitionSettingsRoute
+  '/_authenticated/master/facilities_/$id': typeof AuthenticatedMasterFacilitiesIdRoute
   '/_authenticated/seed-requisition/$id/contract': typeof AuthenticatedSeedRequisitionIdContractRoute
   '/_authenticated/seed-requisition/$id/': typeof AuthenticatedSeedRequisitionIdIndexRoute
 }
@@ -433,6 +443,7 @@ export interface FileRouteTypes {
     | '/seed-requisition/analytics'
     | '/seed-requisition/overview'
     | '/seed-requisition/settings'
+    | '/master/facilities/$id'
     | '/seed-requisition/$id/contract'
     | '/seed-requisition/$id/'
   fileRoutesByTo: FileRoutesByTo
@@ -472,6 +483,7 @@ export interface FileRouteTypes {
     | '/seed-requisition/analytics'
     | '/seed-requisition/overview'
     | '/seed-requisition/settings'
+    | '/master/facilities/$id'
     | '/seed-requisition/$id/contract'
     | '/seed-requisition/$id'
   id:
@@ -513,6 +525,7 @@ export interface FileRouteTypes {
     | '/_authenticated/seed-requisition/analytics'
     | '/_authenticated/seed-requisition/overview'
     | '/_authenticated/seed-requisition/settings'
+    | '/_authenticated/master/facilities_/$id'
     | '/_authenticated/seed-requisition/$id/contract'
     | '/_authenticated/seed-requisition/$id/'
   fileRoutesById: FileRoutesById
@@ -786,6 +799,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSeedRequisitionSettingsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/master/facilities_/$id': {
+      id: '/_authenticated/master/facilities_/$id'
+      path: '/facilities/$id'
+      fullPath: '/master/facilities/$id'
+      preLoaderRoute: typeof AuthenticatedMasterFacilitiesIdRouteImport
+      parentRoute: typeof AuthenticatedMasterRoute
+    }
     '/_authenticated/seed-requisition/$id/': {
       id: '/_authenticated/seed-requisition/$id/'
       path: '/'
@@ -850,6 +870,7 @@ interface AuthenticatedMasterRouteChildren {
   AuthenticatedMasterSeedSizesRoute: typeof AuthenticatedMasterSeedSizesRoute
   AuthenticatedMasterTuberSizesRoute: typeof AuthenticatedMasterTuberSizesRoute
   AuthenticatedMasterVarietiesRoute: typeof AuthenticatedMasterVarietiesRoute
+  AuthenticatedMasterFacilitiesIdRoute: typeof AuthenticatedMasterFacilitiesIdRoute
 }
 
 const AuthenticatedMasterRouteChildren: AuthenticatedMasterRouteChildren = {
@@ -860,6 +881,7 @@ const AuthenticatedMasterRouteChildren: AuthenticatedMasterRouteChildren = {
   AuthenticatedMasterSeedSizesRoute: AuthenticatedMasterSeedSizesRoute,
   AuthenticatedMasterTuberSizesRoute: AuthenticatedMasterTuberSizesRoute,
   AuthenticatedMasterVarietiesRoute: AuthenticatedMasterVarietiesRoute,
+  AuthenticatedMasterFacilitiesIdRoute: AuthenticatedMasterFacilitiesIdRoute,
 }
 
 const AuthenticatedMasterRouteWithChildren =

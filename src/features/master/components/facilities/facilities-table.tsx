@@ -1,3 +1,4 @@
+import { useNavigate } from '@tanstack/react-router';
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -69,8 +70,13 @@ export function FacilitiesTable<TData extends RowData>({
   onEdit,
   onDelete,
 }: FacilitiesTableProps<TData>) {
+  const navigate = useNavigate();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+
+  const onView = (facility: FacilitiesTableRow) => {
+    void navigate({ to: '/master/facilities/$id', params: { id: facility.id } });
+  };
 
   const table = useTable({
     features: masterTableFeatures,
@@ -79,6 +85,7 @@ export function FacilitiesTable<TData extends RowData>({
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     meta: {
+      onView,
       onEdit,
       onDelete,
     } satisfies FacilitiesTableMeta,
@@ -208,6 +215,7 @@ export function FacilitiesTable<TData extends RowData>({
                   </ItemContent>
                   <ItemActions className="shrink-0 self-start">
                     <MasterRowActions
+                      onView={() => onView(facility)}
                       onEdit={() => onEdit?.(facility)}
                       onDelete={() => onDelete?.(facility)}
                     />

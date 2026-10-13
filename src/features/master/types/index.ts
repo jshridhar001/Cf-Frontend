@@ -93,6 +93,32 @@ export type FacilityMessageResponse = {
   message: string;
 };
 
+export type FacilityStock = {
+  id: string;
+  facilityId: string;
+  varietyId: string;
+  sizeId: string;
+  generationId: string;
+  quantity: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type FacilityStockResponse = {
+  success: boolean;
+  data: FacilityStock;
+};
+
+export type FacilityStocksResponse = {
+  success: boolean;
+  data: FacilityStock[];
+};
+
+export type FacilityStockMessageResponse = {
+  success: boolean;
+  message: string;
+};
+
 export type TuberSize = {
   id: string;
   name: string;
