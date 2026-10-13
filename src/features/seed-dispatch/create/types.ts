@@ -4,6 +4,7 @@ export type DispatchableRequisition = {
     name: string;
     accountNumber: number;
   };
+  varietyId: string;
   variety: {
     name: string;
   };

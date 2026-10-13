@@ -6,6 +6,7 @@ export type DispatchFacilityOption = {
 export type DispatchSizeOption = {
   id: string;
   name: string;
+  varietyId: string;
   bagsPerAcre: number | null;
 };
 
@@ -22,7 +23,7 @@ export type DispatchFormOptions = {
 
 export function buildDispatchFormOptions(input: {
   facilities: Array<{ id: string; name: string; usedIn?: string }>;
-  sizes: Array<{ id: string; name: string; seedBagsPerAcre?: number | null }>;
+  sizes: Array<{ id: string; name: string; varietyId: string; seedBagsPerAcre?: number | null }>;
   generations: Array<{ id: string; name: string }>;
 }): DispatchFormOptions {
   const dispatchFacilities = input.facilities.filter(
@@ -36,6 +37,7 @@ export function buildDispatchFormOptions(input: {
     sizes: input.sizes.map((size) => ({
       id: size.id,
       name: size.name,
+      varietyId: size.varietyId,
       bagsPerAcre: size.seedBagsPerAcre ?? null,
     })),
     generations: input.generations.map((generation) => ({

@@ -3,20 +3,29 @@ import apiClient from '@/lib/api-client';
 import type { SeedSize, SeedSizesResponse } from '../types';
 import { masterKeys } from './query-keys';
 
-async function fetchSeedSizes(): Promise<SeedSize[]> {
-  const { data } = await apiClient.get<SeedSizesResponse>('/v1/masters/seed-sizes');
+async function fetchSeedSizes(varietyId?: string): Promise<SeedSize[]> {
+  const { data } = await apiClient.get<SeedSizesResponse>('/v1/masters/seed-sizes', {
+    params: varietyId ? { varietyId } : undefined,
+  });
   return data.data;
 }
 
-export function seedSizesQueryOptions() {
+export function seedSizesQueryOptions(varietyId?: string) {
   return queryOptions({
-    queryKey: masterKeys.seedSizes(),
-    queryFn: fetchSeedSizes,
+    queryKey: masterKeys.seedSizes(varietyId),
+    queryFn: () => fetchSeedSizes(varietyId),
     staleTime: 1000 * 30,
     retry: false,
   });
 }
 
-export function useSeedSizes() {
-  return useQuery(seedSizesQueryOptions());
+type UseSeedSizesOptions = {
+  enabled?: boolean;
+};
+
+export function useSeedSizes(varietyId?: string, options?: UseSeedSizesOptions) {
+  return useQuery({
+    ...seedSizesQueryOptions(varietyId),
+    enabled: options?.enabled ?? true,
+  });
 }

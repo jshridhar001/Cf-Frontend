@@ -23,15 +23,17 @@ const formSchema = z.object({
 
 export type CreateSeedSizeFormValues = {
   name: string;
+  varietyId: string;
   seedBagsPerAcre?: number;
 };
 
 interface CreateSeedSizeFormProps {
+  varietyId: string;
   onSuccess?: (values: CreateSeedSizeFormValues) => void;
   onCancel?: () => void;
 }
 
-export function CreateSeedSizeForm({ onSuccess, onCancel }: CreateSeedSizeFormProps) {
+export function CreateSeedSizeForm({ varietyId, onSuccess, onCancel }: CreateSeedSizeFormProps) {
   const { mutateAsync: createSeedSize, isPending } = useCreateSeedSize();
 
   const form = useForm({
@@ -46,6 +48,7 @@ export function CreateSeedSizeForm({ onSuccess, onCancel }: CreateSeedSizeFormPr
       const trimmedBags = value.seedBagsPerAcre.trim();
       const submitted: CreateSeedSizeFormValues = {
         name: value.name.trim(),
+        varietyId,
         ...(trimmedBags !== '' ? { seedBagsPerAcre: Number(trimmedBags) } : {}),
       };
 

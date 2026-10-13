@@ -2,12 +2,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { masterKeys } from '@/features/master/api/query-keys';
 import type { SeedSizeResponse } from '@/features/master/types';
-import { formatSeedSize } from '@/lib/format-seed-size';
 import apiClient, { getApiErrorMessage } from '@/lib/api-client';
+import { formatSeedSize } from '@/lib/format-seed-size';
 
 export type UpdateSeedSizeVariables = {
   seedSizeId: string;
   name: string;
+  varietyId: string;
   seedBagsPerAcre: number | null;
 };
 
@@ -16,10 +17,15 @@ export function useUpdateSeedSize() {
 
   return useMutation({
     mutationKey: ['master', 'update-seed-size'],
-    mutationFn: async ({ seedSizeId, name, seedBagsPerAcre }: UpdateSeedSizeVariables) => {
+    mutationFn: async ({
+      seedSizeId,
+      name,
+      varietyId,
+      seedBagsPerAcre,
+    }: UpdateSeedSizeVariables) => {
       const { data } = await apiClient.put<SeedSizeResponse>(
         `/v1/masters/seed-sizes/${seedSizeId}`,
-        { name, seedBagsPerAcre },
+        { name, varietyId, seedBagsPerAcre },
       );
       return data.data;
     },

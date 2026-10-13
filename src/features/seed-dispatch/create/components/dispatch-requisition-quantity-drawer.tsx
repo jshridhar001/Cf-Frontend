@@ -206,6 +206,20 @@ function getAcresRowLimits(
   });
 }
 
+function sizesForLine(
+  sizes: DispatchSizeOption[],
+  varietyId: string,
+  selectedSizeId: string,
+): DispatchSizeOption[] {
+  const forVariety = sizes.filter((size) => size.varietyId === varietyId);
+  if (!selectedSizeId || forVariety.some((size) => size.id === selectedSizeId)) {
+    return forVariety;
+  }
+
+  const selected = sizes.find((size) => size.id === selectedSizeId);
+  return selected ? [selected, ...forVariety] : forVariety;
+}
+
 function getSuggestedQuantityForRow(
   requisition: DispatchableRequisition,
   size: DispatchSizeOption | undefined,
@@ -634,7 +648,7 @@ export function DispatchRequisitionQuantityDrawer({
                     key={row.key}
                     row={row}
                     facilities={facilities}
-                    sizes={sizes}
+                    sizes={sizesForLine(sizes, requisition.varietyId, row.sizeId)}
                     generations={generations}
                     usedCombinationKeys={duplicateCombinationKeys}
                     isOverLimit={rowOverLimit}

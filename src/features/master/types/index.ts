@@ -45,7 +45,9 @@ export type GenerationMessageResponse = {
 export type SeedSize = {
   id: string;
   name: string;
+  varietyId: string;
   seedBagsPerAcre: number | null;
+  variety: Variety;
   createdAt: string;
   updatedAt: string;
 };

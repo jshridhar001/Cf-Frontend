@@ -56,6 +56,7 @@ export function mapSeedRequisitionToDispatchable(
       name: requisition.farmer?.name ?? '',
       accountNumber: Number.isFinite(accountNumber) ? accountNumber : 0,
     },
+    varietyId: requisition.varietyId,
     variety: {
       name: requisition.variety?.name ?? '',
     },

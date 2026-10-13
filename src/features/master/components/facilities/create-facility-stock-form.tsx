@@ -1,6 +1,7 @@
 'use client';
 
 import { useForm } from '@tanstack/react-form';
+import type { ReactNode } from 'react';
 import * as z from 'zod';
 
 import { SearchableOptionCombobox } from '@/components/searchable-option-combobox';
@@ -11,6 +12,7 @@ import { useCreateFacilityStock } from '@/features/master/api/use-create-facilit
 import { useGenerations } from '@/features/master/api/use-generations';
 import { useSeedSizes } from '@/features/master/api/use-seed-sizes';
 import { useVarieties } from '@/features/master/api/use-varieties';
+import type { SeedSize } from '@/features/master/types';
 
 const quantitySchema = z
   .string()
@@ -32,6 +34,20 @@ interface CreateFacilityStockFormProps {
   onCancel?: () => void;
 }
 
+function VarietySeedSizes({
+  varietyId,
+  children,
+}: {
+  varietyId: string;
+  children: (seedSizes: SeedSize[]) => ReactNode;
+}) {
+  const { data: seedSizes = [] } = useSeedSizes(varietyId, {
+    enabled: varietyId.length > 0,
+  });
+
+  return children(varietyId ? seedSizes : []);
+}
+
 export function CreateFacilityStockForm({
   facilityId,
   onSuccess,
@@ -39,7 +55,6 @@ export function CreateFacilityStockForm({
 }: CreateFacilityStockFormProps) {
   const { mutateAsync: createFacilityStock, isPending } = useCreateFacilityStock();
   const { data: varieties = [] } = useVarieties();
-  const { data: seedSizes = [] } = useSeedSizes();
   const { data: generations = [] } = useGenerations();
 
   const form = useForm({
@@ -85,7 +100,10 @@ export function CreateFacilityStockForm({
                   id={field.name}
                   name={field.name}
                   value={field.state.value}
-                  onValueChange={field.handleChange}
+                  onValueChange={(value) => {
+                    field.handleChange(value);
+                    form.setFieldValue('sizeId', '');
+                  }}
                   onBlur={field.handleBlur}
                   isInvalid={isInvalid}
                   placeholder="Select a variety"
@@ -94,33 +112,6 @@ export function CreateFacilityStockForm({
                   options={varieties.map((variety) => ({
                     id: variety.id,
                     label: variety.name,
-                  }))}
-                />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-              </Field>
-            );
-          }}
-        </form.Field>
-
-        <form.Field name="sizeId">
-          {(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-            return (
-              <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Seed size</FieldLabel>
-                <SearchableOptionCombobox
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onValueChange={field.handleChange}
-                  onBlur={field.handleBlur}
-                  isInvalid={isInvalid}
-                  placeholder="Select a seed size"
-                  emptyMessage="No seed sizes found"
-                  disabled={isPending}
-                  options={seedSizes.map((size) => ({
-                    id: size.id,
-                    label: size.name,
                   }))}
                 />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
@@ -155,6 +146,41 @@ export function CreateFacilityStockForm({
             );
           }}
         </form.Field>
+
+        <form.Subscribe selector={(state) => state.values.varietyId}>
+          {(varietyId) => (
+            <VarietySeedSizes varietyId={varietyId}>
+              {(seedSizes) => (
+                <form.Field name="sizeId">
+                  {(field) => {
+                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid}>
+                        <FieldLabel htmlFor={field.name}>Seed size</FieldLabel>
+                        <SearchableOptionCombobox
+                          id={field.name}
+                          name={field.name}
+                          value={field.state.value}
+                          onValueChange={field.handleChange}
+                          onBlur={field.handleBlur}
+                          isInvalid={isInvalid}
+                          placeholder={varietyId ? 'Select a seed size' : 'Select a variety first'}
+                          emptyMessage="No seed sizes found"
+                          disabled={isPending || !varietyId}
+                          options={seedSizes.map((size) => ({
+                            id: size.id,
+                            label: size.name,
+                          }))}
+                        />
+                        {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                      </Field>
+                    );
+                  }}
+                </form.Field>
+              )}
+            </VarietySeedSizes>
+          )}
+        </form.Subscribe>
 
         <form.Field name="quantity">
           {(field) => {

@@ -20,7 +20,7 @@ export function CreateFacilityStockDrawer({
       open={open}
       onOpenChange={onOpenChange}
       title="Add Stock"
-      description="Add variety, seed size, generation, and quantity for this facility."
+      description="Add variety, generation, seed size, and quantity for this facility."
       isMutating={isCreating}
     >
       <CreateFacilityStockForm

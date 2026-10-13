@@ -54,6 +54,7 @@ export function EditSeedSizeForm({ seedSize, onSuccess, onCancel }: EditSeedSize
       await updateSeedSize({
         seedSizeId: seedSize.id,
         name: submitted.name,
+        varietyId: seedSize.varietyId,
         seedBagsPerAcre: submitted.seedBagsPerAcre,
       });
       onSuccess?.(submitted);
