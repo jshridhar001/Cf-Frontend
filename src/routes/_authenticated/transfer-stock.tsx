@@ -1,9 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Outlet } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_authenticated/transfer-stock')({
-  component: RouteComponent,
-})
+  component: TransferStockLayout,
+});
 
-function RouteComponent() {
-  return <div>Hello "/_authenticated/transfer-stock"!</div>
+function TransferStockLayout() {
+  return <Outlet />;
 }

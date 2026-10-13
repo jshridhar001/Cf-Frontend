@@ -46,6 +46,9 @@ import { Route as AuthenticatedSeedRequisitionIdRouteImport } from './routes/_au
 import { Route as AuthenticatedSeedRequisitionAnalyticsRouteImport } from './routes/_authenticated/seed-requisition.analytics'
 import { Route as AuthenticatedSeedRequisitionOverviewRouteImport } from './routes/_authenticated/seed-requisition.overview'
 import { Route as AuthenticatedSeedRequisitionSettingsRouteImport } from './routes/_authenticated/seed-requisition.settings'
+import { Route as AuthenticatedTransferStockIndexRouteImport } from './routes/_authenticated/transfer-stock.index'
+import { Route as AuthenticatedTransferStockIdRouteImport } from './routes/_authenticated/transfer-stock.$id'
+import { Route as AuthenticatedTransferStockCreateRouteImport } from './routes/_authenticated/transfer-stock.create'
 import { Route as AuthenticatedMasterFacilitiesIdRouteImport } from './routes/_authenticated/master.facilities_.$id'
 import { Route as AuthenticatedSeedRequisitionIdIndexRouteImport } from './routes/_authenticated/seed-requisition.$id.index'
 import { Route as AuthenticatedSeedRequisitionIdContractRouteImport } from './routes/_authenticated/seed-requisition.$id.contract'
@@ -261,6 +264,24 @@ const AuthenticatedSeedRequisitionSettingsRoute =
     path: '/seed-requisition/settings',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedTransferStockIndexRoute =
+  AuthenticatedTransferStockIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedTransferStockRoute,
+  } as any)
+const AuthenticatedTransferStockIdRoute =
+  AuthenticatedTransferStockIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedTransferStockRoute,
+  } as any)
+const AuthenticatedTransferStockCreateRoute =
+  AuthenticatedTransferStockCreateRouteImport.update({
+    id: '/create',
+    path: '/create',
+    getParentRoute: () => AuthenticatedTransferStockRoute,
+  } as any)
 const AuthenticatedMasterFacilitiesIdRoute =
   AuthenticatedMasterFacilitiesIdRouteImport.update({
     id: '/facilities_/$id',
@@ -291,7 +312,7 @@ export interface FileRoutesByFullPath {
   '/master': typeof AuthenticatedMasterRouteWithChildren
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
-  '/transfer-stock': typeof AuthenticatedTransferStockRoute
+  '/transfer-stock': typeof AuthenticatedTransferStockRouteWithChildren
   '/access-control/permissions': typeof AuthenticatedAccessControlPermissionsRoute
   '/access-control/sessions': typeof AuthenticatedAccessControlSessionsRoute
   '/access-control/users': typeof AuthenticatedAccessControlUsersRoute
@@ -317,6 +338,9 @@ export interface FileRoutesByFullPath {
   '/seed-requisition/analytics': typeof AuthenticatedSeedRequisitionAnalyticsRoute
   '/seed-requisition/overview': typeof AuthenticatedSeedRequisitionOverviewRoute
   '/seed-requisition/settings': typeof AuthenticatedSeedRequisitionSettingsRoute
+  '/transfer-stock/$id': typeof AuthenticatedTransferStockIdRoute
+  '/transfer-stock/create': typeof AuthenticatedTransferStockCreateRoute
+  '/transfer-stock/': typeof AuthenticatedTransferStockIndexRoute
   '/master/facilities/$id': typeof AuthenticatedMasterFacilitiesIdRoute
   '/seed-requisition/$id/contract': typeof AuthenticatedSeedRequisitionIdContractRoute
   '/seed-requisition/$id/': typeof AuthenticatedSeedRequisitionIdIndexRoute
@@ -332,7 +356,6 @@ export interface FileRoutesByTo {
   '/master': typeof AuthenticatedMasterRouteWithChildren
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
-  '/transfer-stock': typeof AuthenticatedTransferStockRoute
   '/access-control/permissions': typeof AuthenticatedAccessControlPermissionsRoute
   '/access-control/sessions': typeof AuthenticatedAccessControlSessionsRoute
   '/access-control/users': typeof AuthenticatedAccessControlUsersRoute
@@ -357,6 +380,9 @@ export interface FileRoutesByTo {
   '/seed-requisition/analytics': typeof AuthenticatedSeedRequisitionAnalyticsRoute
   '/seed-requisition/overview': typeof AuthenticatedSeedRequisitionOverviewRoute
   '/seed-requisition/settings': typeof AuthenticatedSeedRequisitionSettingsRoute
+  '/transfer-stock/$id': typeof AuthenticatedTransferStockIdRoute
+  '/transfer-stock/create': typeof AuthenticatedTransferStockCreateRoute
+  '/transfer-stock': typeof AuthenticatedTransferStockIndexRoute
   '/master/facilities/$id': typeof AuthenticatedMasterFacilitiesIdRoute
   '/seed-requisition/$id/contract': typeof AuthenticatedSeedRequisitionIdContractRoute
   '/seed-requisition/$id': typeof AuthenticatedSeedRequisitionIdIndexRoute
@@ -374,7 +400,7 @@ export interface FileRoutesById {
   '/_authenticated/master': typeof AuthenticatedMasterRouteWithChildren
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
-  '/_authenticated/transfer-stock': typeof AuthenticatedTransferStockRoute
+  '/_authenticated/transfer-stock': typeof AuthenticatedTransferStockRouteWithChildren
   '/_authenticated/access-control/permissions': typeof AuthenticatedAccessControlPermissionsRoute
   '/_authenticated/access-control/sessions': typeof AuthenticatedAccessControlSessionsRoute
   '/_authenticated/access-control/users': typeof AuthenticatedAccessControlUsersRoute
@@ -400,6 +426,9 @@ export interface FileRoutesById {
   '/_authenticated/seed-requisition/analytics': typeof AuthenticatedSeedRequisitionAnalyticsRoute
   '/_authenticated/seed-requisition/overview': typeof AuthenticatedSeedRequisitionOverviewRoute
   '/_authenticated/seed-requisition/settings': typeof AuthenticatedSeedRequisitionSettingsRoute
+  '/_authenticated/transfer-stock/$id': typeof AuthenticatedTransferStockIdRoute
+  '/_authenticated/transfer-stock/create': typeof AuthenticatedTransferStockCreateRoute
+  '/_authenticated/transfer-stock/': typeof AuthenticatedTransferStockIndexRoute
   '/_authenticated/master/facilities_/$id': typeof AuthenticatedMasterFacilitiesIdRoute
   '/_authenticated/seed-requisition/$id/contract': typeof AuthenticatedSeedRequisitionIdContractRoute
   '/_authenticated/seed-requisition/$id/': typeof AuthenticatedSeedRequisitionIdIndexRoute
@@ -443,6 +472,9 @@ export interface FileRouteTypes {
     | '/seed-requisition/analytics'
     | '/seed-requisition/overview'
     | '/seed-requisition/settings'
+    | '/transfer-stock/$id'
+    | '/transfer-stock/create'
+    | '/transfer-stock/'
     | '/master/facilities/$id'
     | '/seed-requisition/$id/contract'
     | '/seed-requisition/$id/'
@@ -458,7 +490,6 @@ export interface FileRouteTypes {
     | '/master'
     | '/messages'
     | '/notifications'
-    | '/transfer-stock'
     | '/access-control/permissions'
     | '/access-control/sessions'
     | '/access-control/users'
@@ -483,6 +514,9 @@ export interface FileRouteTypes {
     | '/seed-requisition/analytics'
     | '/seed-requisition/overview'
     | '/seed-requisition/settings'
+    | '/transfer-stock/$id'
+    | '/transfer-stock/create'
+    | '/transfer-stock'
     | '/master/facilities/$id'
     | '/seed-requisition/$id/contract'
     | '/seed-requisition/$id'
@@ -525,6 +559,9 @@ export interface FileRouteTypes {
     | '/_authenticated/seed-requisition/analytics'
     | '/_authenticated/seed-requisition/overview'
     | '/_authenticated/seed-requisition/settings'
+    | '/_authenticated/transfer-stock/$id'
+    | '/_authenticated/transfer-stock/create'
+    | '/_authenticated/transfer-stock/'
     | '/_authenticated/master/facilities_/$id'
     | '/_authenticated/seed-requisition/$id/contract'
     | '/_authenticated/seed-requisition/$id/'
@@ -799,6 +836,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSeedRequisitionSettingsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/transfer-stock/': {
+      id: '/_authenticated/transfer-stock/'
+      path: '/'
+      fullPath: '/transfer-stock/'
+      preLoaderRoute: typeof AuthenticatedTransferStockIndexRouteImport
+      parentRoute: typeof AuthenticatedTransferStockRoute
+    }
+    '/_authenticated/transfer-stock/$id': {
+      id: '/_authenticated/transfer-stock/$id'
+      path: '/$id'
+      fullPath: '/transfer-stock/$id'
+      preLoaderRoute: typeof AuthenticatedTransferStockIdRouteImport
+      parentRoute: typeof AuthenticatedTransferStockRoute
+    }
+    '/_authenticated/transfer-stock/create': {
+      id: '/_authenticated/transfer-stock/create'
+      path: '/create'
+      fullPath: '/transfer-stock/create'
+      preLoaderRoute: typeof AuthenticatedTransferStockCreateRouteImport
+      parentRoute: typeof AuthenticatedTransferStockRoute
+    }
     '/_authenticated/master/facilities_/$id': {
       id: '/_authenticated/master/facilities_/$id'
       path: '/facilities/$id'
@@ -887,6 +945,25 @@ const AuthenticatedMasterRouteChildren: AuthenticatedMasterRouteChildren = {
 const AuthenticatedMasterRouteWithChildren =
   AuthenticatedMasterRoute._addFileChildren(AuthenticatedMasterRouteChildren)
 
+interface AuthenticatedTransferStockRouteChildren {
+  AuthenticatedTransferStockIdRoute: typeof AuthenticatedTransferStockIdRoute
+  AuthenticatedTransferStockCreateRoute: typeof AuthenticatedTransferStockCreateRoute
+  AuthenticatedTransferStockIndexRoute: typeof AuthenticatedTransferStockIndexRoute
+}
+
+const AuthenticatedTransferStockRouteChildren: AuthenticatedTransferStockRouteChildren =
+  {
+    AuthenticatedTransferStockIdRoute: AuthenticatedTransferStockIdRoute,
+    AuthenticatedTransferStockCreateRoute:
+      AuthenticatedTransferStockCreateRoute,
+    AuthenticatedTransferStockIndexRoute: AuthenticatedTransferStockIndexRoute,
+  }
+
+const AuthenticatedTransferStockRouteWithChildren =
+  AuthenticatedTransferStockRoute._addFileChildren(
+    AuthenticatedTransferStockRouteChildren,
+  )
+
 interface AuthenticatedSeedRequisitionIdRouteChildren {
   AuthenticatedSeedRequisitionIdContractRoute: typeof AuthenticatedSeedRequisitionIdContractRoute
   AuthenticatedSeedRequisitionIdIndexRoute: typeof AuthenticatedSeedRequisitionIdIndexRoute
@@ -912,7 +989,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedMasterRoute: typeof AuthenticatedMasterRouteWithChildren
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
-  AuthenticatedTransferStockRoute: typeof AuthenticatedTransferStockRoute
+  AuthenticatedTransferStockRoute: typeof AuthenticatedTransferStockRouteWithChildren
   AuthenticatedSeedDispatchesIdRoute: typeof AuthenticatedSeedDispatchesIdRoute
   AuthenticatedSeedDispatchesAnalyticsRoute: typeof AuthenticatedSeedDispatchesAnalyticsRoute
   AuthenticatedSeedDispatchesCreateRoute: typeof AuthenticatedSeedDispatchesCreateRoute
@@ -932,7 +1009,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedMasterRoute: AuthenticatedMasterRouteWithChildren,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
-  AuthenticatedTransferStockRoute: AuthenticatedTransferStockRoute,
+  AuthenticatedTransferStockRoute: AuthenticatedTransferStockRouteWithChildren,
   AuthenticatedSeedDispatchesIdRoute: AuthenticatedSeedDispatchesIdRoute,
   AuthenticatedSeedDispatchesAnalyticsRoute:
     AuthenticatedSeedDispatchesAnalyticsRoute,

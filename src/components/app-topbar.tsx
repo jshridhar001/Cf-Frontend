@@ -40,6 +40,7 @@ const routeTitles: Record<string, string> = {
   '/seed-dispatches/analytics': 'Seed-Dispatches',
   '/seed-dispatches/settings': 'Seed-Dispatches',
   '/transfer-stock': 'Transfer Stock',
+  '/transfer-stock/create': 'Transfer Stock',
   '/master': 'Master',
   '/master/farmers': 'Master',
   '/master/addresses': 'Master',
@@ -155,7 +156,9 @@ export function AppTopbar() {
       ? 'Farmers'
       : pathname.startsWith('/seed-requisition/')
         ? 'Seed Requisition'
-        : 'Dashboard');
+        : pathname.startsWith('/transfer-stock')
+          ? 'Transfer Stock'
+          : 'Dashboard');
 
   return (
     <header className={cn('flex h-14 shrink-0 items-center border-b bg-background px-4')}>
