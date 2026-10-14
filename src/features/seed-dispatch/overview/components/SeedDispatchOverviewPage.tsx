@@ -53,9 +53,12 @@ import {
   isActiveCondition,
   isAdvancedGlobalFilter,
 } from '@/features/seed-dispatch/overview/lib/filter-fns';
-import { hasActiveFilters } from '@/features/seed-dispatch/overview/lib/search';
+import {
+  hasActiveFilters,
+  type SeedDispatchSearch,
+} from '@/features/seed-dispatch/overview/lib/search';
 import { summarizeDispatches } from '@/features/seed-dispatch/overview/lib/summary';
-import type { SeedDispatchStatus } from '@/features/seed-dispatch/overview/types';
+import type { SeedDispatch, SeedDispatchStatus } from '@/features/seed-dispatch/overview/types';
 import {
   formatSeedDispatchStatus,
   isSeedDispatchStatus,
@@ -81,6 +84,16 @@ function getDefaultOverviewLayout(): OverviewLayout {
   return window.matchMedia(DESKTOP_LAYOUT_QUERY).matches ? 'table' : 'cards';
 }
 
+function includesFarmer(dispatch: SeedDispatch, farmerId: string) {
+  return dispatch.dispatchRequisitions.some((stop) => stop.requisition.farmerId === farmerId);
+}
+
+type SeedDispatchListProps = {
+  search: SeedDispatchSearch;
+  onSearchChange: (updater: (prev: SeedDispatchSearch) => SeedDispatchSearch) => void;
+  lockedFarmerId?: string;
+};
+
 function SeedDispatchOverviewSkeleton() {
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-4 sm:gap-6">
@@ -102,9 +115,25 @@ function SeedDispatchOverviewSkeleton() {
 }
 
 export default function SeedDispatchOverviewPage() {
-  const queryClient = useQueryClient();
-  const searchParams = overviewRoute.useSearch();
+  const search = overviewRoute.useSearch();
   const navigate = overviewRoute.useNavigate();
+
+  return (
+    <SeedDispatchList
+      search={search}
+      onSearchChange={(updater) => {
+        void navigate({ search: updater });
+      }}
+    />
+  );
+}
+
+export function SeedDispatchList({
+  search: listSearch,
+  onSearchChange,
+  lockedFarmerId,
+}: SeedDispatchListProps) {
+  const queryClient = useQueryClient();
   const { data, isPending, isError, error, isFetching } = useSeedDispatches();
   const {
     data: requisitions,
@@ -120,14 +149,23 @@ export default function SeedDispatchOverviewPage() {
     pageSize: SEED_DISPATCH_PAGE_SIZE,
   });
 
-  const dispatchList = data ?? [];
+  const dispatchList = useMemo(() => {
+    const rows = data ?? [];
+    if (!lockedFarmerId) return rows;
+    return rows.filter((dispatch) => includesFarmer(dispatch, lockedFarmerId));
+  }, [data, lockedFarmerId]);
+  const scopedRequisitions = useMemo(() => {
+    const rows = requisitions ?? [];
+    if (!lockedFarmerId) return rows;
+    return rows.filter((requisition) => requisition.farmerId === lockedFarmerId);
+  }, [requisitions, lockedFarmerId]);
   const hasSearch = search.trim().length > 0;
-  const isAwaiting = searchParams.status === 'AWAITING_DISPATCH';
+  const isAwaiting = listSearch.status === 'AWAITING_DISPATCH';
   const searchQuery = search.trim().toLowerCase();
 
   const approvedRequisitions = useMemo(
-    () => (requisitions ?? []).filter(isApprovedRequisition),
-    [requisitions],
+    () => scopedRequisitions.filter(isApprovedRequisition),
+    [scopedRequisitions],
   );
   const filteredAwaiting = useMemo(() => {
     if (!searchQuery) return approvedRequisitions;
@@ -140,15 +178,15 @@ export default function SeedDispatchOverviewPage() {
     const dispatchSummary = summarizeDispatches(dispatchList);
     return {
       ...dispatchSummary,
-      AWAITING_DISPATCH: summarizeApprovedRequisitions(requisitions ?? []),
+      AWAITING_DISPATCH: summarizeApprovedRequisitions(scopedRequisitions),
     };
-  }, [dispatchList, requisitions]);
+  }, [dispatchList, scopedRequisitions]);
 
   const table = useDispatchesTable({
     data: dispatchList,
     pagination,
     onPaginationChange: setPagination,
-    status: isAwaiting ? undefined : searchParams.status,
+    status: isAwaiting ? undefined : listSearch.status,
   });
   const awaitingTable = useAwaitingRequisitionsTable({
     data: filteredAwaiting,
@@ -166,17 +204,15 @@ export default function SeedDispatchOverviewPage() {
     table.state.grouping.length > 0 ||
     (isAdvancedGlobalFilter(table.state.globalFilter) &&
       table.state.globalFilter.conditions.some(isActiveCondition));
-  const hasFilters = hasSearch || hasActiveFilters(searchParams) || tableFiltersActive;
+  const hasFilters = hasSearch || hasActiveFilters(listSearch) || tableFiltersActive;
 
   const setStatusFilter = (status: SeedDispatchStatus | undefined) => {
-    void navigate({
-      search: (prev) => {
-        if (!status) {
-          const { status: _status, ...rest } = prev;
-          return rest;
-        }
-        return { ...prev, status };
-      },
+    onSearchChange((prev) => {
+      if (!status) {
+        const { status: _status, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, status };
     });
   };
 
@@ -207,22 +243,24 @@ export default function SeedDispatchOverviewPage() {
       }}
       className="flex min-w-0 flex-1 flex-col gap-4 sm:gap-6"
     >
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-2">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10">
-            <Truck className="size-4 text-primary" aria-hidden />
+      {lockedFarmerId ? null : (
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10">
+              <Truck className="size-4 text-primary" aria-hidden />
+            </div>
+            <h1 className="scroll-m-20 text-2xl font-semibold tracking-tight">Seed Dispatches</h1>
           </div>
-          <h1 className="scroll-m-20 text-2xl font-semibold tracking-tight">Seed Dispatches</h1>
+          <p className="hidden text-sm text-muted-foreground sm:block">
+            Manage seed dispatches and track requisitions awaiting fulfillment.
+          </p>
         </div>
-        <p className="hidden text-sm text-muted-foreground sm:block">
-          Manage seed dispatches and track requisitions awaiting fulfillment.
-        </p>
-      </div>
+      )}
 
       {data !== undefined && !isError ? (
         <DispatchSummaryCards
           summary={summary}
-          selectedStatus={searchParams.status}
+          selectedStatus={listSearch.status}
           onSelect={setStatusFilter}
         />
       ) : null}
@@ -284,7 +322,7 @@ export default function SeedDispatchOverviewPage() {
         <div className="flex flex-col gap-3 bg-muted/20 p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-4">
           <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
             <Select
-              value={searchParams.status ?? ALL_STATUSES}
+              value={listSearch.status ?? ALL_STATUSES}
               onValueChange={(value) => {
                 if (!value) return;
                 if (value === ALL_STATUSES) {

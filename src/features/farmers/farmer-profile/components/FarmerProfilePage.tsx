@@ -27,7 +27,7 @@ function FarmerProfileSkeleton() {
   return (
     <div className="flex flex-col gap-4">
       <Skeleton className="h-56 w-full rounded-xl" />
-      <Skeleton className="h-11 w-full rounded-full sm:w-96" />
+      <Skeleton className="h-11 w-full rounded-full" />
       <Skeleton className="h-36 w-full rounded-xl" />
     </div>
   );

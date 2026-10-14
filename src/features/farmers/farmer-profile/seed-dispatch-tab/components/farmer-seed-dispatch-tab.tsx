@@ -1,15 +1,20 @@
-import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
-import { CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
+import type { Farmer } from '@/features/farmers/overview/types';
+import { SeedDispatchList } from '@/features/seed-dispatch/overview/components/SeedDispatchOverviewPage';
+import type { SeedDispatchSearch } from '@/features/seed-dispatch/overview/lib/search';
+import type { SeedDispatchStatus } from '@/features/seed-dispatch/overview/types';
 
-export function FarmerSeedDispatchTab() {
+export function FarmerSeedDispatchTab({ farmer }: { farmer: Farmer }) {
+  const [status, setStatus] = useState<SeedDispatchStatus | undefined>();
+  const search: SeedDispatchSearch = { status };
+
   return (
-    <PageCard>
-      <PageCardHeader>
-        <CardTitle>Seed Dispatches</CardTitle>
-      </PageCardHeader>
-      <PageCardContent>
-        <p className="leading-7">Seed dispatch details will appear here.</p>
-      </PageCardContent>
-    </PageCard>
+    <SeedDispatchList
+      search={search}
+      lockedFarmerId={farmer.id}
+      onSearchChange={(updater) => {
+        setStatus(updater(search).status);
+      }}
+    />
   );
 }
