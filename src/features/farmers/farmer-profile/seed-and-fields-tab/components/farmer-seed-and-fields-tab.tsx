@@ -8,7 +8,7 @@ export function FarmerSeedAndFieldsTab() {
         <CardTitle>Seed & fields</CardTitle>
       </PageCardHeader>
       <PageCardContent>
-        <p className="leading-7">Seed and field details will appear here.</p>
+        <p className="leading-7">Replace with content.</p>
       </PageCardContent>
     </PageCard>
   );
