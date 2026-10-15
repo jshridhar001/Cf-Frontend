@@ -55,15 +55,9 @@ function requisition(partial: {
       partial.hindiContractUrl === undefined
         ? 'https://example.com/hi.pdf'
         : partial.hindiContractUrl,
-    requestedDeliveryDate: null,
-    approvedDeliveryDate: null,
+    requestedDeliveries: [],
     remarks: partial.remarks ?? null,
-    rejectionRemarks: null,
     createdById: 'user',
-    approvedById: null,
-    rejectedById: null,
-    approvedAt: null,
-    rejectedAt: null,
     createdAt: '2026-01-01T00:00:00.000Z',
     updatedAt: '2026-01-01T00:00:00.000Z',
     farmer: {

@@ -6,6 +6,7 @@ import {
   SAMPLE_SEED_REQUISITIONS,
 } from '@/features/seed-requisition/overview/lib/sample-data';
 import type {
+  CreateSeedRequisitionBody,
   SeedRequisition,
   SeedRequisitionListParams,
   SeedRequisitionStatus,
@@ -17,7 +18,7 @@ export type CreateSeedRequisitionVariables = {
   requestedBags?: number;
   requestedAcres?: string;
   requisitionDate: string;
-  requestedDeliveryDate: string;
+  requestedDeliveries?: CreateSeedRequisitionBody['requestedDeliveries'];
   remarks?: string;
 };
 
@@ -25,14 +26,15 @@ export type UpdateSeedRequisitionVariables = {
   requisitionId: string;
   requestedBags?: number | null;
   requestedAcres?: string | null;
-  requestedDeliveryDate?: string;
+  requestedDeliveries?: SeedRequisition['requestedDeliveries'];
   remarks?: string | null;
 };
 
 export type ReviewSeedRequisitionVariables = {
   requisitionId: string;
+  deliveryId: string;
   status: Extract<SeedRequisitionStatus, 'APPROVED' | 'REJECTED'>;
-  approvedDeliveryDate?: string;
+  deliveryDate?: string;
   rejectionRemarks?: string;
 };
 
@@ -109,17 +111,17 @@ export function RequisitionSampleProvider({ children }: { children: ReactNode })
               fulfilledBags: 0,
               fulfilledAcres: '0',
               requisitionDate: variables.requisitionDate,
-              requestedDeliveryDate: variables.requestedDeliveryDate,
-              approvedDeliveryDate: null,
+              requestedDeliveries: (variables.requestedDeliveries ?? []).map((line) => ({
+                deliveryDate: line.deliveryDate,
+                acres: line.acres != null ? line.acres.toFixed(2) : null,
+                bags: line.bags ?? null,
+                status: 'PENDING',
+                rejectionRemarks: null,
+              })),
               remarks: variables.remarks ?? null,
-              rejectionRemarks: null,
               engContractUrl: null,
               hindiContractUrl: null,
               createdById: 'USER_ID',
-              approvedById: null,
-              rejectedById: null,
-              approvedAt: null,
-              rejectedAt: null,
               createdAt: now,
               updatedAt: now,
               farmer: farmer
@@ -150,8 +152,8 @@ export function RequisitionSampleProvider({ children }: { children: ReactNode })
                         variables.requestedAcres !== undefined
                           ? variables.requestedAcres
                           : item.requestedAcres,
-                      requestedDeliveryDate:
-                        variables.requestedDeliveryDate ?? item.requestedDeliveryDate,
+                      requestedDeliveries:
+                        variables.requestedDeliveries ?? item.requestedDeliveries,
                       remarks: variables.remarks !== undefined ? variables.remarks : item.remarks,
                       updatedAt: now,
                     }
@@ -171,22 +173,32 @@ export function RequisitionSampleProvider({ children }: { children: ReactNode })
             setItems((current) =>
               current.map((item) => {
                 if (item.id !== variables.requisitionId) return item;
-                if (variables.status === 'APPROVED') {
+                const requestedDeliveries = item.requestedDeliveries.map((line) => {
+                  if (line.id !== variables.deliveryId) return line;
+                  if (variables.status === 'APPROVED') {
+                    return {
+                      ...line,
+                      status: 'APPROVED' as const,
+                      deliveryDate: variables.deliveryDate ?? line.deliveryDate,
+                      rejectionRemarks: null,
+                    };
+                  }
                   return {
-                    ...item,
-                    status: 'APPROVED',
-                    approvedDeliveryDate: variables.approvedDeliveryDate ?? null,
-                    approvedAt: now,
-                    approvedById: 'USER_ID',
-                    updatedAt: now,
+                    ...line,
+                    status: 'REJECTED' as const,
+                    rejectionRemarks: variables.rejectionRemarks ?? null,
                   };
-                }
+                });
+                const statuses = requestedDeliveries.map((line) => line.status);
+                const status = statuses.includes('PENDING')
+                  ? 'PENDING'
+                  : statuses.includes('APPROVED')
+                    ? 'APPROVED'
+                    : 'REJECTED';
                 return {
                   ...item,
-                  status: 'REJECTED',
-                  rejectionRemarks: variables.rejectionRemarks ?? null,
-                  rejectedAt: now,
-                  rejectedById: 'USER_ID',
+                  requestedDeliveries,
+                  status,
                   updatedAt: now,
                 };
               }),

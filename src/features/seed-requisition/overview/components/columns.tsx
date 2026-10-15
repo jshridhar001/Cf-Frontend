@@ -1,13 +1,11 @@
 import { Link } from '@tanstack/react-router';
 import { createColumnHelper } from '@tanstack/react-table';
 import {
-  CheckIcon,
   EyeIcon,
   FileSignatureIcon,
   MoreHorizontalIcon,
   SquarePenIcon,
   Trash2Icon,
-  XIcon,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,6 +18,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { DataTableFeatures } from '@/features/seed-requisition/overview/components/data-table-features';
+import { RequestedDeliveryLines } from '@/features/seed-requisition/overview/components/requested-delivery-lines';
+import { earliestRequestedDeliveryDate } from '@/features/seed-requisition/overview/lib/requested-deliveries';
 import {
   formatSummaryAcres,
   formatSummaryCount,
@@ -30,13 +30,14 @@ import {
   getRequisitionFamilyLabel,
   getRequisitionPlaceName,
   type SeedRequisition,
+  type SeedRequisitionDelivery,
 } from '@/features/seed-requisition/overview/types';
 
 export type RequisitionsTableMeta = {
   onEdit: (requisition: SeedRequisition) => void;
   onDelete: (requisition: SeedRequisition) => void;
-  onApprove: (requisition: SeedRequisition) => void;
-  onReject: (requisition: SeedRequisition) => void;
+  onApproveDelivery: (requisition: SeedRequisition, delivery: SeedRequisitionDelivery) => void;
+  onRejectDelivery: (requisition: SeedRequisition, delivery: SeedRequisitionDelivery) => void;
 };
 
 function hasRequestedAcres(requisition: SeedRequisition) {
@@ -69,17 +70,11 @@ function RequisitionRowActions({
   requisition,
   onEdit,
   onDelete,
-  onApprove,
-  onReject,
 }: {
   requisition: SeedRequisition;
   onEdit: (requisition: SeedRequisition) => void;
   onDelete: (requisition: SeedRequisition) => void;
-  onApprove: (requisition: SeedRequisition) => void;
-  onReject: (requisition: SeedRequisition) => void;
 }) {
-  const isPending = requisition.status === 'PENDING';
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -97,19 +92,6 @@ function RequisitionRowActions({
           Actions
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {isPending ? (
-          <>
-            <DropdownMenuItem onClick={() => onApprove(requisition)}>
-              <CheckIcon />
-              Approve
-            </DropdownMenuItem>
-            <DropdownMenuItem variant="destructive" onClick={() => onReject(requisition)}>
-              <XIcon />
-              Reject
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-          </>
-        ) : null}
         <DropdownMenuItem asChild>
           <Link to="/seed-requisition/$id" params={{ id: requisition.id }}>
             <EyeIcon />
@@ -288,37 +270,25 @@ export const columns = columnHelper.columns([
       </span>
     ),
   }),
-  columnHelper.accessor('requestedDeliveryDate', {
-    header: 'Delivery date',
+  columnHelper.accessor((row) => earliestRequestedDeliveryDate(row.requestedDeliveries) ?? '', {
+    id: 'requestedDeliveries',
+    header: 'Requested deliveries',
     sortFn: 'alphanumeric',
     meta: {
-      filterLabel: 'Delivery date',
+      filterLabel: 'Requested deliveries',
       filterValueFormatter: (value) =>
         typeof value === 'string' && value ? formatRequisitionDate(value) : 'Blank',
     },
-    cell: ({ row }) => (
-      <span className="text-muted-foreground">
-        {row.original.requestedDeliveryDate
-          ? formatRequisitionDate(row.original.requestedDeliveryDate)
-          : '—'}
-      </span>
-    ),
-  }),
-  columnHelper.accessor('approvedDeliveryDate', {
-    header: 'Approved delivery',
-    sortFn: 'alphanumeric',
-    meta: {
-      filterLabel: 'Approved delivery',
-      filterValueFormatter: (value) =>
-        typeof value === 'string' && value ? formatRequisitionDate(value) : 'Blank',
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as RequisitionsTableMeta | undefined;
+      return (
+        <RequestedDeliveryLines
+          requisition={row.original}
+          onApprove={(delivery) => meta?.onApproveDelivery(row.original, delivery)}
+          onReject={(delivery) => meta?.onRejectDelivery(row.original, delivery)}
+        />
+      );
     },
-    cell: ({ row }) => (
-      <span className="text-muted-foreground">
-        {row.original.approvedDeliveryDate
-          ? formatRequisitionDate(row.original.approvedDeliveryDate)
-          : '—'}
-      </span>
-    ),
   }),
   columnHelper.accessor((row) => row.remarks ?? '', {
     id: 'remarks',
@@ -364,8 +334,6 @@ export const columns = columnHelper.columns([
             requisition={row.original}
             onEdit={meta.onEdit}
             onDelete={meta.onDelete}
-            onApprove={meta.onApprove}
-            onReject={meta.onReject}
           />
         </div>
       );

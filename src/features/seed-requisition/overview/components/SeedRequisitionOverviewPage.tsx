@@ -66,6 +66,7 @@ import {
 import { summarizeRequisitions } from '@/features/seed-requisition/overview/lib/summary';
 import type {
   SeedRequisition,
+  SeedRequisitionDelivery,
   SeedRequisitionStatus,
 } from '@/features/seed-requisition/overview/types';
 import {
@@ -162,8 +163,14 @@ export function SeedRequisitionList({
   const [createOpen, setCreateOpen] = useState(false);
   const [editingRequisition, setEditingRequisition] = useState<SeedRequisition | null>(null);
   const [deletingRequisition, setDeletingRequisition] = useState<SeedRequisition | null>(null);
-  const [approvingRequisition, setApprovingRequisition] = useState<SeedRequisition | null>(null);
-  const [rejectingRequisition, setRejectingRequisition] = useState<SeedRequisition | null>(null);
+  const [approvingDelivery, setApprovingDelivery] = useState<{
+    requisition: SeedRequisition;
+    delivery: SeedRequisitionDelivery;
+  } | null>(null);
+  const [rejectingDelivery, setRejectingDelivery] = useState<{
+    requisition: SeedRequisition;
+    delivery: SeedRequisitionDelivery;
+  } | null>(null);
   const [deleteAllOpen, setDeleteAllOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [layout, setLayout] = useState<OverviewLayout>(getDefaultOverviewLayout);
@@ -187,8 +194,8 @@ export function SeedRequisitionList({
     meta: {
       onEdit: setEditingRequisition,
       onDelete: setDeletingRequisition,
-      onApprove: setApprovingRequisition,
-      onReject: setRejectingRequisition,
+      onApproveDelivery: (requisition, delivery) => setApprovingDelivery({ requisition, delivery }),
+      onRejectDelivery: (requisition, delivery) => setRejectingDelivery({ requisition, delivery }),
     },
   });
 
@@ -497,8 +504,12 @@ export function SeedRequisitionList({
                   requisition={requisition}
                   onEdit={setEditingRequisition}
                   onDelete={setDeletingRequisition}
-                  onApprove={setApprovingRequisition}
-                  onReject={setRejectingRequisition}
+                  onApproveDelivery={(requisition, delivery) =>
+                    setApprovingDelivery({ requisition, delivery })
+                  }
+                  onRejectDelivery={(requisition, delivery) =>
+                    setRejectingDelivery({ requisition, delivery })
+                  }
                 />
               ))}
             </div>
@@ -527,17 +538,19 @@ export function SeedRequisitionList({
         }}
       />
       <ApproveRequisitionDialog
-        requisition={approvingRequisition}
-        open={approvingRequisition !== null}
+        requisition={approvingDelivery?.requisition ?? null}
+        delivery={approvingDelivery?.delivery ?? null}
+        open={approvingDelivery !== null}
         onOpenChange={(open) => {
-          if (!open) setApprovingRequisition(null);
+          if (!open) setApprovingDelivery(null);
         }}
       />
       <RejectRequisitionDialog
-        requisition={rejectingRequisition}
-        open={rejectingRequisition !== null}
+        requisition={rejectingDelivery?.requisition ?? null}
+        delivery={rejectingDelivery?.delivery ?? null}
+        open={rejectingDelivery !== null}
         onOpenChange={(open) => {
-          if (!open) setRejectingRequisition(null);
+          if (!open) setRejectingDelivery(null);
         }}
       />
       {showDeleteAll ? (

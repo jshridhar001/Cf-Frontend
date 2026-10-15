@@ -240,6 +240,30 @@ function withContractDateColumn(columnOrder: string[]): string[] {
   return next;
 }
 
+const REQUESTED_DELIVERIES_COLUMN_ID = 'requestedDeliveries';
+const LEGACY_REQUESTED_DELIVERY_COLUMN_ID = 'requestedDeliveryDate';
+
+export function migrateRequestedDeliveryColumnIds(ids: string[]) {
+  const seen = new Set<string>();
+  return ids.flatMap((id) => {
+    if (id === 'approvedDeliveryDate') return [];
+    const next = id === LEGACY_REQUESTED_DELIVERY_COLUMN_ID ? REQUESTED_DELIVERIES_COLUMN_ID : id;
+    if (seen.has(next)) return [];
+    seen.add(next);
+    return [next];
+  });
+}
+
+function withRequestedDeliveriesColumn(columnOrder: string[]): string[] {
+  const renamed = migrateRequestedDeliveryColumnIds(columnOrder);
+  if (renamed.length === 0 || renamed.includes(REQUESTED_DELIVERIES_COLUMN_ID)) return renamed;
+  const next = [...renamed];
+  const approvedDeliveryIndex = next.indexOf('approvedDeliveryDate');
+  const insertAt = approvedDeliveryIndex >= 0 ? approvedDeliveryIndex : next.length;
+  next.splice(insertAt, 0, REQUESTED_DELIVERIES_COLUMN_ID);
+  return next;
+}
+
 function withFamilyColumn(columnOrder: string[]): string[] {
   if (columnOrder.length === 0 || columnOrder.includes('family')) return columnOrder;
   const next = [...columnOrder];
@@ -253,11 +277,13 @@ export function getColumnPreferences(): ColumnPreferences {
   const { hiddenColumnIds, columnOrder, customized } = useColumnPreferencesStore.getState();
   return {
     columnVisibility: customized
-      ? visibilityFromHiddenIds(hiddenColumnIds)
+      ? visibilityFromHiddenIds(migrateRequestedDeliveryColumnIds(hiddenColumnIds))
       : builtInColumnVisibility(),
-    columnOrder: withFamilyColumn(
-      withRemarksColumn(
-        withContractUrlColumns(withContractDateColumn(withAddressColumns(columnOrder))),
+    columnOrder: withRequestedDeliveriesColumn(
+      withFamilyColumn(
+        withRemarksColumn(
+          withContractUrlColumns(withContractDateColumn(withAddressColumns(columnOrder))),
+        ),
       ),
     ),
   };

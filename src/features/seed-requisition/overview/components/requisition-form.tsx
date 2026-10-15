@@ -1,4 +1,5 @@
 import { useForm } from '@tanstack/react-form';
+import { PlusIcon, Trash2Icon } from 'lucide-react';
 import { useEffect } from 'react';
 import * as z from 'zod';
 import { SearchableOptionCombobox } from '@/components/searchable-option-combobox';
@@ -16,6 +17,11 @@ import { useFarmers } from '@/features/farmers/overview/api/use-farmers';
 import { useVarieties } from '@/features/master/api/use-varieties';
 import { useCreateSeedRequisition } from '@/features/seed-requisition/overview/api/use-create-seed-requisition';
 import { useUpdateSeedRequisition } from '@/features/seed-requisition/overview/api/use-update-seed-requisition';
+import {
+  type DeliveryScheduleLine,
+  scheduledQuantity,
+  validateDeliverySchedule,
+} from '@/features/seed-requisition/overview/lib/requested-deliveries';
 import {
   type CreateSeedRequisitionBody,
   parseRequestedAcres,
@@ -78,7 +84,13 @@ function createFormSchema(allowZero: boolean) {
       requestedAcres: z.string(),
       contractDate: z.string().min(1, 'Contract date is required.'),
       requisitionDate: z.string(),
-      requestedDeliveryDate: z.string(),
+      requestedDeliveries: z.array(
+        z.object({
+          key: z.string(),
+          deliveryDate: z.string(),
+          quantity: z.string(),
+        }),
+      ),
       remarks: z.string(),
       engContractUrl: z.string(),
       hindiContractUrl: z.string(),
@@ -125,7 +137,66 @@ function createFormSchema(allowZero: boolean) {
           });
         }
       }
+
+      const scheduleIssues = validateDeliverySchedule({
+        quantityType: value.quantityType,
+        total:
+          value.quantityType === 'bags'
+            ? Number(value.requestedBags)
+            : Number(value.requestedAcres),
+        lines: value.requestedDeliveries,
+      });
+      for (const issue of scheduleIssues) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['requestedDeliveries', ...issue.path],
+          message: issue.message,
+        });
+      }
     });
+}
+
+type FormDeliveryLine = DeliveryScheduleLine & { key: string };
+
+function deliveryLinesFromRequisition(
+  requisition?: SeedRequisition | null,
+): FormDeliveryLine[] {
+  return (requisition?.requestedDeliveries ?? []).map((line) => ({
+    key: line.id ?? crypto.randomUUID(),
+    deliveryDate: toDateInputValue(line.deliveryDate),
+    quantity:
+      line.bags != null
+        ? String(line.bags)
+        : line.acres != null && line.acres !== ''
+          ? String(Number(line.acres))
+          : '',
+  }));
+}
+
+function remainingScheduleLabel(
+  quantityType: 'bags' | 'acres',
+  totalText: string,
+  lines: FormDeliveryLine[],
+) {
+  const total = Number(totalText);
+  if (!totalText.trim() || !Number.isFinite(total)) {
+    return 'Add a total, then split it across delivery dates.';
+  }
+  const scheduled = scheduledQuantity(lines);
+  const remaining = Number((total - scheduled).toFixed(2));
+  const unit =
+    quantityType === 'bags'
+      ? Math.abs(remaining) === 1
+        ? 'bag'
+        : 'bags'
+      : Math.abs(remaining) === 1
+        ? 'acre'
+        : 'acres';
+  const amount =
+    quantityType === 'bags' ? String(Math.abs(Math.trunc(remaining))) : String(Math.abs(remaining));
+  if (remaining > 0.001) return `${amount} ${unit} still unscheduled.`;
+  if (remaining < -0.001) return `${amount} ${unit} over the requested total.`;
+  return 'The full quantity is scheduled.';
 }
 
 interface RequisitionFormProps {
@@ -176,7 +247,7 @@ export function RequisitionForm({
         ? toDateInputValue(requisition.contractDate)
         : todayIsoDate(),
       requisitionDate: requisition ? toDateInputValue(requisition.requisitionDate) : '',
-      requestedDeliveryDate: requisition ? toDateInputValue(requisition.requestedDeliveryDate) : '',
+      requestedDeliveries: deliveryLinesFromRequisition(requisition),
       remarks: requisition?.remarks ?? '',
       engContractUrl: requisition?.engContractUrl ?? '',
       hindiContractUrl: requisition?.hindiContractUrl ?? '',
@@ -187,15 +258,20 @@ export function RequisitionForm({
     onSubmit: async ({ value }) => {
       const remarks = value.remarks.trim();
       const requisitionDate = value.requisitionDate.trim();
-      const requestedDeliveryDate = value.requestedDeliveryDate.trim();
+      const requestedDeliveries = value.requestedDeliveries
+        .filter((line) => line.deliveryDate.trim() && line.quantity.trim())
+        .map((line) => ({
+          deliveryDate: toRequisitionDateParam(line.deliveryDate),
+          ...(value.quantityType === 'bags'
+            ? { bags: Number(line.quantity) }
+            : { acres: parseRequestedAcres(line.quantity) }),
+        }));
       const body: CreateSeedRequisitionBody = {
         farmerId: value.farmerId,
         varietyId: value.varietyId,
         contractDate: toRequisitionDateParam(value.contractDate),
         ...(requisitionDate ? { requisitionDate: toRequisitionDateParam(requisitionDate) } : {}),
-        ...(requestedDeliveryDate
-          ? { requestedDeliveryDate: toRequisitionDateParam(requestedDeliveryDate) }
-          : {}),
+        ...(isEdit || requestedDeliveries.length > 0 ? { requestedDeliveries } : {}),
         ...(remarks ? { remarks } : {}),
         ...(value.quantityType === 'bags'
           ? { requestedBags: Number(value.requestedBags) }
@@ -420,23 +496,132 @@ export function RequisitionForm({
           }}
         </form.Field>
 
-        <form.Field name="requestedDeliveryDate">
+        <form.Field name="requestedDeliveries" mode="array">
           {(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            const scheduleError = field.state.meta.isTouched && field.state.meta.errors.length > 0;
             return (
-              <Field data-invalid={isInvalid}>
-                <DatePickerInput
-                  id={field.name}
-                  label="Requested delivery date (optional)"
-                  placeholder="Select date"
-                  value={field.state.value ? parseDateOnlyString(field.state.value) : undefined}
-                  aria-invalid={isInvalid}
-                  disabled={isPending}
-                  onChange={(date) => field.handleChange(date ? formatDateOnlyString(date) : '')}
-                  onBlur={field.handleBlur}
-                />
-                {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
-              </Field>
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between gap-2">
+                  <FieldLabel>Requested deliveries (optional)</FieldLabel>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={isPending}
+                    onClick={() =>
+                      field.pushValue({ key: crypto.randomUUID(), deliveryDate: '', quantity: '' })
+                    }
+                  >
+                    <PlusIcon />
+                    Add delivery
+                  </Button>
+                </div>
+                <form.Subscribe
+                  selector={(state) => ({
+                    quantityType: state.values.quantityType,
+                    total:
+                      state.values.quantityType === 'bags'
+                        ? state.values.requestedBags
+                        : state.values.requestedAcres,
+                    lines: state.values.requestedDeliveries,
+                  })}
+                >
+                  {(snapshot) => (
+                    <p className="text-sm text-muted-foreground">
+                      {remainingScheduleLabel(
+                        snapshot.quantityType,
+                        snapshot.total,
+                        snapshot.lines,
+                      )}
+                    </p>
+                  )}
+                </form.Subscribe>
+                {field.state.value.map((line, index) => (
+                  <div
+                    key={line.key}
+                    className="grid grid-cols-[minmax(0,1fr)_7.5rem_auto] items-start gap-2"
+                  >
+                    <form.Field name={`requestedDeliveries[${index}].deliveryDate`}>
+                      {(dateField) => {
+                        const isInvalid =
+                          dateField.state.meta.isTouched && !dateField.state.meta.isValid;
+                        return (
+                          <Field data-invalid={isInvalid}>
+                            <DatePickerInput
+                              id={dateField.name}
+                              label={index === 0 ? 'Date' : undefined}
+                              placeholder="Select date"
+                              value={
+                                dateField.state.value
+                                  ? parseDateOnlyString(dateField.state.value)
+                                  : undefined
+                              }
+                              aria-invalid={isInvalid}
+                              disabled={isPending}
+                              onChange={(date) =>
+                                dateField.handleChange(date ? formatDateOnlyString(date) : '')
+                              }
+                              onBlur={dateField.handleBlur}
+                            />
+                            {isInvalid ? <FieldError errors={dateField.state.meta.errors} /> : null}
+                          </Field>
+                        );
+                      }}
+                    </form.Field>
+                    <form.Subscribe selector={(state) => state.values.quantityType}>
+                      {(quantityType) => (
+                        <form.Field name={`requestedDeliveries[${index}].quantity`}>
+                          {(quantityField) => {
+                            const isInvalid =
+                              quantityField.state.meta.isTouched &&
+                              !quantityField.state.meta.isValid;
+                            return (
+                              <Field data-invalid={isInvalid}>
+                                {index === 0 ? (
+                                  <FieldLabel htmlFor={quantityField.name}>
+                                    {quantityType === 'bags' ? 'Bags' : 'Acres'}
+                                  </FieldLabel>
+                                ) : null}
+                                <Input
+                                  id={quantityField.name}
+                                  name={quantityField.name}
+                                  inputMode={quantityType === 'bags' ? 'numeric' : 'decimal'}
+                                  value={quantityField.state.value}
+                                  aria-invalid={isInvalid}
+                                  disabled={isPending}
+                                  onBlur={quantityField.handleBlur}
+                                  onChange={(event) =>
+                                    quantityField.handleChange(
+                                      quantityType === 'bags'
+                                        ? event.target.value.replace(/[^\d]/g, '')
+                                        : sanitizeAcresInput(event.target.value),
+                                    )
+                                  }
+                                />
+                                {isInvalid ? (
+                                  <FieldError errors={quantityField.state.meta.errors} />
+                                ) : null}
+                              </Field>
+                            );
+                          }}
+                        </form.Field>
+                      )}
+                    </form.Subscribe>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className={index === 0 ? 'mt-6' : undefined}
+                      disabled={isPending}
+                      aria-label="Remove delivery"
+                      onClick={() => field.removeValue(index)}
+                    >
+                      <Trash2Icon />
+                    </Button>
+                  </div>
+                ))}
+                {scheduleError ? <FieldError errors={field.state.meta.errors} /> : null}
+              </div>
             );
           }}
         </form.Field>

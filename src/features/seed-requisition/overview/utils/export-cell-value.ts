@@ -1,5 +1,6 @@
 import type { Column, Row, Table } from '@tanstack/react-table';
 import type { DataTableFeatures } from '@/features/seed-requisition/overview/components/data-table-features';
+import { formatRequestedDeliveries } from '@/features/seed-requisition/overview/lib/requested-deliveries';
 import type { SeedRequisition } from '@/features/seed-requisition/overview/types';
 import {
   formatRequisitionDate,
@@ -135,18 +136,8 @@ function leafCellForColumn(requisition: SeedRequisition, columnId: string): Expo
       return textCell(
         requisition.requisitionDate ? formatRequisitionDate(requisition.requisitionDate) : '—',
       );
-    case 'requestedDeliveryDate':
-      return textCell(
-        requisition.requestedDeliveryDate
-          ? formatRequisitionDate(requisition.requestedDeliveryDate)
-          : '—',
-      );
-    case 'approvedDeliveryDate':
-      return textCell(
-        requisition.approvedDeliveryDate
-          ? formatRequisitionDate(requisition.approvedDeliveryDate)
-          : '—',
-      );
+    case 'requestedDeliveries':
+      return textCell(formatRequestedDeliveries(requisition.requestedDeliveries) || '—');
     case 'remarks':
       return textCell(requisition.remarks?.trim() || '—');
     case 'status':

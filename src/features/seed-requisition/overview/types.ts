@@ -107,6 +107,15 @@ export type SeedRequisitionVariety = {
   name: string;
 };
 
+export type SeedRequisitionDelivery = {
+  id?: string;
+  deliveryDate: string;
+  acres: string | null;
+  bags: number | null;
+  status: SeedRequisitionStatus;
+  rejectionRemarks: string | null;
+};
+
 export type SeedRequisitionActor = {
   name: string;
 };
@@ -124,22 +133,14 @@ export type SeedRequisition = {
   contractDate?: string | null;
   engContractUrl: string | null;
   hindiContractUrl: string | null;
-  requestedDeliveryDate: string | null;
-  approvedDeliveryDate: string | null;
+  requestedDeliveries: SeedRequisitionDelivery[];
   remarks: string | null;
-  rejectionRemarks: string | null;
   createdById: string;
-  approvedById: string | null;
-  rejectedById: string | null;
-  approvedAt: string | null;
-  rejectedAt: string | null;
   createdAt: string;
   updatedAt: string;
   farmer: SeedRequisitionFarmer | null;
   variety: SeedRequisitionVariety | null;
   createdBy?: SeedRequisitionActor | null;
-  approvedBy?: SeedRequisitionActor | null;
-  rejectedBy?: SeedRequisitionActor | null;
   dispatchStops?: unknown[];
 };
 
@@ -193,6 +194,17 @@ export type ApiSeedRequisitionVariety = {
   name: string;
 };
 
+export type ApiSeedRequisitionDelivery = {
+  id: string;
+  requisitionId: string;
+  deliveryDate: string;
+  acres: string | null;
+  bags: number | null;
+  status: SeedRequisitionStatus;
+  rejectionRemarks: string | null;
+  createdAt: string;
+};
+
 export type ApiSeedRequisition = {
   id: string;
   farmerId: string;
@@ -206,19 +218,13 @@ export type ApiSeedRequisition = {
   contractDate: string | null;
   engContractUrl: string | null;
   hindiContractUrl: string | null;
-  requestedDeliveryDate: string | null;
-  approvedDeliveryDate: string | null;
   remarks: string | null;
-  rejectionRemarks: string | null;
   createdById: string;
-  approvedById: string | null;
-  rejectedById: string | null;
-  approvedAt: string | null;
-  rejectedAt: string | null;
   createdAt: string;
   updatedAt: string;
   farmer: ApiSeedRequisitionFarmer;
   variety: ApiSeedRequisitionVariety;
+  deliveries?: ApiSeedRequisitionDelivery[];
 };
 
 export type SeedRequisitionsResponse = {
@@ -238,7 +244,11 @@ export type CreateSeedRequisitionBody = {
   requestedBags?: number;
   requestedAcres?: number;
   requisitionDate?: string;
-  requestedDeliveryDate?: string;
+  requestedDeliveries?: {
+    deliveryDate: string;
+    acres?: number;
+    bags?: number;
+  }[];
   remarks?: string;
   engContractUrl?: string | null;
   hindiContractUrl?: string | null;
@@ -258,15 +268,16 @@ export function toSeedRequisition(row: ApiSeedRequisition): SeedRequisition {
     contractDate: row.contractDate,
     engContractUrl: row.engContractUrl,
     hindiContractUrl: row.hindiContractUrl,
-    requestedDeliveryDate: row.requestedDeliveryDate,
-    approvedDeliveryDate: row.approvedDeliveryDate,
+    requestedDeliveries: (row.deliveries ?? []).map((delivery) => ({
+      id: delivery.id,
+      deliveryDate: delivery.deliveryDate,
+      acres: delivery.acres,
+      bags: delivery.bags,
+      status: delivery.status,
+      rejectionRemarks: delivery.rejectionRemarks,
+    })),
     remarks: row.remarks,
-    rejectionRemarks: row.rejectionRemarks,
     createdById: row.createdById,
-    approvedById: row.approvedById,
-    rejectedById: row.rejectedById,
-    approvedAt: row.approvedAt,
-    rejectedAt: row.rejectedAt,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     farmer: {

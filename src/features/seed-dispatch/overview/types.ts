@@ -96,15 +96,16 @@ export type SeedDispatchRequisitionDetail = {
   contractDate: string | null;
   engContractUrl: string | null;
   hindiContractUrl: string | null;
-  requestedDeliveryDate: string | null;
-  approvedDeliveryDate: string | null;
+  deliveries?: {
+    id: string;
+    deliveryDate: string;
+    acres: string | null;
+    bags: number | null;
+    status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    rejectionRemarks: string | null;
+  }[];
   remarks: string | null;
-  rejectionRemarks: string | null;
   createdById: string;
-  approvedById: string | null;
-  rejectedById: string | null;
-  approvedAt: string | null;
-  rejectedAt: string | null;
   createdAt: string;
   updatedAt: string;
   farmer: SeedDispatchFarmer;

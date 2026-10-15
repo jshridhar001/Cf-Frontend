@@ -1,4 +1,4 @@
-import { Check, X } from 'lucide-react';
+import { CalendarDays, Check, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,7 @@ import {
 import type { DispatchFormOptions } from '@/features/seed-dispatch/create/lib/form-options';
 import { parseDecimal, sumAcresFromBagLines } from '@/features/seed-dispatch/create/lib/quantity';
 import type { DispatchableRequisition } from '@/features/seed-dispatch/create/types';
+import { formatDueTodayQuantity } from '@/features/seed-dispatch/overview/lib/awaiting-requisitions';
 import { formatDispatchDate } from '@/features/seed-dispatch/overview/types';
 import { formatSeedSize } from '@/lib/format-seed-size';
 import { cn } from '@/lib/utils';
@@ -88,6 +89,14 @@ function acresConsumedForSelection(
   return lines.length > 0 ? sumAcresFromBagLines(lines) : null;
 }
 
+function dueTodayLabel(requisition: DispatchableRequisition) {
+  if (requisition.dueTodayBags == null && !requisition.dueTodayAcres) return '';
+  return formatDueTodayQuantity({
+    acres: requisition.dueTodayAcres,
+    bags: requisition.dueTodayBags,
+  });
+}
+
 export function DispatchRequisitionSelectionStep({
   requisitions,
   formOptions,
@@ -103,6 +112,7 @@ export function DispatchRequisitionSelectionStep({
   const [varietyFilter, setVarietyFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<QuantityTypeFilter>('all');
   const [sortOption, setSortOption] = useState<SortOption>('farmer');
+  const [todayOnly, setTodayOnly] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeRequisition, setActiveRequisition] = useState<DispatchableRequisition | null>(null);
   const [lastFacilityId, setLastFacilityId] = useState(
@@ -125,6 +135,7 @@ export function DispatchRequisitionSelectionStep({
       }
       if (typeFilter === 'bags' && row.isAcresBased) return false;
       if (typeFilter === 'acres' && !row.isAcresBased) return false;
+      if (todayOnly && !dueTodayLabel(row)) return false;
 
       if (!query) return true;
 
@@ -148,7 +159,12 @@ export function DispatchRequisitionSelectionStep({
     });
 
     return sorted;
-  }, [requisitions, search, varietyFilter, typeFilter, sortOption]);
+  }, [requisitions, search, varietyFilter, typeFilter, sortOption, todayOnly]);
+
+  const dueTodayCount = useMemo(
+    () => requisitions.filter((row) => dueTodayLabel(row)).length,
+    [requisitions],
+  );
 
   const selectedEntries = useMemo(() => {
     return Array.from(selections.entries())
@@ -172,7 +188,7 @@ export function DispatchRequisitionSelectionStep({
   );
 
   const hasActiveFilters =
-    search.trim().length > 0 || varietyFilter !== 'all' || typeFilter !== 'all';
+    search.trim().length > 0 || varietyFilter !== 'all' || typeFilter !== 'all' || todayOnly;
 
   function openDrawer(requisition: DispatchableRequisition) {
     setActiveRequisition(requisition);
@@ -211,6 +227,7 @@ export function DispatchRequisitionSelectionStep({
     setSearch('');
     setVarietyFilter('all');
     setTypeFilter('all');
+    setTodayOnly(false);
   }
 
   const varietyItems = [
@@ -313,6 +330,17 @@ export function DispatchRequisitionSelectionStep({
                 ))}
               </SelectContent>
             </Select>
+
+            <Button
+              type="button"
+              variant={todayOnly ? 'default' : 'outline'}
+              size="sm"
+              aria-pressed={todayOnly}
+              onClick={() => setTodayOnly((current) => !current)}
+            >
+              <CalendarDays data-icon="inline-start" />
+              Today&apos;s schedule ({dueTodayCount})
+            </Button>
           </div>
         </div>
 
@@ -323,7 +351,12 @@ export function DispatchRequisitionSelectionStep({
         ) : filteredRequisitions.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-8 text-center">
             <p className="text-muted-foreground text-sm">
-              No requisitions match your search or filters.
+              {todayOnly &&
+              search.trim().length === 0 &&
+              varietyFilter === 'all' &&
+              typeFilter === 'all'
+                ? 'No deliveries requested for today.'
+                : 'No requisitions match your search or filters.'}
             </p>
             {hasActiveFilters ? (
               <Button type="button" variant="outline" size="sm" onClick={clearFilters}>
@@ -395,7 +428,14 @@ export function DispatchRequisitionSelectionStep({
                           {formatDispatchDate(requisition.requisitionDate)}
                         </TableCell>
                         <TableCell className="text-muted-foreground whitespace-nowrap">
-                          {remainingLabel(requisition)}
+                          <div className="flex flex-col gap-0.5">
+                            <span>{remainingLabel(requisition)}</span>
+                            {dueTodayLabel(requisition) ? (
+                              <span className="text-foreground font-medium">
+                                Due today {dueTodayLabel(requisition)}
+                              </span>
+                            ) : null}
+                          </div>
                         </TableCell>
                         <TableCell className="text-right">
                           {isSelected ? (
@@ -488,6 +528,14 @@ export function DispatchRequisitionSelectionStep({
                       <span>{requisition.variety.name}</span>
                       <span aria-hidden>·</span>
                       <span>{remainingLabel(requisition)}</span>
+                      {dueTodayLabel(requisition) ? (
+                        <>
+                          <span aria-hidden>·</span>
+                          <span className="text-foreground font-medium">
+                            Due today {dueTodayLabel(requisition)}
+                          </span>
+                        </>
+                      ) : null}
                     </div>
                     {isSelected && breakdown ? (
                       <p className="text-muted-foreground line-clamp-2 pl-7 text-xs">

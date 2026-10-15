@@ -4,7 +4,9 @@ import { Progress } from '@/components/ui/progress';
 import { parseDecimal } from '@/features/seed-dispatch/create/lib/quantity';
 import type { DataTableFeatures } from '@/features/seed-dispatch/overview/components/data-table-features';
 import {
+  deliveryLineForToday,
   formatAwaitingQuantity,
+  formatDueTodayQuantity,
   fulfillmentPercent,
   isAcresBasedSeedRequisition,
   remainingQuantity,
@@ -44,22 +46,32 @@ export const awaitingColumns = columnHelper.columns([
     meta: { filterLabel: 'Variety' },
     cell: ({ getValue }) => <span className="text-sm">{getValue() || '—'}</span>,
   }),
-  columnHelper.accessor((row) => row.approvedDeliveryDate ?? '', {
-    id: 'approvedDeliveryDate',
-    header: 'Approved delivery',
-    sortFn: 'alphanumeric',
-    meta: {
-      filterLabel: 'Approved delivery',
-      filterValueFormatter: formatDateFilterValue,
+  columnHelper.accessor(
+    (row) =>
+      row.requestedDeliveries
+        .filter((line) => line.status === 'APPROVED')
+        .map((line) => line.deliveryDate)
+        .sort()[0] ?? '',
+    {
+      id: 'approvedDeliveryDate',
+      header: 'Approved delivery',
+      sortFn: 'alphanumeric',
+      meta: {
+        filterLabel: 'Approved delivery',
+        filterValueFormatter: formatDateFilterValue,
+      },
+      cell: ({ row }) => {
+        const dates = row.original.requestedDeliveries
+          .filter((line) => line.status === 'APPROVED')
+          .map((line) => formatRequisitionDate(line.deliveryDate));
+        return (
+          <span className="whitespace-nowrap text-muted-foreground">
+            {dates.length > 0 ? dates.join(', ') : '—'}
+          </span>
+        );
+      },
     },
-    cell: ({ row }) => (
-      <span className="whitespace-nowrap text-muted-foreground">
-        {row.original.approvedDeliveryDate
-          ? formatRequisitionDate(row.original.approvedDeliveryDate)
-          : '—'}
-      </span>
-    ),
-  }),
+  ),
   columnHelper.accessor((row) => (isAcresBasedSeedRequisition(row) ? 'Acres' : 'Bags'), {
     id: 'basis',
     header: 'Basis',
@@ -84,6 +96,20 @@ export const awaitingColumns = columnHelper.columns([
       return <span className="tabular-nums">{formatAwaitingQuantity(acres)}</span>;
     },
   }),
+  columnHelper.accessor(
+    (row) => formatDueTodayQuantity(deliveryLineForToday(row.requestedDeliveries)),
+    {
+      id: 'dueToday',
+      header: 'Due today',
+      sortFn: 'text',
+      meta: { filterLabel: 'Due today' },
+      cell: ({ getValue }) => {
+        const label = getValue();
+        if (!label) return <span className="text-muted-foreground">—</span>;
+        return <span className="tabular-nums font-medium">{label}</span>;
+      },
+    },
+  ),
   columnHelper.accessor((row) => row.requestedBags ?? 0, {
     id: 'seedBagsOrdered',
     header: 'Seed Bags ordered',

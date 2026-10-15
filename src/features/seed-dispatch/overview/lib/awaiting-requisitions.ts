@@ -6,10 +6,61 @@ import {
   type QuantityRequisition,
 } from '@/features/seed-dispatch/create/lib/quantity';
 import type { DispatchQuantitySummary } from '@/features/seed-dispatch/overview/lib/summary';
-import type { SeedRequisition } from '@/features/seed-requisition/overview/types';
+import type {
+  SeedRequisition,
+  SeedRequisitionDelivery,
+} from '@/features/seed-requisition/overview/types';
+
+export function localCalendarDay(date: Date) {
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+export function deliveryCalendarDay(value: string) {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value.slice(0, 10);
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  return `${date.getUTCFullYear()}-${month}-${day}`;
+}
+
+export function deliveryLineForDay(
+  deliveries: SeedRequisitionDelivery[] | null | undefined,
+  day: string,
+) {
+  return (
+    deliveries?.find(
+      (line) => line.status === 'APPROVED' && deliveryCalendarDay(line.deliveryDate) === day,
+    ) ?? null
+  );
+}
+
+export function deliveryLineForToday(
+  deliveries: SeedRequisitionDelivery[] | null | undefined,
+  now = new Date(),
+) {
+  return deliveryLineForDay(deliveries, localCalendarDay(now));
+}
+
+export function formatDueTodayQuantity(
+  line: Pick<SeedRequisitionDelivery, 'acres' | 'bags'> | null,
+) {
+  if (!line) return '';
+  if (line.bags != null) {
+    const bags = line.bags;
+    return `${formatAwaitingQuantity(bags, 0)} ${bags === 1 ? 'bag' : 'bags'}`;
+  }
+  if (line.acres != null && line.acres !== '') {
+    const acres = parseDecimal(line.acres);
+    return `${formatAwaitingQuantity(acres)} ${acres === 1 ? 'acre' : 'acres'}`;
+  }
+  return '';
+}
 
 export function isApprovedRequisition(requisition: SeedRequisition) {
-  return requisition.status === 'APPROVED';
+  return requisition.requestedDeliveries.some((line) => line.status === 'APPROVED');
 }
 
 export function toQuantityRequisition(requisition: SeedRequisition): QuantityRequisition {

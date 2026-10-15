@@ -14,7 +14,8 @@ export type DispatchableRequisition = {
   fulfilledAcres: string;
   remarks: string | null;
   requisitionDate: string;
-  approvedDeliveryDate: string | null;
+  dueTodayAcres: string | null;
+  dueTodayBags: number | null;
   remainingQuantity: string;
   initialQuantity: string | null;
   isAcresBased: boolean;

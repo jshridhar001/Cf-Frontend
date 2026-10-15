@@ -14,16 +14,23 @@ import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Textarea } from '@/components/ui/textarea';
 import { useSeedRequisitionDecision } from '@/features/seed-requisition/overview/api/use-seed-requisition-decision';
-import type { SeedRequisition } from '@/features/seed-requisition/overview/types';
+import { formatDeliveryQuantity } from '@/features/seed-requisition/overview/lib/requested-deliveries';
+import type {
+  SeedRequisition,
+  SeedRequisitionDelivery,
+} from '@/features/seed-requisition/overview/types';
+import { formatRequisitionDate } from '@/features/seed-requisition/overview/types';
 
 interface RejectRequisitionDialogProps {
   requisition: SeedRequisition | null;
+  delivery: SeedRequisitionDelivery | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 export function RejectRequisitionDialog({
   requisition,
+  delivery,
   open,
   onOpenChange,
 }: RejectRequisitionDialogProps) {
@@ -31,6 +38,10 @@ export function RejectRequisitionDialog({
   const [remarks, setRemarks] = useState('');
   const [touched, setTouched] = useState(false);
   const farmerName = requisition?.farmer?.name ?? 'this farmer';
+  const quantity = delivery ? formatDeliveryQuantity(delivery) : '';
+  const lineLabel = delivery
+    ? `${quantity ? `${quantity} on ` : ''}${formatRequisitionDate(delivery.deliveryDate)}`
+    : 'this delivery';
   const trimmed = remarks.trim();
   const isInvalid = touched && trimmed.length === 0;
 
@@ -50,9 +61,11 @@ export function RejectRequisitionDialog({
           <AlertDialogMedia className="bg-destructive/10 text-destructive">
             <XIcon />
           </AlertDialogMedia>
-          <AlertDialogTitle>Reject requisition for {farmerName}?</AlertDialogTitle>
+          <AlertDialogTitle>
+            Reject {lineLabel} for {farmerName}?
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            Rejection remarks are required so the farmer knows why this request was declined.
+            This rejects only this delivery. Remarks are required so the reason is recorded.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <Field data-invalid={isInvalid}>
@@ -71,14 +84,15 @@ export function RejectRequisitionDialog({
           <Button
             type="button"
             variant="destructive"
-            disabled={isPending || !requisition || trimmed.length === 0}
+            disabled={isPending || !requisition || !delivery?.id || trimmed.length === 0}
             onClick={() => {
-              if (!requisition || trimmed.length === 0) {
+              if (!requisition || !delivery?.id || trimmed.length === 0) {
                 setTouched(true);
                 return;
               }
               void mutateAsync({
                 requisitionId: requisition.id,
+                deliveryId: delivery.id,
                 decision: 'REJECTED',
                 rejectionRemarks: trimmed,
               })

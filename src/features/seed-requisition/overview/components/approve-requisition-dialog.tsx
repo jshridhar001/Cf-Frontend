@@ -14,33 +14,44 @@ import { Button } from '@/components/ui/button';
 import { Field, FieldLabel } from '@/components/ui/field';
 import { useSeedRequisitionDecision } from '@/features/seed-requisition/overview/api/use-seed-requisition-decision';
 import { DateFilterButton } from '@/features/seed-requisition/overview/components/date-filter-button';
-import type { SeedRequisition } from '@/features/seed-requisition/overview/types';
+import { formatDeliveryQuantity } from '@/features/seed-requisition/overview/lib/requested-deliveries';
+import type {
+  SeedRequisition,
+  SeedRequisitionDelivery,
+} from '@/features/seed-requisition/overview/types';
 import {
+  formatRequisitionDate,
   toDateInputValue,
   toRequisitionDateParam,
 } from '@/features/seed-requisition/overview/types';
 
 interface ApproveRequisitionDialogProps {
   requisition: SeedRequisition | null;
+  delivery: SeedRequisitionDelivery | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 export function ApproveRequisitionDialog({
   requisition,
+  delivery,
   open,
   onOpenChange,
 }: ApproveRequisitionDialogProps) {
   const { mutateAsync, isPending } = useSeedRequisitionDecision();
-  const [approvedDeliveryDate, setApprovedDeliveryDate] = useState('');
+  const [deliveryDate, setDeliveryDate] = useState('');
   const farmerName = requisition?.farmer?.name ?? 'this farmer';
+  const quantity = delivery ? formatDeliveryQuantity(delivery) : '';
+  const lineLabel = delivery
+    ? `${quantity ? `${quantity} on ` : ''}${formatRequisitionDate(delivery.deliveryDate)}`
+    : 'this delivery';
 
   useEffect(() => {
-    if (open && requisition) {
-      setApprovedDeliveryDate(toDateInputValue(requisition.requestedDeliveryDate));
+    if (open && delivery) {
+      setDeliveryDate(toDateInputValue(delivery.deliveryDate));
     }
-    if (!open) setApprovedDeliveryDate('');
-  }, [open, requisition]);
+    if (!open) setDeliveryDate('');
+  }, [open, delivery]);
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen && isPending) return;
@@ -54,18 +65,19 @@ export function ApproveRequisitionDialog({
           <AlertDialogMedia className="bg-primary/10 text-primary">
             <CheckIcon />
           </AlertDialogMedia>
-          <AlertDialogTitle>Approve requisition for {farmerName}?</AlertDialogTitle>
+          <AlertDialogTitle>
+            Approve {lineLabel} for {farmerName}?
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            Set the approved delivery date. It starts as the requested date; you can change it
-            before approving.
+            This approves only this delivery. You can change its date before confirming.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <Field>
-          <FieldLabel htmlFor="approved-delivery-date">Approved delivery date</FieldLabel>
+          <FieldLabel htmlFor="approved-delivery-date">Delivery date</FieldLabel>
           <DateFilterButton
             id="approved-delivery-date"
-            value={approvedDeliveryDate || undefined}
-            onChange={(next) => setApprovedDeliveryDate(next ?? '')}
+            value={deliveryDate || undefined}
+            onChange={(next) => setDeliveryDate(next ?? '')}
             placeholder="Pick a date"
             clearable={false}
           />
@@ -74,13 +86,14 @@ export function ApproveRequisitionDialog({
           <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
           <Button
             type="button"
-            disabled={isPending || !requisition || approvedDeliveryDate.length === 0}
+            disabled={isPending || !requisition || !delivery?.id || deliveryDate.length === 0}
             onClick={() => {
-              if (!requisition || approvedDeliveryDate.length === 0) return;
+              if (!requisition || !delivery?.id || deliveryDate.length === 0) return;
               void mutateAsync({
                 requisitionId: requisition.id,
+                deliveryId: delivery.id,
                 decision: 'APPROVED',
-                approvedDeliveryDate: toRequisitionDateParam(approvedDeliveryDate),
+                deliveryDate: toRequisitionDateParam(deliveryDate),
               })
                 .then(() => {
                   handleOpenChange(false);

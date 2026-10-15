@@ -3,7 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { parseDecimal } from '@/features/seed-dispatch/create/lib/quantity';
 import {
+  deliveryLineForToday,
   formatAwaitingQuantity,
+  formatDueTodayQuantity,
   fulfillmentPercent,
   isAcresBasedSeedRequisition,
   remainingQuantity,
@@ -22,6 +24,7 @@ export function AwaitingRequisitionCard({ requisition }: { requisition: SeedRequ
   const remainingLabel = acresBased
     ? `${formatAwaitingQuantity(remaining)} acres remaining`
     : `${formatAwaitingQuantity(remaining, 0)} seed bags remaining`;
+  const dueToday = formatDueTodayQuantity(deliveryLineForToday(requisition.requestedDeliveries));
 
   return (
     <Card className="gap-3 py-4">
@@ -41,15 +44,19 @@ export function AwaitingRequisitionCard({ requisition }: { requisition: SeedRequ
           </Badge>
         </div>
         <p className="text-muted-foreground">
-          {requisition.approvedDeliveryDate
-            ? `Approved delivery ${formatRequisitionDate(requisition.approvedDeliveryDate)}`
-            : 'No approved delivery date'}
+          {requisition.requestedDeliveries.some((line) => line.status === 'APPROVED')
+            ? `Approved delivery ${requisition.requestedDeliveries
+                .filter((line) => line.status === 'APPROVED')
+                .map((line) => formatRequisitionDate(line.deliveryDate))
+                .join(', ')}`
+            : 'No approved delivery'}
         </p>
         <p className="tabular-nums">
           {acresBased
             ? `${formatAwaitingQuantity(parseDecimal(requisition.requestedAcres))} acres ordered`
             : `${formatAwaitingQuantity(requisition.requestedBags ?? 0, 0)} seed bags ordered`}
         </p>
+        <p className="tabular-nums">{dueToday ? `Due today ${dueToday}` : 'Nothing due today'}</p>
         <p className="text-muted-foreground tabular-nums">
           Dispatched {formatAwaitingQuantity(parseDecimal(quantity.fulfilledAcres))} acres ·{' '}
           {formatAwaitingQuantity(parseDecimal(quantity.fulfilledQuantity), 0)} seed bags

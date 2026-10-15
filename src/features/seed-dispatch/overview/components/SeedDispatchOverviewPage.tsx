@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { getRouteApi, Link } from '@tanstack/react-router';
 import { type PaginationState } from '@tanstack/react-table';
 import {
+  CalendarDays,
   FileText,
   LayoutGrid,
   Loader2,
@@ -44,6 +45,7 @@ import { useAwaitingRequisitionsTable } from '@/features/seed-dispatch/overview/
 import { useDispatchesTable } from '@/features/seed-dispatch/overview/components/use-dispatches-table';
 import { ViewFiltersSheet } from '@/features/seed-dispatch/overview/components/view-filters/ViewFiltersSheet';
 import {
+  deliveryLineForToday,
   isApprovedRequisition,
   matchesAwaitingSearch,
   summarizeApprovedRequisitions,
@@ -143,6 +145,7 @@ export function SeedDispatchList({
     isFetching: isRequisitionsFetching,
   } = useSeedRequisitions();
   const [search, setSearch] = useState('');
+  const [todayOnly, setTodayOnly] = useState(false);
   const [layout, setLayout] = useState<OverviewLayout>(getDefaultOverviewLayout);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -167,12 +170,18 @@ export function SeedDispatchList({
     () => scopedRequisitions.filter(isApprovedRequisition),
     [scopedRequisitions],
   );
+  const dueTodayRequisitions = useMemo(
+    () =>
+      approvedRequisitions.filter(
+        (requisition) => deliveryLineForToday(requisition.requestedDeliveries) != null,
+      ),
+    [approvedRequisitions],
+  );
   const filteredAwaiting = useMemo(() => {
-    if (!searchQuery) return approvedRequisitions;
-    return approvedRequisitions.filter((requisition) =>
-      matchesAwaitingSearch(requisition, searchQuery),
-    );
-  }, [approvedRequisitions, searchQuery]);
+    const source = todayOnly ? dueTodayRequisitions : approvedRequisitions;
+    if (!searchQuery) return source;
+    return source.filter((requisition) => matchesAwaitingSearch(requisition, searchQuery));
+  }, [approvedRequisitions, dueTodayRequisitions, searchQuery, todayOnly]);
 
   const summary = useMemo(() => {
     const dispatchSummary = summarizeDispatches(dispatchList);
@@ -344,6 +353,22 @@ export function SeedDispatchList({
                 ))}
               </SelectContent>
             </Select>
+            {isAwaiting ? (
+              <Button
+                type="button"
+                variant={todayOnly ? 'default' : 'outline'}
+                size="sm"
+                className="h-11 sm:h-9"
+                aria-pressed={todayOnly}
+                onClick={() => {
+                  setTodayOnly((current) => !current);
+                  setPagination((current) => ({ ...current, pageIndex: 0 }));
+                }}
+              >
+                <CalendarDays data-icon="inline-start" />
+                Today&apos;s schedule ({dueTodayRequisitions.length})
+              </Button>
+            ) : null}
           </div>
 
           <div className="flex min-w-0 items-center gap-2 sm:shrink-0">
@@ -420,10 +445,18 @@ export function SeedDispatchList({
                 <Truck />
               </EmptyMedia>
               <EmptyTitle>
-                {hasSearch ? 'No matching requisitions' : 'No requisitions awaiting dispatch'}
+                {todayOnly && !hasSearch
+                  ? 'No deliveries requested for today.'
+                  : hasSearch
+                    ? 'No matching requisitions'
+                    : 'No requisitions awaiting dispatch'}
               </EmptyTitle>
               <EmptyDescription>
-                {hasSearch ? 'Try a different search.' : 'Approved requisitions will appear here.'}
+                {todayOnly && !hasSearch
+                  ? 'Turn Today’s schedule off to see every approved requisition.'
+                  : hasSearch
+                    ? 'Try a different search.'
+                    : 'Approved requisitions will appear here.'}
               </EmptyDescription>
             </EmptyHeader>
           </Empty>

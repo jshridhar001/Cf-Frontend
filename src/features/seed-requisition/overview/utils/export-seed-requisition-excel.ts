@@ -41,8 +41,7 @@ const COLUMN_WIDTHS: Record<string, number> = {
   engContractUrl: 36,
   hindiContractUrl: 36,
   requisitionDate: 16,
-  requestedDeliveryDate: 16,
-  approvedDeliveryDate: 16,
+  requestedDeliveries: 42,
   status: 12,
 };
 

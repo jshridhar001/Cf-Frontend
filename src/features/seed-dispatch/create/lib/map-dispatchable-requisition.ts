@@ -7,6 +7,7 @@ import {
   round2,
 } from '@/features/seed-dispatch/create/lib/quantity';
 import type { DispatchableRequisition } from '@/features/seed-dispatch/create/types';
+import { deliveryLineForToday } from '@/features/seed-dispatch/overview/lib/awaiting-requisitions';
 import type { ApiSeedRequisition } from '@/features/seed-requisition/overview/types';
 
 function isoToDateOnly(value: string | null | undefined): string {
@@ -26,7 +27,8 @@ function toQuantityString(value: string | number | null | undefined): string {
 export function mapSeedRequisitionToDispatchable(
   requisition: ApiSeedRequisition,
 ): DispatchableRequisition | null {
-  if (requisition.status !== 'APPROVED') return null;
+  const hasApprovedLine = (requisition.deliveries ?? []).some((line) => line.status === 'APPROVED');
+  if (!hasApprovedLine) return null;
 
   const acres =
     requisition.requestedAcres != null && String(requisition.requestedAcres).trim()
@@ -47,6 +49,7 @@ export function mapSeedRequisitionToDispatchable(
 
   if (remaining <= 0) return null;
 
+  const dueToday = deliveryLineForToday(requisition.deliveries);
   const initialQuantity = isAcresBased ? acres : seedBagsInitialQuantity;
   const accountNumber = Number.parseInt(requisition.farmer?.accountNumber ?? '', 10);
 
@@ -66,7 +69,8 @@ export function mapSeedRequisitionToDispatchable(
     fulfilledAcres: quantityRow.fulfilledAcres,
     remarks: requisition.remarks,
     requisitionDate: isoToDateOnly(requisition.requisitionDate),
-    approvedDeliveryDate: isoToDateOnly(requisition.approvedDeliveryDate) || null,
+    dueTodayAcres: dueToday?.acres ?? null,
+    dueTodayBags: dueToday?.bags ?? null,
     remainingQuantity: formatDecimal(remaining),
     initialQuantity,
     isAcresBased,

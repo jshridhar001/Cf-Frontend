@@ -71,17 +71,18 @@ export type FarmerSeedRequisition = {
   fulfilledAcres: string;
   requisitionDate: string | null;
   contractDate: string | null;
-  requestedDeliveryDate: string | null;
-  approvedDeliveryDate: string | null;
+  deliveries: {
+    id: string;
+    deliveryDate: string;
+    acres: string | null;
+    bags: number | null;
+    status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    rejectionRemarks: string | null;
+  }[];
   remarks: string | null;
-  rejectionRemarks: string | null;
   engContractUrl: string | null;
   hindiContractUrl: string | null;
   createdById: string;
-  approvedById: string | null;
-  rejectedById: string | null;
-  approvedAt: string | null;
-  rejectedAt: string | null;
   createdAt: string;
   updatedAt: string;
   variety: FarmerSeedRequisitionVariety | null;

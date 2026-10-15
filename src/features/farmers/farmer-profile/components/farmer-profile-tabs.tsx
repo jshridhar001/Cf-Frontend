@@ -1,3 +1,4 @@
+import { ClipboardList, Sprout, Truck } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FarmerSeedAndFieldsTab } from '@/features/farmers/farmer-profile/seed-and-fields-tab/components/farmer-seed-and-fields-tab';
 import { FarmerSeedDispatchTab } from '@/features/farmers/farmer-profile/seed-dispatch-tab/components/farmer-seed-dispatch-tab';
@@ -6,16 +7,23 @@ import type { Farmer } from '@/features/farmers/overview/types';
 
 export function FarmerProfileTabs({ farmer }: { farmer: Farmer }) {
   return (
-    <Tabs defaultValue="requisitions">
-      <TabsList className="h-11 w-full justify-start overflow-x-auto sm:overflow-visible">
-        <TabsTrigger value="requisitions" className="flex-none sm:flex-1">
-          Seed Requisitions
+    <Tabs defaultValue="requisitions" className="w-full">
+      <TabsList className="w-full justify-start overflow-x-auto md:overflow-visible">
+        <TabsTrigger
+          value="requisitions"
+          aria-label="Seed Requisitions"
+          className="shrink-0 md:flex-1"
+        >
+          <ClipboardList className="md:hidden" aria-hidden />
+          <span className="hidden md:inline">Seed Requisitions</span>
         </TabsTrigger>
-        <TabsTrigger value="dispatches" className="flex-none sm:flex-1">
-          Seed Dispatches
+        <TabsTrigger value="dispatches" aria-label="Seed Dispatches" className="shrink-0 md:flex-1">
+          <Truck className="md:hidden" aria-hidden />
+          <span className="hidden md:inline">Seed Dispatches</span>
         </TabsTrigger>
-        <TabsTrigger value="fields" className="flex-none sm:flex-1">
-          Seed & fields
+        <TabsTrigger value="fields" aria-label="Seed & fields" className="shrink-0 md:flex-1">
+          <Sprout className="md:hidden" aria-hidden />
+          <span className="hidden md:inline">Seed & fields</span>
         </TabsTrigger>
       </TabsList>
       <TabsContent value="requisitions">
@@ -25,7 +33,7 @@ export function FarmerProfileTabs({ farmer }: { farmer: Farmer }) {
         <FarmerSeedDispatchTab farmer={farmer} />
       </TabsContent>
       <TabsContent value="fields">
-        <FarmerSeedAndFieldsTab />
+        <FarmerSeedAndFieldsTab farmer={farmer} />
       </TabsContent>
     </Tabs>
   );

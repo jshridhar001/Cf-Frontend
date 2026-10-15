@@ -1,7 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import {
   CalendarDays,
-  CheckIcon,
   EyeIcon,
   FileSignatureIcon,
   LandPlot,
@@ -12,7 +11,6 @@ import {
   SquarePenIcon,
   Trash2Icon,
   Users,
-  XIcon,
 } from 'lucide-react';
 import type { ComponentProps } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +24,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { RequestedDeliveryLines } from '@/features/seed-requisition/overview/components/requested-delivery-lines';
 import {
   formatRequestedQuantity,
   formatRequisitionDate,
@@ -33,6 +32,7 @@ import {
   getRequisitionFamilyLabel,
   getRequisitionPlaceLabel,
   type SeedRequisition,
+  type SeedRequisitionDelivery,
 } from '@/features/seed-requisition/overview/types';
 import { cn } from '@/lib/utils';
 
@@ -89,21 +89,20 @@ export function RequisitionCard({
   requisition,
   onEdit,
   onDelete,
-  onApprove,
-  onReject,
+  onApproveDelivery,
+  onRejectDelivery,
 }: {
   requisition: SeedRequisition;
   onEdit: (requisition: SeedRequisition) => void;
   onDelete: (requisition: SeedRequisition) => void;
-  onApprove: (requisition: SeedRequisition) => void;
-  onReject: (requisition: SeedRequisition) => void;
+  onApproveDelivery: (requisition: SeedRequisition, delivery: SeedRequisitionDelivery) => void;
+  onRejectDelivery: (requisition: SeedRequisition, delivery: SeedRequisitionDelivery) => void;
 }) {
   const farmerName = requisition.farmer?.name ?? 'Unknown farmer';
   const accountNumber = requisition.farmer?.accountNumber;
   const familyLabel = getRequisitionFamilyLabel(requisition.farmer);
   const placeLabel = getRequisitionPlaceLabel(requisition.farmer);
   const varietyName = requisition.variety?.name ?? 'Unknown variety';
-  const isPending = requisition.status === 'PENDING';
 
   return (
     <Card className="gap-3 py-4">
@@ -132,20 +131,11 @@ export function RequisitionCard({
             muted
           />
         ) : null}
-        {requisition.requestedDeliveryDate ? (
-          <RequisitionRow
-            icon={CalendarDays}
-            value={`Delivery ${formatRequisitionDate(requisition.requestedDeliveryDate)}`}
-            muted
-          />
-        ) : null}
-        {requisition.approvedDeliveryDate ? (
-          <RequisitionRow
-            icon={CalendarDays}
-            value={`Approved ${formatRequisitionDate(requisition.approvedDeliveryDate)}`}
-            muted
-          />
-        ) : null}
+        <RequestedDeliveryLines
+          requisition={requisition}
+          onApprove={(delivery) => onApproveDelivery(requisition, delivery)}
+          onReject={(delivery) => onRejectDelivery(requisition, delivery)}
+        />
         {requisition.remarks?.trim() ? (
           <div className="flex min-w-0 items-start gap-2">
             <MessageSquare className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" aria-hidden />
@@ -163,23 +153,6 @@ export function RequisitionCard({
           {formatSeedRequisitionStatus(requisition.status)}
         </Badge>
         <div className="flex items-center gap-0.5">
-          {isPending ? (
-            <>
-              <CardIconButton
-                aria-label={`Approve requisition for ${farmerName}`}
-                onClick={() => onApprove(requisition)}
-              >
-                <CheckIcon />
-              </CardIconButton>
-              <CardIconButton
-                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                aria-label={`Reject requisition for ${farmerName}`}
-                onClick={() => onReject(requisition)}
-              >
-                <XIcon />
-              </CardIconButton>
-            </>
-          ) : null}
           <Button
             variant="ghost"
             size="icon-sm"

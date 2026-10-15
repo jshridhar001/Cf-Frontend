@@ -9,11 +9,13 @@ import apiClient, { getApiErrorMessage } from '@/lib/api-client';
 export type SeedRequisitionDecisionVariables =
   | {
       requisitionId: string;
+      deliveryId: string;
       decision: 'APPROVED';
-      approvedDeliveryDate: string;
+      deliveryDate: string;
     }
   | {
       requisitionId: string;
+      deliveryId: string;
       decision: 'REJECTED';
       rejectionRemarks: string;
     };
@@ -28,14 +30,14 @@ export function useSeedRequisitionDecision() {
         variables.decision === 'APPROVED'
           ? {
               decision: variables.decision,
-              approvedDeliveryDate: variables.approvedDeliveryDate,
+              deliveryDate: variables.deliveryDate,
             }
           : {
               decision: variables.decision,
               rejectionRemarks: variables.rejectionRemarks,
             };
       const { data } = await apiClient.patch<SeedRequisitionDecisionResponse>(
-        `/v1/seed-requisitions/${variables.requisitionId}/decision`,
+        `/v1/seed-requisitions/${variables.requisitionId}/deliveries/${variables.deliveryId}/decision`,
         body,
       );
       return toSeedRequisition(data.data);
@@ -48,16 +50,13 @@ export function useSeedRequisitionDecision() {
         queryClient.invalidateQueries({ queryKey: farmersKeys.list() }),
       ]);
       const farmerName = requisition.farmer?.name;
-      toast.success(
-        variables.decision === 'APPROVED' ? 'Requisition approved' : 'Requisition rejected',
-        {
-          description: farmerName ? `${farmerName} was updated.` : undefined,
-          position: 'bottom-right',
-        },
-      );
+      toast.success(variables.decision === 'APPROVED' ? 'Delivery approved' : 'Delivery rejected', {
+        description: farmerName ? `${farmerName} was updated.` : undefined,
+        position: 'bottom-right',
+      });
     },
     onError: (error) => {
-      toast.error(getApiErrorMessage(error, 'Failed to update requisition. Please try again.'), {
+      toast.error(getApiErrorMessage(error, 'Failed to update delivery. Please try again.'), {
         position: 'bottom-right',
       });
     },
