@@ -176,7 +176,8 @@ export function FacilityStockTable<TData extends RowData>({
                   <ItemContent className="min-w-0 pr-1">
                     <ItemTitle>{stock.varietyName}</ItemTitle>
                     <ItemDescription>
-                      {stock.sizeName} · {stock.generationName} · {stock.quantity}
+                      {stock.sizeName} · {stock.generationName} · Initial {stock.initialQuantity} ·
+                      Current {stock.currentQuantity}
                     </ItemDescription>
                   </ItemContent>
                   <ItemActions className="shrink-0 self-start">

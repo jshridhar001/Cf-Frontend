@@ -21,7 +21,7 @@ export function EditFacilityStockDrawer({
       open={open}
       onOpenChange={onOpenChange}
       title="Edit Stock"
-      description="Update the quantity for this stock row."
+      description="Update the initial and current quantity for this stock row."
       isMutating={isSaving}
     >
       {stock ? (

@@ -1,5 +1,6 @@
 import { createContext, type ReactNode, useContext, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { statusFromDeliveries } from '@/features/seed-requisition/overview/lib/requested-deliveries';
 import {
   SAMPLE_REQUISITION_FARMERS,
   SAMPLE_REQUISITION_VARIETIES,
@@ -189,16 +190,10 @@ export function RequisitionSampleProvider({ children }: { children: ReactNode })
                     rejectionRemarks: variables.rejectionRemarks ?? null,
                   };
                 });
-                const statuses = requestedDeliveries.map((line) => line.status);
-                const status = statuses.includes('PENDING')
-                  ? 'PENDING'
-                  : statuses.includes('APPROVED')
-                    ? 'APPROVED'
-                    : 'REJECTED';
                 return {
                   ...item,
                   requestedDeliveries,
-                  status,
+                  status: statusFromDeliveries(requestedDeliveries),
                   updatedAt: now,
                 };
               }),

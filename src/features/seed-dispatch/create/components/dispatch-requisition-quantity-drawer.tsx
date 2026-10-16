@@ -612,8 +612,8 @@ export function DispatchRequisitionQuantityDrawer({
         <DrawerHeader>
           <DrawerTitle>{requisition.farmer.name}</DrawerTitle>
           <DrawerDescription>
-            Account #{requisition.farmer.accountNumber} · {requisition.variety.name} · Req.{' '}
-            {formatDispatchDate(requisition.requisitionDate)}
+            Account #{requisition.farmer.accountNumber} · {requisition.variety.name} · Delivery{' '}
+            {formatDispatchDate(requisition.deliveryDate)}
           </DrawerDescription>
           {requisition.remarks ? (
             <p className="text-muted-foreground mt-1 text-sm">{requisition.remarks}</p>

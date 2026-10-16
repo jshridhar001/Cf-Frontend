@@ -9,7 +9,7 @@ export type CreateFacilityStockVariables = {
   varietyId: string;
   sizeId: string;
   generationId: string;
-  quantity: number;
+  initialQuantity: number;
 };
 
 export function useCreateFacilityStock() {
@@ -29,7 +29,7 @@ export function useCreateFacilityStock() {
     onSuccess: async (stock) => {
       await queryClient.invalidateQueries({ queryKey: masterKeys.facilityStock() });
       toast.success('Stock added successfully', {
-        description: `${stock.quantity} was added.`,
+        description: `${stock.initialQuantity} was added.`,
         position: 'bottom-right',
       });
     },

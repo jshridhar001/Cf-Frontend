@@ -123,12 +123,12 @@ export function DispatchDetailsStep({
 
   const summaryRows = useMemo(
     () =>
-      selectionsToInput(selections).map((selection) => ({
+      selectionsToInput(selections, requisitions).map((selection) => ({
         ...selection,
-        requisition: requisitionById.get(selection.requisitionId),
+        requisition: requisitionById.get(selection.deliveryId),
         total: getSelectionTotal(selection.sizeLines),
       })),
-    [selections, requisitionById],
+    [selections, requisitionById, requisitions],
   );
   const totalBags = useMemo(
     () => summaryRows.reduce((sum, row) => sum + row.total, 0),
@@ -184,7 +184,7 @@ export function DispatchDetailsStep({
       },
     },
     onSubmit: async ({ value }) => {
-      const requisitionInput = selectionsToInput(selections);
+      const requisitionInput = selectionsToInput(selections, requisitions);
       const hasGrossWeight = (value.grossWeight ?? '').trim().length > 0;
       const hasTareWeight = (value.tareWeight ?? '').trim().length > 0;
       const grossWeight = parseWeightValue(value.grossWeight ?? '');
@@ -266,7 +266,7 @@ export function DispatchDetailsStep({
                     {summaryRows.flatMap((row) =>
                       row.sizeLines.map((line, lineIndex) => (
                         <TableRow
-                          key={`${row.requisitionId}-${line.facilityId}-${line.sizeId}-${line.generationId}`}
+                          key={`${row.deliveryId}-${line.facilityId}-${line.sizeId}-${line.generationId}`}
                         >
                           {lineIndex === 0 ? (
                             <>

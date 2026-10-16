@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { validateDeliverySchedule } from '@/features/seed-requisition/overview/lib/requested-deliveries';
+import {
+  statusFromDeliveries,
+  validateDeliverySchedule,
+} from '@/features/seed-requisition/overview/lib/requested-deliveries';
 
 describe('validateDeliverySchedule', () => {
   it('allows an empty schedule and a partial acres schedule under the total', () => {
@@ -84,5 +87,22 @@ describe('validateDeliverySchedule', () => {
         message: 'Scheduled quantity cannot exceed the requested total.',
       },
     ]);
+  });
+});
+
+describe('statusFromDeliveries', () => {
+  it('stays pending until every delivery is decided', () => {
+    expect(statusFromDeliveries([])).toBe('PENDING');
+    expect(
+      statusFromDeliveries([{ status: 'APPROVED' }, { status: 'PENDING' }, { status: 'REJECTED' }]),
+    ).toBe('PENDING');
+  });
+
+  it('is approved when a decided requisition still has an approved delivery', () => {
+    expect(statusFromDeliveries([{ status: 'APPROVED' }, { status: 'REJECTED' }])).toBe('APPROVED');
+  });
+
+  it('is rejected only when every delivery is rejected', () => {
+    expect(statusFromDeliveries([{ status: 'REJECTED' }, { status: 'REJECTED' }])).toBe('REJECTED');
   });
 });

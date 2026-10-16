@@ -118,6 +118,16 @@ export function formatRequestedDeliveries(
     .join(', ');
 }
 
+export function statusFromDeliveries(
+  deliveries: Array<Pick<SeedRequisitionDelivery, 'status'>> | null | undefined,
+) {
+  if (!deliveries?.length || deliveries.some((line) => line.status === 'PENDING')) {
+    return 'PENDING' as const;
+  }
+  if (deliveries.some((line) => line.status === 'APPROVED')) return 'APPROVED' as const;
+  return 'REJECTED' as const;
+}
+
 export function earliestRequestedDeliveryDate(
   deliveries: SeedRequisitionDelivery[] | null | undefined,
 ) {

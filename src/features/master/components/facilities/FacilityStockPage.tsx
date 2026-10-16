@@ -67,7 +67,8 @@ export function FacilityStockPage({ facilityId }: { facilityId: string }) {
         <PageCardHeader className="has-data-[slot=card-action]:grid-cols-[1fr_auto] md:has-data-[slot=card-action]:grid-cols-1">
           <CardTitle>Stock</CardTitle>
           <CardDescription className="hidden sm:block">
-            Manage variety, seed size, generation, and quantity stored at this facility.
+            Manage variety, seed size, generation, and the initial and current quantity stored at
+            this facility.
           </CardDescription>
           <CardAction className="flex items-center gap-1 md:hidden">
             <Button

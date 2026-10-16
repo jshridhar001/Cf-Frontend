@@ -2,7 +2,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { getRouteApi, Link } from '@tanstack/react-router';
 import { type PaginationState } from '@tanstack/react-table';
 import {
-  CalendarDays,
   FileText,
   LayoutGrid,
   Loader2,
@@ -14,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { DatePickerInput, parseDateOnlyString } from '@/components/ui/date-picker';
 import {
   Empty,
   EmptyDescription,
@@ -45,10 +45,12 @@ import { useAwaitingRequisitionsTable } from '@/features/seed-dispatch/overview/
 import { useDispatchesTable } from '@/features/seed-dispatch/overview/components/use-dispatches-table';
 import { ViewFiltersSheet } from '@/features/seed-dispatch/overview/components/view-filters/ViewFiltersSheet';
 import {
-  deliveryLineForToday,
-  isApprovedRequisition,
+  buildAwaitingLots,
+  deliveryCalendarDay,
+  formatCalendarDayLabel,
+  localCalendarDay,
   matchesAwaitingSearch,
-  summarizeApprovedRequisitions,
+  summarizeAwaitingLots,
 } from '@/features/seed-dispatch/overview/lib/awaiting-requisitions';
 import {
   emptyGlobalFilter,
@@ -145,7 +147,7 @@ export function SeedDispatchList({
     isFetching: isRequisitionsFetching,
   } = useSeedRequisitions();
   const [search, setSearch] = useState('');
-  const [todayOnly, setTodayOnly] = useState(false);
+  const [lotDate, setLotDate] = useState('');
   const [layout, setLayout] = useState<OverviewLayout>(getDefaultOverviewLayout);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -166,30 +168,25 @@ export function SeedDispatchList({
   const isAwaiting = listSearch.status === 'AWAITING_DISPATCH';
   const searchQuery = search.trim().toLowerCase();
 
-  const approvedRequisitions = useMemo(
-    () => scopedRequisitions.filter(isApprovedRequisition),
-    [scopedRequisitions],
-  );
-  const dueTodayRequisitions = useMemo(
-    () =>
-      approvedRequisitions.filter(
-        (requisition) => deliveryLineForToday(requisition.requestedDeliveries) != null,
-      ),
-    [approvedRequisitions],
+  const awaitingLots = useMemo(
+    () => buildAwaitingLots(scopedRequisitions, dispatchList),
+    [scopedRequisitions, dispatchList],
   );
   const filteredAwaiting = useMemo(() => {
-    const source = todayOnly ? dueTodayRequisitions : approvedRequisitions;
-    if (!searchQuery) return source;
-    return source.filter((requisition) => matchesAwaitingSearch(requisition, searchQuery));
-  }, [approvedRequisitions, dueTodayRequisitions, searchQuery, todayOnly]);
+    return awaitingLots.filter((lot) => {
+      if (lotDate && deliveryCalendarDay(lot.deliveryDate) !== lotDate) return false;
+      if (searchQuery && !matchesAwaitingSearch(lot, searchQuery)) return false;
+      return true;
+    });
+  }, [awaitingLots, lotDate, searchQuery]);
 
   const summary = useMemo(() => {
     const dispatchSummary = summarizeDispatches(dispatchList);
     return {
       ...dispatchSummary,
-      AWAITING_DISPATCH: summarizeApprovedRequisitions(scopedRequisitions),
+      AWAITING_DISPATCH: summarizeAwaitingLots(awaitingLots),
     };
-  }, [dispatchList, scopedRequisitions]);
+  }, [awaitingLots, dispatchList]);
 
   const table = useDispatchesTable({
     data: dispatchList,
@@ -354,20 +351,32 @@ export function SeedDispatchList({
               </SelectContent>
             </Select>
             {isAwaiting ? (
-              <Button
-                type="button"
-                variant={todayOnly ? 'default' : 'outline'}
-                size="sm"
-                className="h-11 sm:h-9"
-                aria-pressed={todayOnly}
-                onClick={() => {
-                  setTodayOnly((current) => !current);
-                  setPagination((current) => ({ ...current, pageIndex: 0 }));
-                }}
-              >
-                <CalendarDays data-icon="inline-start" />
-                Today&apos;s schedule ({dueTodayRequisitions.length})
-              </Button>
+              <div className="flex w-full items-center gap-2 sm:w-auto">
+                <DatePickerInput
+                  id="awaiting-lot-date"
+                  className="w-full sm:w-52"
+                  placeholder="All dates"
+                  value={lotDate ? parseDateOnlyString(lotDate) : undefined}
+                  onChange={(date) => {
+                    setLotDate(date ? localCalendarDay(date) : '');
+                    setPagination((current) => ({ ...current, pageIndex: 0 }));
+                  }}
+                />
+                {lotDate ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-11 shrink-0 sm:h-9"
+                    onClick={() => {
+                      setLotDate('');
+                      setPagination((current) => ({ ...current, pageIndex: 0 }));
+                    }}
+                  >
+                    Clear
+                  </Button>
+                ) : null}
+              </div>
             ) : null}
           </div>
 
@@ -445,18 +454,22 @@ export function SeedDispatchList({
                 <Truck />
               </EmptyMedia>
               <EmptyTitle>
-                {todayOnly && !hasSearch
-                  ? 'No deliveries requested for today.'
+                {lotDate
+                  ? hasSearch
+                    ? `No matching lots for ${formatCalendarDayLabel(lotDate)}`
+                    : `No approved lots for ${formatCalendarDayLabel(lotDate)}`
                   : hasSearch
-                    ? 'No matching requisitions'
-                    : 'No requisitions awaiting dispatch'}
+                    ? 'No matching lots'
+                    : 'No lots awaiting dispatch'}
               </EmptyTitle>
               <EmptyDescription>
-                {todayOnly && !hasSearch
-                  ? 'Turn Today’s schedule off to see every approved requisition.'
+                {lotDate && !hasSearch
+                  ? 'Clear the date to see every approved lot that still has quantity left.'
                   : hasSearch
-                    ? 'Try a different search.'
-                    : 'Approved requisitions will appear here.'}
+                    ? lotDate
+                      ? `Nothing matches this search for ${formatCalendarDayLabel(lotDate)}.`
+                      : 'Try a different search.'
+                    : 'Approved delivery lots will appear here until they are fully dispatched.'}
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
@@ -467,8 +480,8 @@ export function SeedDispatchList({
             </TabsContent>
             <TabsContent value="cards">
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {pagedAwaiting.map((requisition) => (
-                  <AwaitingRequisitionCard key={requisition.id} requisition={requisition} />
+                {pagedAwaiting.map((lot) => (
+                  <AwaitingRequisitionCard key={lot.id} lot={lot} />
                 ))}
               </div>
             </TabsContent>

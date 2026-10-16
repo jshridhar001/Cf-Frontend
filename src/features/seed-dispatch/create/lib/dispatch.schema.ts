@@ -37,6 +37,7 @@ export const dispatchSizeLineSchema = z.object({
 
 export const dispatchRequisitionSelectionSchema = z.object({
   requisitionId: z.string().min(1, 'Requisition is required'),
+  deliveryId: z.string().min(1, 'Delivery is required'),
   sizeLines: z
     .array(dispatchSizeLineSchema)
     .min(1, 'At least one Seed Size line is required')
@@ -152,6 +153,7 @@ export function normalizeCreateDispatchInput(input: CreateDispatchInput) {
 
   const requisitions = input.requisitions.map((selection) => ({
     requisitionId: selection.requisitionId,
+    deliveryId: selection.deliveryId,
     sizeLines: selection.sizeLines.map((line) => ({
       facilityId: line.facilityId,
       sizeId: line.sizeId,

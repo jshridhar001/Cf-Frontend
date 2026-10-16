@@ -32,6 +32,7 @@ export function toCreateSeedDispatchBody(input: CreateDispatchInput): CreateSeed
     ...(normalized.remarks ? { remarks: normalized.remarks } : {}),
     requisitions: normalized.requisitions.map((selection) => ({
       requisitionId: selection.requisitionId,
+      deliveryId: selection.deliveryId,
       sizeLines: selection.sizeLines.map((line) => ({
         facilityId: line.facilityId,
         sizeId: line.sizeId,

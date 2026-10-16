@@ -11,6 +11,7 @@ import {
   Shield,
   Truck,
   User,
+  Warehouse,
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
@@ -48,6 +49,7 @@ type AppPath =
   | '/seed-dispatches/analytics'
   | '/seed-dispatches/settings'
   | '/transfer-stock'
+  | '/cs-gate-pass'
   | '/master'
   | '/access-control';
 
@@ -113,6 +115,11 @@ const platformNavItems: NavItem[] = [
     title: 'Transfer Stock',
     url: '/transfer-stock',
     icon: ArrowLeftRight,
+  },
+  {
+    title: 'CS Gate Pass',
+    url: '/cs-gate-pass',
+    icon: Warehouse,
   },
   {
     title: 'Master',

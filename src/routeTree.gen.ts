@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as TermsOfServiceRouteImport } from './routes/terms-of-service'
 import { Route as AuthenticatedAccessControlRouteImport } from './routes/_authenticated/access-control'
+import { Route as AuthenticatedCsGatePassRouteImport } from './routes/_authenticated/cs-gate-pass'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedFarmersRouteImport } from './routes/_authenticated/farmers'
 import { Route as AuthenticatedMasterRouteImport } from './routes/_authenticated/master'
@@ -83,6 +84,11 @@ const AuthenticatedAccessControlRoute =
     path: '/access-control',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedCsGatePassRoute = AuthenticatedCsGatePassRouteImport.update({
+  id: '/cs-gate-pass',
+  path: '/cs-gate-pass',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -307,6 +313,7 @@ export interface FileRoutesByFullPath {
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/terms-of-service': typeof TermsOfServiceRoute
   '/access-control': typeof AuthenticatedAccessControlRouteWithChildren
+  '/cs-gate-pass': typeof AuthenticatedCsGatePassRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/farmers': typeof AuthenticatedFarmersRouteWithChildren
   '/master': typeof AuthenticatedMasterRouteWithChildren
@@ -351,6 +358,7 @@ export interface FileRoutesByTo {
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/terms-of-service': typeof TermsOfServiceRoute
   '/access-control': typeof AuthenticatedAccessControlRouteWithChildren
+  '/cs-gate-pass': typeof AuthenticatedCsGatePassRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/farmers': typeof AuthenticatedFarmersRouteWithChildren
   '/master': typeof AuthenticatedMasterRouteWithChildren
@@ -395,6 +403,7 @@ export interface FileRoutesById {
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/terms-of-service': typeof TermsOfServiceRoute
   '/_authenticated/access-control': typeof AuthenticatedAccessControlRouteWithChildren
+  '/_authenticated/cs-gate-pass': typeof AuthenticatedCsGatePassRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/farmers': typeof AuthenticatedFarmersRouteWithChildren
   '/_authenticated/master': typeof AuthenticatedMasterRouteWithChildren
@@ -441,6 +450,7 @@ export interface FileRouteTypes {
     | '/privacy-policy'
     | '/terms-of-service'
     | '/access-control'
+    | '/cs-gate-pass'
     | '/dashboard'
     | '/farmers'
     | '/master'
@@ -485,6 +495,7 @@ export interface FileRouteTypes {
     | '/privacy-policy'
     | '/terms-of-service'
     | '/access-control'
+    | '/cs-gate-pass'
     | '/dashboard'
     | '/farmers'
     | '/master'
@@ -528,6 +539,7 @@ export interface FileRouteTypes {
     | '/privacy-policy'
     | '/terms-of-service'
     | '/_authenticated/access-control'
+    | '/_authenticated/cs-gate-pass'
     | '/_authenticated/dashboard'
     | '/_authenticated/farmers'
     | '/_authenticated/master'
@@ -617,6 +629,13 @@ declare module '@tanstack/react-router' {
       path: '/access-control'
       fullPath: '/access-control'
       preLoaderRoute: typeof AuthenticatedAccessControlRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/cs-gate-pass': {
+      id: '/_authenticated/cs-gate-pass'
+      path: '/cs-gate-pass'
+      fullPath: '/cs-gate-pass'
+      preLoaderRoute: typeof AuthenticatedCsGatePassRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/dashboard': {
@@ -984,6 +1003,7 @@ const AuthenticatedSeedRequisitionIdRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAccessControlRoute: typeof AuthenticatedAccessControlRouteWithChildren
+  AuthenticatedCsGatePassRoute: typeof AuthenticatedCsGatePassRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedFarmersRoute: typeof AuthenticatedFarmersRouteWithChildren
   AuthenticatedMasterRoute: typeof AuthenticatedMasterRouteWithChildren
@@ -1004,6 +1024,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAccessControlRoute: AuthenticatedAccessControlRouteWithChildren,
+  AuthenticatedCsGatePassRoute: AuthenticatedCsGatePassRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedFarmersRoute: AuthenticatedFarmersRouteWithChildren,
   AuthenticatedMasterRoute: AuthenticatedMasterRouteWithChildren,

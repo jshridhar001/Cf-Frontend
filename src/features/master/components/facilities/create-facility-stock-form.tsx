@@ -25,7 +25,7 @@ const formSchema = z.object({
   varietyId: z.string().min(1, 'Variety is required.'),
   sizeId: z.string().min(1, 'Seed size is required.'),
   generationId: z.string().min(1, 'Generation is required.'),
-  quantity: quantitySchema,
+  initialQuantity: quantitySchema,
 });
 
 interface CreateFacilityStockFormProps {
@@ -62,7 +62,7 @@ export function CreateFacilityStockForm({
       varietyId: '',
       sizeId: '',
       generationId: '',
-      quantity: '',
+      initialQuantity: '',
     },
     validators: {
       onSubmit: formSchema,
@@ -73,7 +73,7 @@ export function CreateFacilityStockForm({
         varietyId: value.varietyId,
         sizeId: value.sizeId,
         generationId: value.generationId,
-        quantity: Number(value.quantity),
+        initialQuantity: Number(value.initialQuantity),
       });
       form.reset();
       onSuccess?.();
@@ -182,12 +182,12 @@ export function CreateFacilityStockForm({
           )}
         </form.Subscribe>
 
-        <form.Field name="quantity">
+        <form.Field name="initialQuantity">
           {(field) => {
             const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Quantity</FieldLabel>
+                <FieldLabel htmlFor={field.name}>Initial quantity</FieldLabel>
                 <Input
                   id={field.name}
                   name={field.name}

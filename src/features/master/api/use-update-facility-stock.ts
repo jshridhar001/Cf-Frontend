@@ -6,7 +6,8 @@ import apiClient, { getApiErrorMessage } from '@/lib/api-client';
 
 export type UpdateFacilityStockVariables = {
   stockId: string;
-  quantity: number;
+  initialQuantity: number;
+  currentQuantity: number;
 };
 
 export function useUpdateFacilityStock() {
@@ -14,10 +15,14 @@ export function useUpdateFacilityStock() {
 
   return useMutation({
     mutationKey: ['master', 'update-facility-stock'],
-    mutationFn: async ({ stockId, quantity }: UpdateFacilityStockVariables) => {
+    mutationFn: async ({
+      stockId,
+      initialQuantity,
+      currentQuantity,
+    }: UpdateFacilityStockVariables) => {
       const { data } = await apiClient.put<FacilityStockResponse>(
         `/v1/masters/facility-stock/${stockId}`,
-        { quantity },
+        { initialQuantity, currentQuantity },
       );
       return data.data;
     },
@@ -26,7 +31,7 @@ export function useUpdateFacilityStock() {
     onSuccess: async (stock) => {
       await queryClient.invalidateQueries({ queryKey: masterKeys.facilityStock() });
       toast.success('Stock updated successfully', {
-        description: `Quantity is now ${stock.quantity}.`,
+        description: `Current quantity is now ${stock.currentQuantity}.`,
         position: 'bottom-right',
       });
     },

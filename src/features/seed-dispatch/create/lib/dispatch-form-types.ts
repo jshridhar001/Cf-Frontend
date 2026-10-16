@@ -29,20 +29,28 @@ export function hasValidSelection(sizeLines: DispatchSizeLineDraft[]) {
 
 export function selectionsToInput(
   selections: DispatchRequisitionSelectionMap,
-): Array<{ requisitionId: string; sizeLines: DispatchSizeLineDraft[] }> {
+  requisitions: Array<{ id: string; requisitionId: string }>,
+): Array<{ requisitionId: string; deliveryId: string; sizeLines: DispatchSizeLineDraft[] }> {
   return Array.from(selections.entries())
     .filter(([, sizeLines]) => hasValidSelection(sizeLines))
-    .map(([requisitionId, sizeLines]) => ({
-      requisitionId,
-      sizeLines: sizeLines.filter((line) => {
-        const value = Number.parseFloat(line.quantity);
-        return (
-          Boolean(line.facilityId) &&
-          Boolean(line.sizeId) &&
-          Boolean(line.generationId) &&
-          Number.isFinite(value) &&
-          value > 0
-        );
-      }),
-    }));
+    .flatMap(([deliveryId, sizeLines]) => {
+      const requisitionId = requisitions.find((row) => row.id === deliveryId)?.requisitionId;
+      if (!requisitionId) return [];
+      return [
+        {
+          requisitionId,
+          deliveryId,
+          sizeLines: sizeLines.filter((line) => {
+            const value = Number.parseFloat(line.quantity);
+            return (
+              Boolean(line.facilityId) &&
+              Boolean(line.sizeId) &&
+              Boolean(line.generationId) &&
+              Number.isFinite(value) &&
+              value > 0
+            );
+          }),
+        },
+      ];
+    });
 }

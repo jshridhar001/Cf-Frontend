@@ -31,8 +31,12 @@ export const columns = columnHelper.columns([
     header: 'Generation',
     sortFn: 'text',
   }),
-  columnHelper.accessor('quantity', {
-    header: 'Quantity',
+  columnHelper.accessor('initialQuantity', {
+    header: 'Initial quantity',
+    sortFn: 'alphanumeric',
+  }),
+  columnHelper.accessor('currentQuantity', {
+    header: 'Current quantity',
     sortFn: 'alphanumeric',
   }),
   columnHelper.accessor('createdAt', {

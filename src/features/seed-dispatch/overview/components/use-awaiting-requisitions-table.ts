@@ -7,14 +7,14 @@ import {
 import { useState } from 'react';
 import { awaitingColumns } from '@/features/seed-dispatch/overview/components/awaiting-dispatch-columns';
 import { features } from '@/features/seed-dispatch/overview/components/data-table-features';
-import type { SeedRequisition } from '@/features/seed-requisition/overview/types';
+import type { AwaitingDeliveryLot } from '@/features/seed-dispatch/overview/lib/awaiting-requisitions';
 
 export function useAwaitingRequisitionsTable({
   data,
   pagination,
   onPaginationChange,
 }: {
-  data: SeedRequisition[];
+  data: AwaitingDeliveryLot[];
   pagination: PaginationState;
   onPaginationChange: OnChangeFn<PaginationState>;
 }) {

@@ -374,7 +374,7 @@ export function DispatchRequisitionSelectionStep({
                     <TableHead className="w-10" />
                     <TableHead>Farmer / Account</TableHead>
                     <TableHead>Variety</TableHead>
-                    <TableHead>Req. date</TableHead>
+                    <TableHead>Delivery date</TableHead>
                     <TableHead>Remaining</TableHead>
                     <TableHead className="text-right">Action</TableHead>
                   </TableRow>
@@ -425,7 +425,7 @@ export function DispatchRequisitionSelectionStep({
                         </TableCell>
                         <TableCell>{requisition.variety.name}</TableCell>
                         <TableCell className="text-muted-foreground whitespace-nowrap">
-                          {formatDispatchDate(requisition.requisitionDate)}
+                          {formatDispatchDate(requisition.deliveryDate)}
                         </TableCell>
                         <TableCell className="text-muted-foreground whitespace-nowrap">
                           <div className="flex flex-col gap-0.5">
@@ -527,6 +527,8 @@ export function DispatchRequisitionSelectionStep({
                     <div className="text-muted-foreground flex flex-wrap gap-x-2 gap-y-0.5 pl-7 text-xs">
                       <span>{requisition.variety.name}</span>
                       <span aria-hidden>·</span>
+                      <span>{formatDispatchDate(requisition.deliveryDate)}</span>
+                      <span aria-hidden>·</span>
                       <span>{remainingLabel(requisition)}</span>
                       {dueTodayLabel(requisition) ? (
                         <>
@@ -555,12 +557,12 @@ export function DispatchRequisitionSelectionStep({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0 flex-1">
             {selectedCount === 0 ? (
-              <p className="text-muted-foreground text-sm">No requisitions added yet.</p>
+              <p className="text-muted-foreground text-sm">No lots added yet.</p>
             ) : (
               <div className="flex flex-col gap-2">
                 <p className="text-sm tabular-nums">
                   <span className="font-medium">
-                    {selectedCount} requisition
+                    {selectedCount} lot
                     {selectedCount === 1 ? '' : 's'}
                   </span>
                   <span className="text-muted-foreground"> · {totalBags} seed bags</span>

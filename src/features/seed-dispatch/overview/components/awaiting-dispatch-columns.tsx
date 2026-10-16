@@ -1,78 +1,63 @@
 import { createColumnHelper } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { parseDecimal } from '@/features/seed-dispatch/create/lib/quantity';
 import type { DataTableFeatures } from '@/features/seed-dispatch/overview/components/data-table-features';
 import {
-  deliveryLineForToday,
+  type AwaitingDeliveryLot,
   formatAwaitingQuantity,
-  formatDueTodayQuantity,
-  fulfillmentPercent,
-  isAcresBasedSeedRequisition,
-  remainingQuantity,
-  toQuantityRequisition,
 } from '@/features/seed-dispatch/overview/lib/awaiting-requisitions';
-import {
-  formatRequisitionDate,
-  type SeedRequisition,
-} from '@/features/seed-requisition/overview/types';
+import { formatRequisitionDate } from '@/features/seed-requisition/overview/types';
 
-const columnHelper = createColumnHelper<DataTableFeatures, SeedRequisition>();
+const columnHelper = createColumnHelper<DataTableFeatures, AwaitingDeliveryLot>();
 
 function formatDateFilterValue(value: unknown) {
   if (typeof value !== 'string' || !value) return 'Blank';
   return formatRequisitionDate(value);
 }
 
+function quantityLabel(lot: AwaitingDeliveryLot, value: number) {
+  return lot.isAcresBased
+    ? `${formatAwaitingQuantity(value)} acres`
+    : `${formatAwaitingQuantity(value, 0)} seed bags`;
+}
+
 export const awaitingColumns = columnHelper.columns([
-  columnHelper.accessor((row) => row.farmer?.name ?? '', {
+  columnHelper.accessor((row) => row.farmerName, {
     id: 'farmer',
     header: 'Farmer',
     sortFn: 'text',
     meta: { filterLabel: 'Farmer' },
     cell: ({ row }) => (
       <div className="min-w-40 leading-snug">
-        <p className="text-sm font-semibold">{row.original.farmer?.name || '—'}</p>
+        <p className="text-sm font-semibold">{row.original.farmerName || '—'}</p>
         <p className="text-xs text-muted-foreground tabular-nums">
-          {row.original.farmer?.accountNumber ? `#${row.original.farmer.accountNumber}` : '—'}
+          {row.original.accountNumber ? `#${row.original.accountNumber}` : '—'}
         </p>
       </div>
     ),
   }),
-  columnHelper.accessor((row) => row.variety?.name ?? '', {
+  columnHelper.accessor((row) => row.varietyName, {
     id: 'variety',
     header: 'Variety',
     sortFn: 'text',
     meta: { filterLabel: 'Variety' },
     cell: ({ getValue }) => <span className="text-sm">{getValue() || '—'}</span>,
   }),
-  columnHelper.accessor(
-    (row) =>
-      row.requestedDeliveries
-        .filter((line) => line.status === 'APPROVED')
-        .map((line) => line.deliveryDate)
-        .sort()[0] ?? '',
-    {
-      id: 'approvedDeliveryDate',
-      header: 'Approved delivery',
-      sortFn: 'alphanumeric',
-      meta: {
-        filterLabel: 'Approved delivery',
-        filterValueFormatter: formatDateFilterValue,
-      },
-      cell: ({ row }) => {
-        const dates = row.original.requestedDeliveries
-          .filter((line) => line.status === 'APPROVED')
-          .map((line) => formatRequisitionDate(line.deliveryDate));
-        return (
-          <span className="whitespace-nowrap text-muted-foreground">
-            {dates.length > 0 ? dates.join(', ') : '—'}
-          </span>
-        );
-      },
+  columnHelper.accessor((row) => row.deliveryDate, {
+    id: 'approvedDeliveryDate',
+    header: 'Approved delivery',
+    sortFn: 'alphanumeric',
+    meta: {
+      filterLabel: 'Approved delivery',
+      filterValueFormatter: formatDateFilterValue,
     },
-  ),
-  columnHelper.accessor((row) => (isAcresBasedSeedRequisition(row) ? 'Acres' : 'Bags'), {
+    cell: ({ row }) => (
+      <span className="whitespace-nowrap text-muted-foreground">
+        {formatRequisitionDate(row.original.deliveryDate)}
+      </span>
+    ),
+  }),
+  columnHelper.accessor((row) => (row.isAcresBased ? 'Acres' : 'Bags'), {
     id: 'basis',
     header: 'Basis',
     sortFn: 'text',
@@ -83,44 +68,36 @@ export const awaitingColumns = columnHelper.columns([
       </Badge>
     ),
   }),
-  columnHelper.accessor((row) => parseDecimal(row.requestedAcres), {
+  columnHelper.accessor((row) => (row.isAcresBased ? row.approvedQuantity : 0), {
     id: 'acresOrdered',
     header: 'Acres ordered',
     sortFn: 'alphanumeric',
     meta: { filterLabel: 'Acres ordered' },
     cell: ({ row }) => {
-      const acres = parseDecimal(row.original.requestedAcres);
-      if (!isAcresBasedSeedRequisition(row.original) || acres <= 0) {
+      if (!row.original.isAcresBased) {
         return <span className="text-muted-foreground">—</span>;
       }
-      return <span className="tabular-nums">{formatAwaitingQuantity(acres)}</span>;
+      return (
+        <span className="tabular-nums">
+          {formatAwaitingQuantity(row.original.approvedQuantity)}
+        </span>
+      );
     },
   }),
-  columnHelper.accessor(
-    (row) => formatDueTodayQuantity(deliveryLineForToday(row.requestedDeliveries)),
-    {
-      id: 'dueToday',
-      header: 'Due today',
-      sortFn: 'text',
-      meta: { filterLabel: 'Due today' },
-      cell: ({ getValue }) => {
-        const label = getValue();
-        if (!label) return <span className="text-muted-foreground">—</span>;
-        return <span className="tabular-nums font-medium">{label}</span>;
-      },
-    },
-  ),
-  columnHelper.accessor((row) => row.requestedBags ?? 0, {
+  columnHelper.accessor((row) => (row.isAcresBased ? 0 : row.approvedQuantity), {
     id: 'seedBagsOrdered',
     header: 'Seed Bags ordered',
     sortFn: 'alphanumeric',
     meta: { filterLabel: 'Seed Bags ordered' },
     cell: ({ row }) => {
-      const bags = row.original.requestedBags ?? 0;
-      if (isAcresBasedSeedRequisition(row.original) || bags <= 0) {
+      if (row.original.isAcresBased) {
         return <span className="text-muted-foreground">—</span>;
       }
-      return <span className="tabular-nums">{formatAwaitingQuantity(bags, 0)}</span>;
+      return (
+        <span className="tabular-nums">
+          {formatAwaitingQuantity(row.original.approvedQuantity, 0)}
+        </span>
+      );
     },
   }),
   columnHelper.accessor((row) => row.remarks ?? '', {
@@ -132,51 +109,35 @@ export const awaitingColumns = columnHelper.columns([
       <span className="text-muted-foreground">{row.original.remarks?.trim() || '—'}</span>
     ),
   }),
-  columnHelper.accessor(
-    (row) => {
-      const quantity = toQuantityRequisition(row);
-      return parseDecimal(quantity.fulfilledAcres) + parseDecimal(quantity.fulfilledQuantity);
-    },
-    {
-      id: 'dispatched',
-      header: 'Dispatched',
-      sortFn: 'alphanumeric',
-      meta: { filterLabel: 'Dispatched' },
-      cell: ({ row }) => {
-        const quantity = toQuantityRequisition(row.original);
-        return (
-          <span className="whitespace-nowrap text-sm tabular-nums">
-            {formatAwaitingQuantity(parseDecimal(quantity.fulfilledAcres))} acres ·{' '}
-            {formatAwaitingQuantity(parseDecimal(quantity.fulfilledQuantity), 0)} seed bags
-          </span>
-        );
-      },
-    },
-  ),
-  columnHelper.accessor((row) => remainingQuantity(row), {
+  columnHelper.accessor((row) => row.dispatchedQuantity, {
+    id: 'dispatched',
+    header: 'Dispatched',
+    sortFn: 'alphanumeric',
+    meta: { filterLabel: 'Dispatched' },
+    cell: ({ row }) => (
+      <span className="whitespace-nowrap text-sm tabular-nums">
+        {quantityLabel(row.original, row.original.dispatchedQuantity)}
+      </span>
+    ),
+  }),
+  columnHelper.accessor((row) => row.remainingQuantity, {
     id: 'remaining',
     header: 'Remaining',
     sortFn: 'alphanumeric',
     meta: { filterLabel: 'Remaining' },
-    cell: ({ row }) => {
-      const remaining = remainingQuantity(row.original);
-      const label = isAcresBasedSeedRequisition(row.original)
-        ? `${formatAwaitingQuantity(remaining)} acres`
-        : `${formatAwaitingQuantity(remaining, 0)} seed bags`;
-      return (
-        <Badge variant="secondary" className="font-normal tabular-nums">
-          {label}
-        </Badge>
-      );
-    },
+    cell: ({ row }) => (
+      <Badge variant="secondary" className="font-normal tabular-nums">
+        {quantityLabel(row.original, row.original.remainingQuantity)}
+      </Badge>
+    ),
   }),
-  columnHelper.accessor((row) => fulfillmentPercent(row), {
+  columnHelper.accessor((row) => row.fulfillmentPercent, {
     id: 'fulfillment',
     header: 'Fulfillment',
     sortFn: 'alphanumeric',
     meta: { filterLabel: 'Fulfillment' },
     cell: ({ row }) => {
-      const percent = fulfillmentPercent(row.original);
+      const percent = row.original.fulfillmentPercent;
       const isPartial = percent > 0 && percent < 100;
       return (
         <div className="flex w-full max-w-38 flex-col gap-1.5">

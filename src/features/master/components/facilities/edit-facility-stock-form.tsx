@@ -9,13 +9,16 @@ import { Input } from '@/components/ui/input';
 import { useUpdateFacilityStock } from '@/features/master/api/use-update-facility-stock';
 import type { FacilityStockTableRow } from './facility-stock-table-column';
 
+const quantitySchema = z
+  .string()
+  .trim()
+  .refine((value) => /^\d+$/.test(value) && Number(value) >= 0, {
+    message: 'Quantity must be a whole number of 0 or more.',
+  });
+
 const formSchema = z.object({
-  quantity: z
-    .string()
-    .trim()
-    .refine((value) => /^\d+$/.test(value) && Number(value) >= 1, {
-      message: 'Quantity must be a whole number of at least 1.',
-    }),
+  initialQuantity: quantitySchema,
+  currentQuantity: quantitySchema,
 });
 
 interface EditFacilityStockFormProps {
@@ -29,7 +32,8 @@ export function EditFacilityStockForm({ stock, onSuccess, onCancel }: EditFacili
 
   const form = useForm({
     defaultValues: {
-      quantity: String(stock.quantity),
+      initialQuantity: String(stock.initialQuantity),
+      currentQuantity: String(stock.currentQuantity),
     },
     validators: {
       onSubmit: formSchema,
@@ -37,7 +41,8 @@ export function EditFacilityStockForm({ stock, onSuccess, onCancel }: EditFacili
     onSubmit: async ({ value }) => {
       await updateFacilityStock({
         stockId: stock.id,
-        quantity: Number(value.quantity),
+        initialQuantity: Number(value.initialQuantity),
+        currentQuantity: Number(value.currentQuantity),
       });
       onSuccess?.();
     },
@@ -53,17 +58,43 @@ export function EditFacilityStockForm({ stock, onSuccess, onCancel }: EditFacili
       }}
     >
       <FieldGroup>
-        <form.Field name="quantity">
+        <form.Field name="initialQuantity">
           {(field) => {
             const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Quantity</FieldLabel>
+                <FieldLabel htmlFor={field.name}>Initial quantity</FieldLabel>
                 <Input
                   id={field.name}
                   name={field.name}
                   type="number"
-                  min={1}
+                  min={0}
+                  step={1}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                  aria-invalid={isInvalid}
+                  placeholder="100"
+                  autoComplete="off"
+                  disabled={isPending}
+                />
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
+        </form.Field>
+
+        <form.Field name="currentQuantity">
+          {(field) => {
+            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>Current quantity</FieldLabel>
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  type="number"
+                  min={0}
                   step={1}
                   value={field.state.value}
                   onBlur={field.handleBlur}

@@ -1,3 +1,4 @@
+import { parseDecimal, sumAcresFromBagLines } from '@/features/seed-dispatch/create/lib/quantity';
 import type { SeedDispatch } from '@/features/seed-dispatch/overview/types';
 
 export type FarmersReceived = {
@@ -19,10 +20,18 @@ export function getTotalBags(dispatch: SeedDispatch): number {
   );
 }
 
-export function getRequestedAcres(dispatch: SeedDispatch): number {
+export function getDispatchedAcres(dispatch: SeedDispatch): number {
   return dispatch.dispatchRequisitions.reduce((sum, stop) => {
-    const acres = Number(stop.requisition.requestedAcres);
-    return Number.isFinite(acres) ? sum + acres : sum;
+    if (parseDecimal(stop.requisition.requestedAcres) <= 0) return sum;
+    return (
+      sum +
+      sumAcresFromBagLines(
+        stop.sizeLines.map((line) => ({
+          quantity: line.bagQuantity,
+          bagsPerAcre: line.size?.seedBagsPerAcre ?? 0,
+        })),
+      )
+    );
   }, 0);
 }
 

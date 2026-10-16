@@ -116,6 +116,7 @@ export type SeedDispatchRequisition = {
   id: string;
   dispatchId: string;
   requisitionId: string;
+  deliveryId: string | null;
   status: DispatchRequisitionStatus | string;
   otpSentAt: string | null;
   otpVerifiedAt: string | null;

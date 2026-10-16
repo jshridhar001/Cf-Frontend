@@ -101,7 +101,8 @@ export type FacilityStock = {
   varietyId: string;
   sizeId: string;
   generationId: string;
-  quantity: number;
+  initialQuantity: number;
+  currentQuantity: number;
   createdAt: string;
   updatedAt: string;
 };

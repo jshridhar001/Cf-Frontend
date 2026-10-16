@@ -41,6 +41,7 @@ const routeTitles: Record<string, string> = {
   '/seed-dispatches/settings': 'Seed-Dispatches',
   '/transfer-stock': 'Transfer Stock',
   '/transfer-stock/create': 'Transfer Stock',
+  '/cs-gate-pass': 'CS Gate Pass',
   '/master': 'Master',
   '/master/farmers': 'Master',
   '/master/addresses': 'Master',

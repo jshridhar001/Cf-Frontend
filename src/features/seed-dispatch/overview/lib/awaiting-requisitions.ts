@@ -1,11 +1,6 @@
-import {
-  getRemainingAcres,
-  getRemainingBags,
-  isAcresBasedRequisition,
-  parseDecimal,
-  type QuantityRequisition,
-} from '@/features/seed-dispatch/create/lib/quantity';
+import { acresFromBags, parseDecimal, round2 } from '@/features/seed-dispatch/create/lib/quantity';
 import type { DispatchQuantitySummary } from '@/features/seed-dispatch/overview/lib/summary';
+import type { SeedDispatch } from '@/features/seed-dispatch/overview/types';
 import type {
   SeedRequisition,
   SeedRequisitionDelivery,
@@ -59,67 +54,136 @@ export function formatDueTodayQuantity(
   return '';
 }
 
-export function isApprovedRequisition(requisition: SeedRequisition) {
-  return requisition.requestedDeliveries.some((line) => line.status === 'APPROVED');
-}
+export type DeliveryUsage = {
+  bags: number;
+  acres: number;
+};
 
-export function toQuantityRequisition(requisition: SeedRequisition): QuantityRequisition {
-  return {
-    acres: requisition.requestedAcres,
-    seedBagsInitialQuantity:
-      requisition.requestedBags != null ? String(requisition.requestedBags) : null,
-    fulfilledQuantity: String(requisition.fulfilledBags),
-    fulfilledAcres: requisition.fulfilledAcres,
-  };
-}
+export type AwaitingDeliveryLot = {
+  id: string;
+  requisitionId: string;
+  farmerName: string;
+  accountNumber: string;
+  varietyName: string;
+  deliveryDate: string;
+  remarks: string | null;
+  isAcresBased: boolean;
+  approvedQuantity: number;
+  dispatchedQuantity: number;
+  remainingQuantity: number;
+  fulfillmentPercent: number;
+};
 
-export function isAcresBasedSeedRequisition(requisition: SeedRequisition) {
-  return isAcresBasedRequisition(toQuantityRequisition(requisition));
-}
+type DispatchUsageSource = {
+  status: string;
+  dispatchRequisitions: Array<{
+    deliveryId?: string | null;
+    sizeLines: Array<{
+      bagQuantity: number;
+      size?: { seedBagsPerAcre: number | null } | null;
+    }>;
+  }>;
+};
 
-export function remainingQuantity(requisition: SeedRequisition) {
-  const row = toQuantityRequisition(requisition);
-  return isAcresBasedRequisition(row) ? getRemainingAcres(row) : getRemainingBags(row);
-}
+export function usageByDeliveryId(dispatches: DispatchUsageSource[]) {
+  const usage = new Map<string, DeliveryUsage>();
 
-export function fulfillmentPercent(requisition: SeedRequisition) {
-  const row = toQuantityRequisition(requisition);
-  if (isAcresBasedRequisition(row)) {
-    const initial = parseDecimal(row.acres);
-    if (initial <= 0) return 0;
-    return Math.min(100, Math.round((parseDecimal(row.fulfilledAcres) / initial) * 100));
+  for (const dispatch of dispatches) {
+    if (dispatch.status === 'NULL') continue;
+    for (const stop of dispatch.dispatchRequisitions) {
+      if (!stop.deliveryId) continue;
+      const current = usage.get(stop.deliveryId) ?? { bags: 0, acres: 0 };
+      for (const line of stop.sizeLines) {
+        current.bags += line.bagQuantity;
+        current.acres = round2(
+          current.acres + acresFromBags(line.bagQuantity, line.size?.seedBagsPerAcre ?? 0),
+        );
+      }
+      usage.set(stop.deliveryId, current);
+    }
   }
 
-  const initial = parseDecimal(row.seedBagsInitialQuantity);
-  if (initial <= 0) return 0;
-  return Math.min(100, Math.round((parseDecimal(row.fulfilledQuantity) / initial) * 100));
+  return usage;
 }
 
-export function matchesAwaitingSearch(requisition: SeedRequisition, query: string) {
-  const haystack = [
-    requisition.farmer?.name,
-    requisition.farmer?.accountNumber,
-    requisition.variety?.name,
-    requisition.remarks,
-  ]
+function lotFulfillmentPercent(approved: number, dispatched: number) {
+  if (approved <= 0) return 0;
+  return Math.min(100, Math.round((dispatched / approved) * 100));
+}
+
+export function buildAwaitingLots(
+  requisitions: SeedRequisition[],
+  dispatches: SeedDispatch[],
+): AwaitingDeliveryLot[] {
+  const usage = usageByDeliveryId(dispatches);
+  const lots: AwaitingDeliveryLot[] = [];
+
+  for (const requisition of requisitions) {
+    for (const delivery of requisition.requestedDeliveries) {
+      if (delivery.status !== 'APPROVED' || !delivery.id) continue;
+
+      const acres = parseDecimal(delivery.acres);
+      const isAcresBased = acres > 0;
+      const approvedQuantity = isAcresBased ? acres : (delivery.bags ?? 0);
+      if (approvedQuantity <= 0) continue;
+
+      const dispatched = usage.get(delivery.id) ?? { bags: 0, acres: 0 };
+      const dispatchedQuantity = isAcresBased ? round2(dispatched.acres) : dispatched.bags;
+      const remainingQuantity = isAcresBased
+        ? Math.max(0, round2(approvedQuantity - dispatchedQuantity))
+        : Math.max(0, approvedQuantity - dispatchedQuantity);
+      if (remainingQuantity <= 0) continue;
+
+      lots.push({
+        id: delivery.id,
+        requisitionId: requisition.id,
+        farmerName: requisition.farmer?.name ?? '',
+        accountNumber: requisition.farmer?.accountNumber
+          ? String(requisition.farmer.accountNumber)
+          : '',
+        varietyName: requisition.variety?.name ?? '',
+        deliveryDate: delivery.deliveryDate,
+        remarks: requisition.remarks,
+        isAcresBased,
+        approvedQuantity,
+        dispatchedQuantity,
+        remainingQuantity,
+        fulfillmentPercent: lotFulfillmentPercent(approvedQuantity, dispatchedQuantity),
+      });
+    }
+  }
+
+  return lots;
+}
+
+export function matchesAwaitingSearch(lot: AwaitingDeliveryLot, query: string) {
+  const haystack = [lot.farmerName, lot.accountNumber, lot.varietyName, lot.remarks]
     .join(' ')
     .toLowerCase();
   return haystack.includes(query);
 }
 
-export function summarizeApprovedRequisitions(
-  requisitions: SeedRequisition[],
-): DispatchQuantitySummary {
+export function summarizeAwaitingLots(lots: AwaitingDeliveryLot[]): DispatchQuantitySummary {
   const summary: DispatchQuantitySummary = { count: 0, acres: 0, bags: 0 };
 
-  for (const requisition of requisitions) {
-    if (!isApprovedRequisition(requisition)) continue;
+  for (const lot of lots) {
     summary.count += 1;
-    summary.acres += parseDecimal(requisition.requestedAcres);
-    summary.bags += requisition.requestedBags ?? 0;
+    if (lot.isAcresBased) summary.acres += lot.remainingQuantity;
+    else summary.bags += lot.remainingQuantity;
   }
 
   return summary;
+}
+
+export function formatCalendarDayLabel(day: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day);
+  if (!match) return day;
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  return new Intl.DateTimeFormat('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(date);
 }
 
 const quantityFormatter = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 });

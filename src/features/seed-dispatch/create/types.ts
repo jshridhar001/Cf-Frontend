@@ -1,5 +1,7 @@
 export type DispatchableRequisition = {
   id: string;
+  requisitionId: string;
+  deliveryDate: string;
   farmer: {
     name: string;
     accountNumber: number;
@@ -30,6 +32,7 @@ export type CreateSeedDispatchLineInput = {
 
 export type CreateSeedDispatchRequisitionInput = {
   requisitionId: string;
+  deliveryId: string;
   sizeLines: CreateSeedDispatchLineInput[];
 };
 

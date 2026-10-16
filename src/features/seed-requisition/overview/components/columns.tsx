@@ -19,7 +19,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { DataTableFeatures } from '@/features/seed-requisition/overview/components/data-table-features';
 import { RequestedDeliveryLines } from '@/features/seed-requisition/overview/components/requested-delivery-lines';
-import { earliestRequestedDeliveryDate } from '@/features/seed-requisition/overview/lib/requested-deliveries';
+import {
+  earliestRequestedDeliveryDate,
+  statusFromDeliveries,
+} from '@/features/seed-requisition/overview/lib/requested-deliveries';
 import {
   formatSummaryAcres,
   formatSummaryCount,
@@ -305,7 +308,8 @@ export const columns = columnHelper.columns([
       );
     },
   }),
-  columnHelper.accessor('status', {
+  columnHelper.accessor((row) => statusFromDeliveries(row.requestedDeliveries), {
+    id: 'status',
     header: 'Status',
     sortFn: 'text',
     meta: {
@@ -315,9 +319,9 @@ export const columns = columnHelper.columns([
           ? formatSeedRequisitionStatus(value as SeedRequisition['status'])
           : 'Blank',
     },
-    cell: ({ row }) => (
-      <Badge variant="outline" className={statusBadgeClass(row.original.status)}>
-        {formatSeedRequisitionStatus(row.original.status)}
+    cell: ({ getValue }) => (
+      <Badge variant="outline" className={statusBadgeClass(getValue())}>
+        {formatSeedRequisitionStatus(getValue())}
       </Badge>
     ),
   }),

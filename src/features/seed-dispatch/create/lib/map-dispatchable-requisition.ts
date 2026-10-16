@@ -7,15 +7,13 @@ import {
   round2,
 } from '@/features/seed-dispatch/create/lib/quantity';
 import type { DispatchableRequisition } from '@/features/seed-dispatch/create/types';
-import { deliveryLineForToday } from '@/features/seed-dispatch/overview/lib/awaiting-requisitions';
+import {
+  deliveryCalendarDay,
+  localCalendarDay,
+  usageByDeliveryId,
+} from '@/features/seed-dispatch/overview/lib/awaiting-requisitions';
+import type { SeedDispatch } from '@/features/seed-dispatch/overview/types';
 import type { ApiSeedRequisition } from '@/features/seed-requisition/overview/types';
-
-function isoToDateOnly(value: string | null | undefined): string {
-  if (!value?.trim()) return '';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-  return date.toISOString().slice(0, 10);
-}
 
 function toQuantityString(value: string | number | null | undefined): string {
   if (value == null || value === '') return '0';
@@ -24,70 +22,77 @@ function toQuantityString(value: string | number | null | undefined): string {
   return formatDecimal(parsed);
 }
 
-export function mapSeedRequisitionToDispatchable(
-  requisition: ApiSeedRequisition,
-): DispatchableRequisition | null {
-  const hasApprovedLine = (requisition.deliveries ?? []).some((line) => line.status === 'APPROVED');
-  if (!hasApprovedLine) return null;
+export function mapApprovedDeliveryLots(
+  requisitions: ApiSeedRequisition[],
+  dispatches: SeedDispatch[],
+): DispatchableRequisition[] {
+  const usage = usageByDeliveryId(dispatches);
+  const today = localCalendarDay(new Date());
+  const lots: DispatchableRequisition[] = [];
 
-  const acres =
-    requisition.requestedAcres != null && String(requisition.requestedAcres).trim()
-      ? String(requisition.requestedAcres)
-      : null;
-  const seedBagsInitialQuantity =
-    requisition.requestedBags != null ? String(requisition.requestedBags) : null;
+  for (const requisition of requisitions) {
+    const acres =
+      requisition.requestedAcres != null && String(requisition.requestedAcres).trim()
+        ? String(requisition.requestedAcres)
+        : null;
+    const seedBagsInitialQuantity =
+      requisition.requestedBags != null ? String(requisition.requestedBags) : null;
+    const quantityRow = {
+      acres,
+      seedBagsInitialQuantity,
+      fulfilledQuantity: toQuantityString(requisition.fulfilledBags),
+      fulfilledAcres: toQuantityString(requisition.fulfilledAcres),
+    };
+    const isAcresBased = isAcresBasedRequisition(quantityRow);
+    const requisitionRemaining = isAcresBased
+      ? getRemainingAcres(quantityRow)
+      : getRemainingBags(quantityRow);
+    const accountNumber = Number.parseInt(requisition.farmer?.accountNumber ?? '', 10);
 
-  const quantityRow = {
-    acres,
-    seedBagsInitialQuantity,
-    fulfilledQuantity: toQuantityString(requisition.fulfilledBags),
-    fulfilledAcres: toQuantityString(requisition.fulfilledAcres),
-  };
+    for (const delivery of requisition.deliveries ?? []) {
+      if (delivery.status !== 'APPROVED') continue;
 
-  const isAcresBased = isAcresBasedRequisition(quantityRow);
-  const remaining = isAcresBased ? getRemainingAcres(quantityRow) : getRemainingBags(quantityRow);
+      const approvedQuantity = isAcresBased ? parseDecimal(delivery.acres) : (delivery.bags ?? 0);
+      if (approvedQuantity <= 0) continue;
 
-  if (remaining <= 0) return null;
+      const dispatched = usage.get(delivery.id) ?? { bags: 0, acres: 0 };
+      const dispatchedQuantity = isAcresBased ? round2(dispatched.acres) : dispatched.bags;
+      const lotRemaining = isAcresBased
+        ? Math.max(0, round2(approvedQuantity - dispatchedQuantity))
+        : Math.max(0, approvedQuantity - dispatchedQuantity);
+      const remaining = Math.min(lotRemaining, requisitionRemaining);
+      if (remaining <= 0) continue;
 
-  const dueToday = deliveryLineForToday(requisition.deliveries);
-  const initialQuantity = isAcresBased ? acres : seedBagsInitialQuantity;
-  const accountNumber = Number.parseInt(requisition.farmer?.accountNumber ?? '', 10);
+      const deliveryDate = deliveryCalendarDay(delivery.deliveryDate);
+      const isToday = deliveryDate === today;
+      const fulfilledAgainstCap = Math.max(0, round2(approvedQuantity - remaining));
 
-  return {
-    id: requisition.id,
-    farmer: {
-      name: requisition.farmer?.name ?? '',
-      accountNumber: Number.isFinite(accountNumber) ? accountNumber : 0,
-    },
-    varietyId: requisition.varietyId,
-    variety: {
-      name: requisition.variety?.name ?? '',
-    },
-    acres,
-    seedBagsInitialQuantity,
-    fulfilledQuantity: quantityRow.fulfilledQuantity,
-    fulfilledAcres: quantityRow.fulfilledAcres,
-    remarks: requisition.remarks,
-    requisitionDate: isoToDateOnly(requisition.requisitionDate),
-    dueTodayAcres: dueToday?.acres ?? null,
-    dueTodayBags: dueToday?.bags ?? null,
-    remainingQuantity: formatDecimal(remaining),
-    initialQuantity,
-    isAcresBased,
-  };
-}
-
-export function hasRemainingDispatchQuantity(requisition: ApiSeedRequisition): boolean {
-  if (requisition.status !== 'APPROVED') return false;
-
-  const requestedBags = Number(requisition.requestedBags) || 0;
-  const fulfilledBags = Number(requisition.fulfilledBags) || 0;
-  const requestedAcres = parseDecimal(requisition.requestedAcres);
-  const fulfilledAcres = parseDecimal(requisition.fulfilledAcres);
-
-  if (requestedAcres > 0) {
-    return round2(requestedAcres - fulfilledAcres) > 0;
+      lots.push({
+        id: delivery.id,
+        requisitionId: requisition.id,
+        deliveryDate,
+        farmer: {
+          name: requisition.farmer?.name ?? '',
+          accountNumber: Number.isFinite(accountNumber) ? accountNumber : 0,
+        },
+        varietyId: requisition.varietyId,
+        variety: {
+          name: requisition.variety?.name ?? '',
+        },
+        acres: isAcresBased ? formatDecimal(approvedQuantity) : null,
+        seedBagsInitialQuantity: isAcresBased ? null : String(approvedQuantity),
+        fulfilledQuantity: isAcresBased ? '0' : formatDecimal(fulfilledAgainstCap),
+        fulfilledAcres: isAcresBased ? formatDecimal(fulfilledAgainstCap) : '0',
+        remarks: requisition.remarks,
+        requisitionDate: deliveryDate,
+        dueTodayAcres: isToday && isAcresBased ? formatDecimal(remaining) : null,
+        dueTodayBags: isToday && !isAcresBased ? remaining : null,
+        remainingQuantity: isAcresBased ? formatDecimal(remaining) : String(remaining),
+        initialQuantity: isAcresBased ? formatDecimal(approvedQuantity) : String(approvedQuantity),
+        isAcresBased,
+      });
+    }
   }
 
-  return requestedBags > fulfilledBags;
+  return lots;
 }

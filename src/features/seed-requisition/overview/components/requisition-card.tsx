@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { RequestedDeliveryLines } from '@/features/seed-requisition/overview/components/requested-delivery-lines';
+import { statusFromDeliveries } from '@/features/seed-requisition/overview/lib/requested-deliveries';
 import {
   formatRequestedQuantity,
   formatRequisitionDate,
@@ -103,6 +104,7 @@ export function RequisitionCard({
   const familyLabel = getRequisitionFamilyLabel(requisition.farmer);
   const placeLabel = getRequisitionPlaceLabel(requisition.farmer);
   const varietyName = requisition.variety?.name ?? 'Unknown variety';
+  const status = statusFromDeliveries(requisition.requestedDeliveries);
 
   return (
     <Card className="gap-3 py-4">
@@ -149,8 +151,8 @@ export function RequisitionCard({
       <Separator className="mx-4" />
 
       <CardFooter className="justify-between gap-2 px-4">
-        <Badge variant="outline" className={statusBadgeClass(requisition.status)}>
-          {formatSeedRequisitionStatus(requisition.status)}
+        <Badge variant="outline" className={statusBadgeClass(status)}>
+          {formatSeedRequisitionStatus(status)}
         </Badge>
         <div className="flex items-center gap-0.5">
           <Button

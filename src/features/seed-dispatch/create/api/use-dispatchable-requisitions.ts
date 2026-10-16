@@ -1,16 +1,18 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
 
-import { mapSeedRequisitionToDispatchable } from '@/features/seed-dispatch/create/lib/map-dispatchable-requisition';
+import { mapApprovedDeliveryLots } from '@/features/seed-dispatch/create/lib/map-dispatchable-requisition';
 import type { DispatchableRequisition } from '@/features/seed-dispatch/create/types';
 import { seedDispatchKeys } from '@/features/seed-dispatch/overview/api/query-keys';
+import type { SeedDispatchesResponse } from '@/features/seed-dispatch/overview/types';
 import type { SeedRequisitionsResponse } from '@/features/seed-requisition/overview/types';
 import apiClient from '@/lib/api-client';
 
 async function fetchDispatchableRequisitions(): Promise<DispatchableRequisition[]> {
-  const { data } = await apiClient.get<SeedRequisitionsResponse>('/v1/seed-requisitions');
-  return data.data
-    .map(mapSeedRequisitionToDispatchable)
-    .filter((row): row is DispatchableRequisition => row != null);
+  const [requisitions, dispatches] = await Promise.all([
+    apiClient.get<SeedRequisitionsResponse>('/v1/seed-requisitions'),
+    apiClient.get<SeedDispatchesResponse>('/v1/seed-dispatches'),
+  ]);
+  return mapApprovedDeliveryLots(requisitions.data.data, dispatches.data.data);
 }
 
 export function dispatchableRequisitionsQueryOptions() {
