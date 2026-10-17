@@ -42,6 +42,7 @@ import { Route as AuthenticatedSeedDispatchesAnalyticsRouteImport } from './rout
 import { Route as AuthenticatedSeedDispatchesCreateRouteImport } from './routes/_authenticated/seed-dispatches.create'
 import { Route as AuthenticatedSeedDispatchesOverviewRouteImport } from './routes/_authenticated/seed-dispatches.overview'
 import { Route as AuthenticatedSeedDispatchesReportRouteImport } from './routes/_authenticated/seed-dispatches.report'
+import { Route as AuthenticatedSeedDispatchesSchedulingRouteImport } from './routes/_authenticated/seed-dispatches.scheduling'
 import { Route as AuthenticatedSeedDispatchesSettingsRouteImport } from './routes/_authenticated/seed-dispatches.settings'
 import { Route as AuthenticatedSeedRequisitionIdRouteImport } from './routes/_authenticated/seed-requisition.$id'
 import { Route as AuthenticatedSeedRequisitionAnalyticsRouteImport } from './routes/_authenticated/seed-requisition.analytics'
@@ -240,6 +241,12 @@ const AuthenticatedSeedDispatchesReportRoute =
     path: '/seed-dispatches/report',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedSeedDispatchesSchedulingRoute =
+  AuthenticatedSeedDispatchesSchedulingRouteImport.update({
+    id: '/seed-dispatches/scheduling',
+    path: '/seed-dispatches/scheduling',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedSeedDispatchesSettingsRoute =
   AuthenticatedSeedDispatchesSettingsRouteImport.update({
     id: '/seed-dispatches/settings',
@@ -340,6 +347,7 @@ export interface FileRoutesByFullPath {
   '/seed-dispatches/create': typeof AuthenticatedSeedDispatchesCreateRoute
   '/seed-dispatches/overview': typeof AuthenticatedSeedDispatchesOverviewRoute
   '/seed-dispatches/report': typeof AuthenticatedSeedDispatchesReportRoute
+  '/seed-dispatches/scheduling': typeof AuthenticatedSeedDispatchesSchedulingRoute
   '/seed-dispatches/settings': typeof AuthenticatedSeedDispatchesSettingsRoute
   '/seed-requisition/$id': typeof AuthenticatedSeedRequisitionIdRouteWithChildren
   '/seed-requisition/analytics': typeof AuthenticatedSeedRequisitionAnalyticsRoute
@@ -384,6 +392,7 @@ export interface FileRoutesByTo {
   '/seed-dispatches/create': typeof AuthenticatedSeedDispatchesCreateRoute
   '/seed-dispatches/overview': typeof AuthenticatedSeedDispatchesOverviewRoute
   '/seed-dispatches/report': typeof AuthenticatedSeedDispatchesReportRoute
+  '/seed-dispatches/scheduling': typeof AuthenticatedSeedDispatchesSchedulingRoute
   '/seed-dispatches/settings': typeof AuthenticatedSeedDispatchesSettingsRoute
   '/seed-requisition/analytics': typeof AuthenticatedSeedRequisitionAnalyticsRoute
   '/seed-requisition/overview': typeof AuthenticatedSeedRequisitionOverviewRoute
@@ -430,6 +439,7 @@ export interface FileRoutesById {
   '/_authenticated/seed-dispatches/create': typeof AuthenticatedSeedDispatchesCreateRoute
   '/_authenticated/seed-dispatches/overview': typeof AuthenticatedSeedDispatchesOverviewRoute
   '/_authenticated/seed-dispatches/report': typeof AuthenticatedSeedDispatchesReportRoute
+  '/_authenticated/seed-dispatches/scheduling': typeof AuthenticatedSeedDispatchesSchedulingRoute
   '/_authenticated/seed-dispatches/settings': typeof AuthenticatedSeedDispatchesSettingsRoute
   '/_authenticated/seed-requisition/$id': typeof AuthenticatedSeedRequisitionIdRouteWithChildren
   '/_authenticated/seed-requisition/analytics': typeof AuthenticatedSeedRequisitionAnalyticsRoute
@@ -477,6 +487,7 @@ export interface FileRouteTypes {
     | '/seed-dispatches/create'
     | '/seed-dispatches/overview'
     | '/seed-dispatches/report'
+    | '/seed-dispatches/scheduling'
     | '/seed-dispatches/settings'
     | '/seed-requisition/$id'
     | '/seed-requisition/analytics'
@@ -521,6 +532,7 @@ export interface FileRouteTypes {
     | '/seed-dispatches/create'
     | '/seed-dispatches/overview'
     | '/seed-dispatches/report'
+    | '/seed-dispatches/scheduling'
     | '/seed-dispatches/settings'
     | '/seed-requisition/analytics'
     | '/seed-requisition/overview'
@@ -566,6 +578,7 @@ export interface FileRouteTypes {
     | '/_authenticated/seed-dispatches/create'
     | '/_authenticated/seed-dispatches/overview'
     | '/_authenticated/seed-dispatches/report'
+    | '/_authenticated/seed-dispatches/scheduling'
     | '/_authenticated/seed-dispatches/settings'
     | '/_authenticated/seed-requisition/$id'
     | '/_authenticated/seed-requisition/analytics'
@@ -820,6 +833,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSeedDispatchesReportRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/seed-dispatches/scheduling': {
+      id: '/_authenticated/seed-dispatches/scheduling'
+      path: '/seed-dispatches/scheduling'
+      fullPath: '/seed-dispatches/scheduling'
+      preLoaderRoute: typeof AuthenticatedSeedDispatchesSchedulingRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/seed-dispatches/settings': {
       id: '/_authenticated/seed-dispatches/settings'
       path: '/seed-dispatches/settings'
@@ -1015,6 +1035,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedSeedDispatchesCreateRoute: typeof AuthenticatedSeedDispatchesCreateRoute
   AuthenticatedSeedDispatchesOverviewRoute: typeof AuthenticatedSeedDispatchesOverviewRoute
   AuthenticatedSeedDispatchesReportRoute: typeof AuthenticatedSeedDispatchesReportRoute
+  AuthenticatedSeedDispatchesSchedulingRoute: typeof AuthenticatedSeedDispatchesSchedulingRoute
   AuthenticatedSeedDispatchesSettingsRoute: typeof AuthenticatedSeedDispatchesSettingsRoute
   AuthenticatedSeedRequisitionIdRoute: typeof AuthenticatedSeedRequisitionIdRouteWithChildren
   AuthenticatedSeedRequisitionAnalyticsRoute: typeof AuthenticatedSeedRequisitionAnalyticsRoute
@@ -1040,6 +1061,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
     AuthenticatedSeedDispatchesOverviewRoute,
   AuthenticatedSeedDispatchesReportRoute:
     AuthenticatedSeedDispatchesReportRoute,
+  AuthenticatedSeedDispatchesSchedulingRoute:
+    AuthenticatedSeedDispatchesSchedulingRoute,
   AuthenticatedSeedDispatchesSettingsRoute:
     AuthenticatedSeedDispatchesSettingsRoute,
   AuthenticatedSeedRequisitionIdRoute:

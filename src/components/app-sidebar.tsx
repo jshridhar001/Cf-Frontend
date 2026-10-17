@@ -46,6 +46,7 @@ type AppPath =
   | '/seed-requisition/analytics'
   | '/seed-requisition/settings'
   | '/seed-dispatches/overview'
+  | '/seed-dispatches/scheduling'
   | '/seed-dispatches/analytics'
   | '/seed-dispatches/settings'
   | '/transfer-stock'
@@ -107,6 +108,7 @@ const platformNavItems: NavItem[] = [
     icon: Truck,
     items: [
       { title: 'Overview', url: '/seed-dispatches/overview' },
+      { title: 'Dispatch scheduling', url: '/seed-dispatches/scheduling' },
       { title: 'Analytics', url: '/seed-dispatches/analytics' },
       { title: 'Settings', url: '/seed-dispatches/settings' },
     ],

@@ -36,6 +36,7 @@ const routeTitles: Record<string, string> = {
   '/seed-requisition/analytics': 'Seed Requisition',
   '/seed-requisition/settings': 'Seed Requisition',
   '/seed-dispatches/overview': 'Seed-Dispatches',
+  '/seed-dispatches/scheduling': 'Seed-Dispatches',
   '/seed-dispatches/create': 'Seed-Dispatches',
   '/seed-dispatches/analytics': 'Seed-Dispatches',
   '/seed-dispatches/settings': 'Seed-Dispatches',
