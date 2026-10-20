@@ -14,9 +14,12 @@ function quantityLabel(lot: AwaitingDeliveryLot, value: number) {
 }
 
 export function AwaitingRequisitionCard({ lot }: { lot: AwaitingDeliveryLot }) {
-  const remainingLabel = lot.isAcresBased
-    ? `${formatAwaitingQuantity(lot.remainingQuantity)} acres remaining`
-    : `${formatAwaitingQuantity(lot.remainingQuantity, 0)} seed bags remaining`;
+  const remainingLabel =
+    lot.remainingQuantity <= 0
+      ? 'Fulfilled'
+      : lot.isAcresBased
+        ? `${formatAwaitingQuantity(lot.remainingQuantity)} acres remaining`
+        : `${formatAwaitingQuantity(lot.remainingQuantity, 0)} seed bags remaining`;
 
   return (
     <Card className="gap-3 py-4">

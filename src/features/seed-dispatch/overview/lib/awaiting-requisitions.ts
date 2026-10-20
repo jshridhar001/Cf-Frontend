@@ -132,7 +132,6 @@ export function buildAwaitingLots(
       const remainingQuantity = isAcresBased
         ? Math.max(0, round2(approvedQuantity - dispatchedQuantity))
         : Math.max(0, approvedQuantity - dispatchedQuantity);
-      if (remainingQuantity <= 0) continue;
 
       lots.push({
         id: delivery.id,
@@ -154,6 +153,24 @@ export function buildAwaitingLots(
   }
 
   return lots;
+}
+
+export type DeliveryLotScope = 'active' | 'fulfilled';
+
+export function isFulfilledDeliveryLot(lot: AwaitingDeliveryLot) {
+  return lot.remainingQuantity <= 0;
+}
+
+export function partitionDeliveryLots(lots: AwaitingDeliveryLot[]) {
+  const active: AwaitingDeliveryLot[] = [];
+  const fulfilled: AwaitingDeliveryLot[] = [];
+
+  for (const lot of lots) {
+    if (isFulfilledDeliveryLot(lot)) fulfilled.push(lot);
+    else active.push(lot);
+  }
+
+  return { active, fulfilled };
 }
 
 export function matchesAwaitingSearch(lot: AwaitingDeliveryLot, query: string) {

@@ -46,10 +46,12 @@ import { useDispatchesTable } from '@/features/seed-dispatch/overview/components
 import { ViewFiltersSheet } from '@/features/seed-dispatch/overview/components/view-filters/ViewFiltersSheet';
 import {
   buildAwaitingLots,
+  type DeliveryLotScope,
   deliveryCalendarDay,
   formatCalendarDayLabel,
   localCalendarDay,
   matchesAwaitingSearch,
+  partitionDeliveryLots,
   summarizeAwaitingLots,
 } from '@/features/seed-dispatch/overview/lib/awaiting-requisitions';
 import {
@@ -75,6 +77,56 @@ import { getApiErrorMessage } from '@/lib/api-client';
 
 const ALL_STATUSES = 'all';
 const overviewRoute = getRouteApi('/_authenticated/seed-dispatches/overview');
+
+const DELIVERY_LOT_TABS: Array<{
+  value: DeliveryLotScope;
+  label: string;
+  description: string;
+}> = [
+  {
+    value: 'active',
+    label: 'Active Requisitions',
+    description: 'Approved deliveries that still have some acres or bags left to dispatch.',
+  },
+  {
+    value: 'fulfilled',
+    label: 'Fulfilled Requisitions',
+    description:
+      'Approved deliveries with 0 acres or bags left. These have been fully dispatched.',
+  },
+];
+
+function awaitingEmptyCopy(scope: DeliveryLotScope, lotDate: string, hasSearch: boolean) {
+  const label = scope === 'fulfilled' ? 'fulfilled requisitions' : 'active requisitions';
+  if (lotDate && hasSearch) {
+    return {
+      title: `No matching ${label} for ${formatCalendarDayLabel(lotDate)}`,
+      description: `Nothing matches this search for ${formatCalendarDayLabel(lotDate)}.`,
+    };
+  }
+  if (lotDate) {
+    return {
+      title: `No ${label} for ${formatCalendarDayLabel(lotDate)}`,
+      description: 'Clear the date to see every approved delivery on this tab.',
+    };
+  }
+  if (hasSearch) {
+    return {
+      title: `No matching ${label}`,
+      description: 'Try a different search.',
+    };
+  }
+  if (scope === 'fulfilled') {
+    return {
+      title: 'No fulfilled requisitions',
+      description: 'Approved deliveries appear here once nothing is left to dispatch.',
+    };
+  }
+  return {
+    title: 'No active requisitions',
+    description: 'Approved deliveries with quantity left will appear here.',
+  };
+}
 
 type OverviewLayout = 'cards' | 'table';
 const DESKTOP_LAYOUT_QUERY = '(min-width: 768px)';
@@ -148,6 +200,7 @@ export function SeedDispatchList({
   } = useSeedRequisitions();
   const [search, setSearch] = useState('');
   const [lotDate, setLotDate] = useState('');
+  const [lotScope, setLotScope] = useState<DeliveryLotScope>('active');
   const [layout, setLayout] = useState<OverviewLayout>(getDefaultOverviewLayout);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -172,21 +225,29 @@ export function SeedDispatchList({
     () => buildAwaitingLots(scopedRequisitions, dispatchList),
     [scopedRequisitions, dispatchList],
   );
+  const { active: activeLots, fulfilled: fulfilledLots } = useMemo(
+    () => partitionDeliveryLots(awaitingLots),
+    [awaitingLots],
+  );
+  const scopedAwaitingLots = lotScope === 'fulfilled' ? fulfilledLots : activeLots;
   const filteredAwaiting = useMemo(() => {
-    return awaitingLots.filter((lot) => {
+    return scopedAwaitingLots.filter((lot) => {
       if (lotDate && deliveryCalendarDay(lot.deliveryDate) !== lotDate) return false;
       if (searchQuery && !matchesAwaitingSearch(lot, searchQuery)) return false;
       return true;
     });
-  }, [awaitingLots, lotDate, searchQuery]);
+  }, [scopedAwaitingLots, lotDate, searchQuery]);
+  const lotScopeTab =
+    DELIVERY_LOT_TABS.find((tab) => tab.value === lotScope) ?? DELIVERY_LOT_TABS[0];
+  const awaitingEmpty = awaitingEmptyCopy(lotScope, lotDate, hasSearch);
 
   const summary = useMemo(() => {
     const dispatchSummary = summarizeDispatches(dispatchList);
     return {
       ...dispatchSummary,
-      AWAITING_DISPATCH: summarizeAwaitingLots(awaitingLots),
+      AWAITING_DISPATCH: summarizeAwaitingLots(activeLots),
     };
-  }, [awaitingLots, dispatchList]);
+  }, [activeLots, dispatchList]);
 
   const table = useDispatchesTable({
     data: dispatchList,
@@ -307,7 +368,13 @@ export function SeedDispatchList({
           <div className="relative w-full">
             <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder={isAwaiting ? 'Search awaiting requisitions...' : 'Search dispatches...'}
+              placeholder={
+                isAwaiting
+                  ? lotScope === 'fulfilled'
+                    ? 'Search fulfilled requisitions...'
+                    : 'Search active requisitions...'
+                  : 'Search dispatches...'
+              }
               className="w-full pl-10"
               inputMode="search"
               value={search}
@@ -423,6 +490,30 @@ export function SeedDispatchList({
         </div>
       </div>
 
+      {isAwaiting && !(isRequisitionsError && requisitions === undefined) ? (
+        <Tabs
+          value={lotScope}
+          onValueChange={(value) => {
+            if (value !== 'active' && value !== 'fulfilled') return;
+            setLotScope(value);
+            setPagination((current) => ({ ...current, pageIndex: 0 }));
+          }}
+          className="gap-2"
+        >
+          <TabsList
+            aria-label="Approved requisitions"
+            className="h-11 min-h-11 w-full justify-start overflow-x-auto group-data-horizontal/tabs:h-11 sm:w-fit md:h-9 md:min-h-9 md:group-data-horizontal/tabs:h-9"
+          >
+            {DELIVERY_LOT_TABS.map((tab) => (
+              <TabsTrigger key={tab.value} value={tab.value} className="shrink-0 px-4">
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <p className="text-sm text-muted-foreground">{lotScopeTab.description}</p>
+        </Tabs>
+      ) : null}
+
       {isAwaiting ? (
         isRequisitionsError && requisitions === undefined ? (
           <Empty className="rounded-xl border bg-muted/10">
@@ -453,24 +544,8 @@ export function SeedDispatchList({
               <EmptyMedia variant="icon">
                 <Truck />
               </EmptyMedia>
-              <EmptyTitle>
-                {lotDate
-                  ? hasSearch
-                    ? `No matching lots for ${formatCalendarDayLabel(lotDate)}`
-                    : `No approved lots for ${formatCalendarDayLabel(lotDate)}`
-                  : hasSearch
-                    ? 'No matching lots'
-                    : 'No lots awaiting dispatch'}
-              </EmptyTitle>
-              <EmptyDescription>
-                {lotDate && !hasSearch
-                  ? 'Clear the date to see every approved lot that still has quantity left.'
-                  : hasSearch
-                    ? lotDate
-                      ? `Nothing matches this search for ${formatCalendarDayLabel(lotDate)}.`
-                      : 'Try a different search.'
-                    : 'Approved delivery lots will appear here until they are fully dispatched.'}
-              </EmptyDescription>
+              <EmptyTitle>{awaitingEmpty.title}</EmptyTitle>
+              <EmptyDescription>{awaitingEmpty.description}</EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : (

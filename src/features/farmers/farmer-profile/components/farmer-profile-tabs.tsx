@@ -1,39 +1,69 @@
+import { Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
 import { ClipboardList, Sprout, Truck } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FarmerSeedAndFieldsTab } from '@/features/farmers/farmer-profile/seed-and-fields-tab/components/farmer-seed-and-fields-tab';
-import { FarmerSeedDispatchTab } from '@/features/farmers/farmer-profile/seed-dispatch-tab/components/farmer-seed-dispatch-tab';
-import { FarmerSeedRequisitionTab } from '@/features/farmers/farmer-profile/seed-requisition-tab/components/farmer-seed-requisition-tab';
 import type { Farmer } from '@/features/farmers/overview/types';
 
+const tabs = [
+  {
+    label: 'Seed Requisitions',
+    value: 'requisitions',
+    to: '/farmers/$id/requisitions',
+    icon: ClipboardList,
+  },
+  {
+    label: 'Seed Dispatches',
+    value: 'dispatches',
+    to: '/farmers/$id/dispatches',
+    icon: Truck,
+  },
+  {
+    label: 'Seed & fields',
+    value: 'fields',
+    to: '/farmers/$id/fields',
+    icon: Sprout,
+  },
+] as const;
+
+type TabValue = (typeof tabs)[number]['value'];
+
 export function FarmerProfileTabs({ farmer }: { farmer: Farmer }) {
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const activeTab =
+    tabs.find((tab) => {
+      const href = `/farmers/${farmer.id}/${tab.value}`;
+      return pathname === href || pathname === `${href}/` || pathname.startsWith(`${href}/`);
+    })?.value ?? 'requisitions';
+
   return (
-    <Tabs defaultValue="requisitions" className="w-full">
+    <Tabs
+      value={activeTab}
+      onValueChange={(value) => {
+        const tab = tabs.find((item) => item.value === (value as TabValue));
+        if (tab) {
+          void navigate({ to: tab.to, params: { id: farmer.id } });
+        }
+      }}
+      className="w-full"
+    >
       <TabsList className="w-full justify-start overflow-x-auto md:overflow-visible">
-        <TabsTrigger
-          value="requisitions"
-          aria-label="Seed Requisitions"
-          className="shrink-0 md:flex-1"
-        >
-          <ClipboardList className="md:hidden" aria-hidden />
-          <span className="hidden md:inline">Seed Requisitions</span>
-        </TabsTrigger>
-        <TabsTrigger value="dispatches" aria-label="Seed Dispatches" className="shrink-0 md:flex-1">
-          <Truck className="md:hidden" aria-hidden />
-          <span className="hidden md:inline">Seed Dispatches</span>
-        </TabsTrigger>
-        <TabsTrigger value="fields" aria-label="Seed & fields" className="shrink-0 md:flex-1">
-          <Sprout className="md:hidden" aria-hidden />
-          <span className="hidden md:inline">Seed & fields</span>
-        </TabsTrigger>
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <TabsTrigger
+              key={tab.value}
+              value={tab.value}
+              aria-label={tab.label}
+              className="shrink-0 md:flex-1"
+            >
+              <Icon className="md:hidden" aria-hidden />
+              <span className="hidden md:inline">{tab.label}</span>
+            </TabsTrigger>
+          );
+        })}
       </TabsList>
-      <TabsContent value="requisitions">
-        <FarmerSeedRequisitionTab farmer={farmer} />
-      </TabsContent>
-      <TabsContent value="dispatches">
-        <FarmerSeedDispatchTab farmer={farmer} />
-      </TabsContent>
-      <TabsContent value="fields">
-        <FarmerSeedAndFieldsTab farmer={farmer} />
+      <TabsContent value={activeTab}>
+        <Outlet />
       </TabsContent>
     </Tabs>
   );

@@ -51,9 +51,14 @@ import { Route as AuthenticatedSeedRequisitionSettingsRouteImport } from './rout
 import { Route as AuthenticatedTransferStockIndexRouteImport } from './routes/_authenticated/transfer-stock.index'
 import { Route as AuthenticatedTransferStockIdRouteImport } from './routes/_authenticated/transfer-stock.$id'
 import { Route as AuthenticatedTransferStockCreateRouteImport } from './routes/_authenticated/transfer-stock.create'
+import { Route as AuthenticatedFarmersIdIndexRouteImport } from './routes/_authenticated/farmers.$id.index'
+import { Route as AuthenticatedFarmersIdDispatchesRouteImport } from './routes/_authenticated/farmers.$id.dispatches'
+import { Route as AuthenticatedFarmersIdRequisitionsRouteImport } from './routes/_authenticated/farmers.$id.requisitions'
 import { Route as AuthenticatedMasterFacilitiesIdRouteImport } from './routes/_authenticated/master.facilities_.$id'
 import { Route as AuthenticatedSeedRequisitionIdIndexRouteImport } from './routes/_authenticated/seed-requisition.$id.index'
 import { Route as AuthenticatedSeedRequisitionIdContractRouteImport } from './routes/_authenticated/seed-requisition.$id.contract'
+import { Route as AuthenticatedFarmersIdFieldsIndexRouteImport } from './routes/_authenticated/farmers.$id.fields.index'
+import { Route as AuthenticatedFarmersIdFieldsFieldIdRouteImport } from './routes/_authenticated/farmers.$id.fields.$fieldId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -295,6 +300,24 @@ const AuthenticatedTransferStockCreateRoute =
     path: '/create',
     getParentRoute: () => AuthenticatedTransferStockRoute,
   } as any)
+const AuthenticatedFarmersIdIndexRoute =
+  AuthenticatedFarmersIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedFarmersIdRoute,
+  } as any)
+const AuthenticatedFarmersIdDispatchesRoute =
+  AuthenticatedFarmersIdDispatchesRouteImport.update({
+    id: '/dispatches',
+    path: '/dispatches',
+    getParentRoute: () => AuthenticatedFarmersIdRoute,
+  } as any)
+const AuthenticatedFarmersIdRequisitionsRoute =
+  AuthenticatedFarmersIdRequisitionsRouteImport.update({
+    id: '/requisitions',
+    path: '/requisitions',
+    getParentRoute: () => AuthenticatedFarmersIdRoute,
+  } as any)
 const AuthenticatedMasterFacilitiesIdRoute =
   AuthenticatedMasterFacilitiesIdRouteImport.update({
     id: '/facilities_/$id',
@@ -313,6 +336,18 @@ const AuthenticatedSeedRequisitionIdContractRoute =
     path: '/contract',
     getParentRoute: () => AuthenticatedSeedRequisitionIdRoute,
   } as any)
+const AuthenticatedFarmersIdFieldsIndexRoute =
+  AuthenticatedFarmersIdFieldsIndexRouteImport.update({
+    id: '/fields/',
+    path: '/fields/',
+    getParentRoute: () => AuthenticatedFarmersIdRoute,
+  } as any)
+const AuthenticatedFarmersIdFieldsFieldIdRoute =
+  AuthenticatedFarmersIdFieldsFieldIdRouteImport.update({
+    id: '/fields/$fieldId',
+    path: '/fields/$fieldId',
+    getParentRoute: () => AuthenticatedFarmersIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -330,7 +365,7 @@ export interface FileRoutesByFullPath {
   '/access-control/permissions': typeof AuthenticatedAccessControlPermissionsRoute
   '/access-control/sessions': typeof AuthenticatedAccessControlSessionsRoute
   '/access-control/users': typeof AuthenticatedAccessControlUsersRoute
-  '/farmers/$id': typeof AuthenticatedFarmersIdRoute
+  '/farmers/$id': typeof AuthenticatedFarmersIdRouteWithChildren
   '/farmers/analytics': typeof AuthenticatedFarmersAnalyticsRoute
   '/farmers/contract': typeof AuthenticatedFarmersContractRoute
   '/farmers/overview': typeof AuthenticatedFarmersOverviewRoute
@@ -356,9 +391,14 @@ export interface FileRoutesByFullPath {
   '/transfer-stock/$id': typeof AuthenticatedTransferStockIdRoute
   '/transfer-stock/create': typeof AuthenticatedTransferStockCreateRoute
   '/transfer-stock/': typeof AuthenticatedTransferStockIndexRoute
+  '/farmers/$id/dispatches': typeof AuthenticatedFarmersIdDispatchesRoute
+  '/farmers/$id/requisitions': typeof AuthenticatedFarmersIdRequisitionsRoute
   '/master/facilities/$id': typeof AuthenticatedMasterFacilitiesIdRoute
   '/seed-requisition/$id/contract': typeof AuthenticatedSeedRequisitionIdContractRoute
+  '/farmers/$id/': typeof AuthenticatedFarmersIdIndexRoute
   '/seed-requisition/$id/': typeof AuthenticatedSeedRequisitionIdIndexRoute
+  '/farmers/$id/fields/$fieldId': typeof AuthenticatedFarmersIdFieldsFieldIdRoute
+  '/farmers/$id/fields/': typeof AuthenticatedFarmersIdFieldsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -375,7 +415,6 @@ export interface FileRoutesByTo {
   '/access-control/permissions': typeof AuthenticatedAccessControlPermissionsRoute
   '/access-control/sessions': typeof AuthenticatedAccessControlSessionsRoute
   '/access-control/users': typeof AuthenticatedAccessControlUsersRoute
-  '/farmers/$id': typeof AuthenticatedFarmersIdRoute
   '/farmers/analytics': typeof AuthenticatedFarmersAnalyticsRoute
   '/farmers/contract': typeof AuthenticatedFarmersContractRoute
   '/farmers/overview': typeof AuthenticatedFarmersOverviewRoute
@@ -400,9 +439,14 @@ export interface FileRoutesByTo {
   '/transfer-stock/$id': typeof AuthenticatedTransferStockIdRoute
   '/transfer-stock/create': typeof AuthenticatedTransferStockCreateRoute
   '/transfer-stock': typeof AuthenticatedTransferStockIndexRoute
+  '/farmers/$id/dispatches': typeof AuthenticatedFarmersIdDispatchesRoute
+  '/farmers/$id/requisitions': typeof AuthenticatedFarmersIdRequisitionsRoute
   '/master/facilities/$id': typeof AuthenticatedMasterFacilitiesIdRoute
   '/seed-requisition/$id/contract': typeof AuthenticatedSeedRequisitionIdContractRoute
+  '/farmers/$id': typeof AuthenticatedFarmersIdIndexRoute
   '/seed-requisition/$id': typeof AuthenticatedSeedRequisitionIdIndexRoute
+  '/farmers/$id/fields/$fieldId': typeof AuthenticatedFarmersIdFieldsFieldIdRoute
+  '/farmers/$id/fields': typeof AuthenticatedFarmersIdFieldsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -422,7 +466,7 @@ export interface FileRoutesById {
   '/_authenticated/access-control/permissions': typeof AuthenticatedAccessControlPermissionsRoute
   '/_authenticated/access-control/sessions': typeof AuthenticatedAccessControlSessionsRoute
   '/_authenticated/access-control/users': typeof AuthenticatedAccessControlUsersRoute
-  '/_authenticated/farmers/$id': typeof AuthenticatedFarmersIdRoute
+  '/_authenticated/farmers/$id': typeof AuthenticatedFarmersIdRouteWithChildren
   '/_authenticated/farmers/analytics': typeof AuthenticatedFarmersAnalyticsRoute
   '/_authenticated/farmers/contract': typeof AuthenticatedFarmersContractRoute
   '/_authenticated/farmers/overview': typeof AuthenticatedFarmersOverviewRoute
@@ -448,9 +492,14 @@ export interface FileRoutesById {
   '/_authenticated/transfer-stock/$id': typeof AuthenticatedTransferStockIdRoute
   '/_authenticated/transfer-stock/create': typeof AuthenticatedTransferStockCreateRoute
   '/_authenticated/transfer-stock/': typeof AuthenticatedTransferStockIndexRoute
+  '/_authenticated/farmers/$id/dispatches': typeof AuthenticatedFarmersIdDispatchesRoute
+  '/_authenticated/farmers/$id/requisitions': typeof AuthenticatedFarmersIdRequisitionsRoute
   '/_authenticated/master/facilities_/$id': typeof AuthenticatedMasterFacilitiesIdRoute
   '/_authenticated/seed-requisition/$id/contract': typeof AuthenticatedSeedRequisitionIdContractRoute
+  '/_authenticated/farmers/$id/': typeof AuthenticatedFarmersIdIndexRoute
   '/_authenticated/seed-requisition/$id/': typeof AuthenticatedSeedRequisitionIdIndexRoute
+  '/_authenticated/farmers/$id/fields/$fieldId': typeof AuthenticatedFarmersIdFieldsFieldIdRoute
+  '/_authenticated/farmers/$id/fields/': typeof AuthenticatedFarmersIdFieldsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -496,9 +545,14 @@ export interface FileRouteTypes {
     | '/transfer-stock/$id'
     | '/transfer-stock/create'
     | '/transfer-stock/'
+    | '/farmers/$id/dispatches'
+    | '/farmers/$id/requisitions'
     | '/master/facilities/$id'
     | '/seed-requisition/$id/contract'
+    | '/farmers/$id/'
     | '/seed-requisition/$id/'
+    | '/farmers/$id/fields/$fieldId'
+    | '/farmers/$id/fields/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -515,7 +569,6 @@ export interface FileRouteTypes {
     | '/access-control/permissions'
     | '/access-control/sessions'
     | '/access-control/users'
-    | '/farmers/$id'
     | '/farmers/analytics'
     | '/farmers/contract'
     | '/farmers/overview'
@@ -540,9 +593,14 @@ export interface FileRouteTypes {
     | '/transfer-stock/$id'
     | '/transfer-stock/create'
     | '/transfer-stock'
+    | '/farmers/$id/dispatches'
+    | '/farmers/$id/requisitions'
     | '/master/facilities/$id'
     | '/seed-requisition/$id/contract'
+    | '/farmers/$id'
     | '/seed-requisition/$id'
+    | '/farmers/$id/fields/$fieldId'
+    | '/farmers/$id/fields'
   id:
     | '__root__'
     | '/'
@@ -587,9 +645,14 @@ export interface FileRouteTypes {
     | '/_authenticated/transfer-stock/$id'
     | '/_authenticated/transfer-stock/create'
     | '/_authenticated/transfer-stock/'
+    | '/_authenticated/farmers/$id/dispatches'
+    | '/_authenticated/farmers/$id/requisitions'
     | '/_authenticated/master/facilities_/$id'
     | '/_authenticated/seed-requisition/$id/contract'
+    | '/_authenticated/farmers/$id/'
     | '/_authenticated/seed-requisition/$id/'
+    | '/_authenticated/farmers/$id/fields/$fieldId'
+    | '/_authenticated/farmers/$id/fields/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -896,6 +959,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTransferStockCreateRouteImport
       parentRoute: typeof AuthenticatedTransferStockRoute
     }
+    '/_authenticated/farmers/$id/': {
+      id: '/_authenticated/farmers/$id/'
+      path: '/'
+      fullPath: '/farmers/$id/'
+      preLoaderRoute: typeof AuthenticatedFarmersIdIndexRouteImport
+      parentRoute: typeof AuthenticatedFarmersIdRoute
+    }
+    '/_authenticated/farmers/$id/dispatches': {
+      id: '/_authenticated/farmers/$id/dispatches'
+      path: '/dispatches'
+      fullPath: '/farmers/$id/dispatches'
+      preLoaderRoute: typeof AuthenticatedFarmersIdDispatchesRouteImport
+      parentRoute: typeof AuthenticatedFarmersIdRoute
+    }
+    '/_authenticated/farmers/$id/requisitions': {
+      id: '/_authenticated/farmers/$id/requisitions'
+      path: '/requisitions'
+      fullPath: '/farmers/$id/requisitions'
+      preLoaderRoute: typeof AuthenticatedFarmersIdRequisitionsRouteImport
+      parentRoute: typeof AuthenticatedFarmersIdRoute
+    }
     '/_authenticated/master/facilities_/$id': {
       id: '/_authenticated/master/facilities_/$id'
       path: '/facilities/$id'
@@ -916,6 +1000,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/seed-requisition/$id/contract'
       preLoaderRoute: typeof AuthenticatedSeedRequisitionIdContractRouteImport
       parentRoute: typeof AuthenticatedSeedRequisitionIdRoute
+    }
+    '/_authenticated/farmers/$id/fields/': {
+      id: '/_authenticated/farmers/$id/fields/'
+      path: '/fields'
+      fullPath: '/farmers/$id/fields/'
+      preLoaderRoute: typeof AuthenticatedFarmersIdFieldsIndexRouteImport
+      parentRoute: typeof AuthenticatedFarmersIdRoute
+    }
+    '/_authenticated/farmers/$id/fields/$fieldId': {
+      id: '/_authenticated/farmers/$id/fields/$fieldId'
+      path: '/fields/$fieldId'
+      fullPath: '/farmers/$id/fields/$fieldId'
+      preLoaderRoute: typeof AuthenticatedFarmersIdFieldsFieldIdRouteImport
+      parentRoute: typeof AuthenticatedFarmersIdRoute
     }
   }
 }
@@ -940,8 +1038,34 @@ const AuthenticatedAccessControlRouteWithChildren =
     AuthenticatedAccessControlRouteChildren,
   )
 
+interface AuthenticatedFarmersIdRouteChildren {
+  AuthenticatedFarmersIdDispatchesRoute: typeof AuthenticatedFarmersIdDispatchesRoute
+  AuthenticatedFarmersIdRequisitionsRoute: typeof AuthenticatedFarmersIdRequisitionsRoute
+  AuthenticatedFarmersIdIndexRoute: typeof AuthenticatedFarmersIdIndexRoute
+  AuthenticatedFarmersIdFieldsFieldIdRoute: typeof AuthenticatedFarmersIdFieldsFieldIdRoute
+  AuthenticatedFarmersIdFieldsIndexRoute: typeof AuthenticatedFarmersIdFieldsIndexRoute
+}
+
+const AuthenticatedFarmersIdRouteChildren: AuthenticatedFarmersIdRouteChildren =
+  {
+    AuthenticatedFarmersIdDispatchesRoute:
+      AuthenticatedFarmersIdDispatchesRoute,
+    AuthenticatedFarmersIdRequisitionsRoute:
+      AuthenticatedFarmersIdRequisitionsRoute,
+    AuthenticatedFarmersIdIndexRoute: AuthenticatedFarmersIdIndexRoute,
+    AuthenticatedFarmersIdFieldsFieldIdRoute:
+      AuthenticatedFarmersIdFieldsFieldIdRoute,
+    AuthenticatedFarmersIdFieldsIndexRoute:
+      AuthenticatedFarmersIdFieldsIndexRoute,
+  }
+
+const AuthenticatedFarmersIdRouteWithChildren =
+  AuthenticatedFarmersIdRoute._addFileChildren(
+    AuthenticatedFarmersIdRouteChildren,
+  )
+
 interface AuthenticatedFarmersRouteChildren {
-  AuthenticatedFarmersIdRoute: typeof AuthenticatedFarmersIdRoute
+  AuthenticatedFarmersIdRoute: typeof AuthenticatedFarmersIdRouteWithChildren
   AuthenticatedFarmersAnalyticsRoute: typeof AuthenticatedFarmersAnalyticsRoute
   AuthenticatedFarmersContractRoute: typeof AuthenticatedFarmersContractRoute
   AuthenticatedFarmersOverviewRoute: typeof AuthenticatedFarmersOverviewRoute
@@ -949,7 +1073,7 @@ interface AuthenticatedFarmersRouteChildren {
 }
 
 const AuthenticatedFarmersRouteChildren: AuthenticatedFarmersRouteChildren = {
-  AuthenticatedFarmersIdRoute: AuthenticatedFarmersIdRoute,
+  AuthenticatedFarmersIdRoute: AuthenticatedFarmersIdRouteWithChildren,
   AuthenticatedFarmersAnalyticsRoute: AuthenticatedFarmersAnalyticsRoute,
   AuthenticatedFarmersContractRoute: AuthenticatedFarmersContractRoute,
   AuthenticatedFarmersOverviewRoute: AuthenticatedFarmersOverviewRoute,

@@ -93,6 +93,7 @@ export type DatePickerInputProps = {
   onBlur?: () => void;
   disabled?: boolean;
   className?: string;
+  portalContainer?: HTMLElement | null;
   'aria-invalid'?: boolean;
 };
 
@@ -105,6 +106,7 @@ export function DatePickerInput({
   onBlur,
   disabled,
   className,
+  portalContainer,
   'aria-invalid': ariaInvalid,
 }: DatePickerInputProps) {
   const [open, setOpen] = React.useState(false);
@@ -163,6 +165,7 @@ export function DatePickerInput({
               </InputGroupButton>
             </PopoverTrigger>
             <PopoverContent
+              container={portalContainer}
               className="w-auto overflow-hidden p-0"
               align="end"
               alignOffset={-8}

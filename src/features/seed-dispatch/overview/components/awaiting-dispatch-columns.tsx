@@ -127,7 +127,9 @@ export const awaitingColumns = columnHelper.columns([
     meta: { filterLabel: 'Remaining' },
     cell: ({ row }) => (
       <Badge variant="secondary" className="font-normal tabular-nums">
-        {quantityLabel(row.original, row.original.remainingQuantity)}
+        {row.original.remainingQuantity <= 0
+          ? 'Fulfilled'
+          : quantityLabel(row.original, row.original.remainingQuantity)}
       </Badge>
     ),
   }),
@@ -138,12 +140,14 @@ export const awaitingColumns = columnHelper.columns([
     meta: { filterLabel: 'Fulfillment' },
     cell: ({ row }) => {
       const percent = row.original.fulfillmentPercent;
-      const isPartial = percent > 0 && percent < 100;
+      const fulfillmentLabel = percent >= 100 ? 'Fulfilled' : percent > 0 ? 'Partial' : null;
       return (
         <div className="flex w-full max-w-38 flex-col gap-1.5">
           <div className="flex items-center justify-between gap-2 text-sm">
             <span className="tabular-nums">{percent}%</span>
-            {isPartial ? <span className="text-xs text-muted-foreground">Partial</span> : null}
+            {fulfillmentLabel ? (
+              <span className="text-xs text-muted-foreground">{fulfillmentLabel}</span>
+            ) : null}
           </div>
           <Progress value={percent} className="h-1.5" aria-label={`${percent}% fulfilled`} />
         </div>
