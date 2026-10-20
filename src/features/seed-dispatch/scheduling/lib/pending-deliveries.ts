@@ -4,7 +4,7 @@ import {
   formatAwaitingQuantity,
 } from '@/features/seed-dispatch/overview/lib/awaiting-requisitions';
 import type { SeedRequisition } from '@/features/seed-requisition/overview/types';
-import { getRequisitionVillageName } from '@/features/seed-requisition/overview/types';
+import { getRequisitionPlaceName } from '@/features/seed-requisition/overview/types';
 
 export type PendingDeliveryLine = {
   id: string;
@@ -12,7 +12,7 @@ export type PendingDeliveryLine = {
   requisitionId: string;
   farmerName: string;
   accountNumber: string;
-  villageName: string;
+  stationName: string;
   varietyId: string;
   varietyName: string;
   deliveryDate: string;
@@ -26,7 +26,7 @@ export type PendingDeliveryFilters = {
   query: string;
   date: string;
   varietyId: string;
-  village: string;
+  station: string;
 };
 
 export type PendingDateGroup = {
@@ -64,7 +64,7 @@ export function buildPendingDeliveryLines(requisitions: SeedRequisition[]): Pend
         accountNumber: requisition.farmer?.accountNumber
           ? String(requisition.farmer.accountNumber)
           : '',
-        villageName: getRequisitionVillageName(requisition.farmer),
+        stationName: getRequisitionPlaceName(requisition.farmer?.station),
         varietyId: requisition.varietyId,
         varietyName: requisition.variety?.name ?? '',
         deliveryDate,
@@ -85,13 +85,13 @@ export function filterPendingLines(lines: PendingDeliveryLine[], filters: Pendin
   return lines.filter((line) => {
     if (filters.date && line.deliveryDate !== filters.date) return false;
     if (filters.varietyId && line.varietyId !== filters.varietyId) return false;
-    if (filters.village && line.villageName !== filters.village) return false;
+    if (filters.station && line.stationName !== filters.station) return false;
     if (!query) return true;
 
     const haystack = [
       line.farmerName,
       line.accountNumber,
-      line.villageName,
+      line.stationName,
       line.varietyName,
       line.remarks,
     ]

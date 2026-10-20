@@ -47,7 +47,7 @@ export function DispatchSchedulingPage() {
   const [query, setQuery] = useState('');
   const [date, setDate] = useState('');
   const [varietyId, setVarietyId] = useState(ALL);
-  const [village, setVillage] = useState(ALL);
+  const [station, setStation] = useState(ALL);
   const [approving, setApproving] = useState<{
     requisition: SeedRequisition;
     delivery: SeedRequisitionDelivery;
@@ -61,9 +61,9 @@ export function DispatchSchedulingPage() {
         query,
         date,
         varietyId: varietyId === ALL ? '' : varietyId,
-        village: village === ALL ? '' : village,
+        station: station === ALL ? '' : station,
       }),
-    [lines, query, date, varietyId, village],
+    [lines, query, date, varietyId, station],
   );
   const groups = useMemo(() => groupPendingDeliveriesByDate(visibleLines), [visibleLines]);
 
@@ -77,13 +77,13 @@ export function DispatchSchedulingPage() {
       .sort((left, right) => left.name.localeCompare(right.name));
   }, [lines]);
 
-  const villages = useMemo(() => {
-    return [...new Set(lines.map((line) => line.villageName).filter(Boolean))].sort((left, right) =>
+  const stations = useMemo(() => {
+    return [...new Set(lines.map((line) => line.stationName).filter(Boolean))].sort((left, right) =>
       left.localeCompare(right),
     );
   }, [lines]);
 
-  const filtersActive = query.trim() !== '' || date !== '' || varietyId !== ALL || village !== ALL;
+  const filtersActive = query.trim() !== '' || date !== '' || varietyId !== ALL || station !== ALL;
 
   function approveLine(line: PendingDeliveryLine) {
     if (!line.deliveryId || !requisitions) return;
@@ -143,7 +143,7 @@ export function DispatchSchedulingPage() {
                 </InputGroupAddon>
                 <InputGroupInput
                   value={query}
-                  placeholder="Farmer, village, variety"
+                  placeholder="Farmer, station, variety"
                   aria-label="Search pending deliveries"
                   onChange={(event) => setQuery(event.target.value)}
                 />
@@ -176,17 +176,17 @@ export function DispatchSchedulingPage() {
                 </SelectContent>
               </Select>
               <Select
-                value={village}
+                value={station}
                 onValueChange={(value) => {
-                  if (value) setVillage(value);
+                  if (value) setStation(value);
                 }}
               >
-                <SelectTrigger className="w-full sm:w-48" aria-label="Village">
-                  <SelectValue placeholder="All villages" />
+                <SelectTrigger className="w-full sm:w-48" aria-label="Station">
+                  <SelectValue placeholder="All stations" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={ALL}>All villages</SelectItem>
-                  {villages.map((name) => (
+                  <SelectItem value={ALL}>All stations</SelectItem>
+                  {stations.map((name) => (
                     <SelectItem key={name} value={name}>
                       {name}
                     </SelectItem>
@@ -203,7 +203,7 @@ export function DispatchSchedulingPage() {
                     setQuery('');
                     setDate('');
                     setVarietyId(ALL);
-                    setVillage(ALL);
+                    setStation(ALL);
                   }}
                 >
                   Clear filters

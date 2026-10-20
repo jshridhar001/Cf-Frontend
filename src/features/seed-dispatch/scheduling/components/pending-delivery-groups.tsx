@@ -41,7 +41,7 @@ export function PendingDeliveryGroups({
       <Empty className="border">
         <EmptyHeader>
           <EmptyTitle>No matching requests</EmptyTitle>
-          <EmptyDescription>Try another date, village, or variety.</EmptyDescription>
+          <EmptyDescription>Try another date, station, or variety.</EmptyDescription>
         </EmptyHeader>
       </Empty>
     );
@@ -61,7 +61,7 @@ export function PendingDeliveryGroups({
               <TableHeader className="bg-muted">
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="font-semibold">Farmer</TableHead>
-                  <TableHead className="font-semibold">Village</TableHead>
+                  <TableHead className="font-semibold">Station</TableHead>
                   <TableHead className="font-semibold">Variety</TableHead>
                   <TableHead className="font-semibold">Quantity</TableHead>
                   <TableHead className="text-right font-semibold">
@@ -75,7 +75,7 @@ export function PendingDeliveryGroups({
                     <TableCell>
                       <div className="font-medium">{line.farmerName || '—'}</div>
                     </TableCell>
-                    <TableCell>{line.villageName || '—'}</TableCell>
+                    <TableCell>{line.stationName || '—'}</TableCell>
                     <TableCell>{line.varietyName || '—'}</TableCell>
                     <TableCell className="tabular-nums">{formatPendingQuantity(line)}</TableCell>
                     <TableCell className="text-right">
@@ -93,7 +93,7 @@ export function PendingDeliveryGroups({
                 <ItemContent className="min-w-0">
                   <ItemTitle>{line.farmerName || '—'}</ItemTitle>
                   <ItemDescription className="line-clamp-2">
-                    {[line.villageName, line.varietyName].filter(Boolean).join(' · ') || '—'}
+                    {[line.stationName, line.varietyName].filter(Boolean).join(' · ') || '—'}
                   </ItemDescription>
                   <p className="text-sm font-medium tabular-nums">{formatPendingQuantity(line)}</p>
                 </ItemContent>

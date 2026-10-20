@@ -29,7 +29,7 @@ function requisition(
     farmer: {
       name: 'Aman Singh',
       accountNumber: '1042',
-      village: { name: 'Rampur' },
+      station: { name: 'Rampur' },
     },
     variety: { name: 'Kufri Jyoti' },
     ...overrides,
@@ -91,7 +91,7 @@ describe('buildPendingDeliveryLines', () => {
       bags: 240,
       acres: 0,
       isAcresBased: false,
-      villageName: 'Rampur',
+      stationName: 'Rampur',
       varietyName: 'Kufri Jyoti',
       accountNumber: '1042',
       deliveryDate: '2026-10-18',
@@ -109,7 +109,7 @@ describe('groupPendingDeliveriesByDate', () => {
   const lines = buildPendingDeliveryLines([
     requisition({
       id: 'req-late',
-      farmer: { name: 'Zara Khan', accountNumber: '9', village: { name: 'Rampur' } },
+      farmer: { name: 'Zara Khan', accountNumber: '9', station: { name: 'Rampur' } },
       requestedDeliveries: [
         {
           id: 'late',
@@ -123,7 +123,7 @@ describe('groupPendingDeliveriesByDate', () => {
     }),
     requisition({
       id: 'req-early',
-      farmer: { name: 'Aman Singh', accountNumber: '1', village: { name: 'Sadar' } },
+      farmer: { name: 'Aman Singh', accountNumber: '1', station: { name: 'Sadar' } },
       varietyId: 'variety-2',
       variety: { name: 'Chipsona' },
       requestedDeliveries: [
@@ -139,7 +139,7 @@ describe('groupPendingDeliveriesByDate', () => {
     }),
     requisition({
       id: 'req-early-2',
-      farmer: { name: 'Bina Devi', accountNumber: '2', village: { name: 'Sadar' } },
+      farmer: { name: 'Bina Devi', accountNumber: '2', station: { name: 'Sadar' } },
       requestedDeliveries: [
         {
           id: 'early-a',
@@ -168,13 +168,13 @@ describe('groupPendingDeliveriesByDate', () => {
     });
   });
 
-  it('filters by search, date, variety, and village', () => {
+  it('filters by search, date, variety, and station', () => {
     expect(
       filterPendingLines(lines, {
         query: 'bina',
         date: '',
         varietyId: '',
-        village: '',
+        station: '',
       }).map((line) => line.id),
     ).toEqual(['early-a']);
 
@@ -183,7 +183,7 @@ describe('groupPendingDeliveriesByDate', () => {
         query: '',
         date: '2026-10-18',
         varietyId: 'variety-2',
-        village: 'Sadar',
+        station: 'Sadar',
       }).map((line) => line.id),
     ).toEqual(['early-b']);
   });
