@@ -12,3 +12,8 @@ export const plantationKeys = {
   all: ['plantations'] as const,
   list: (fieldId: string) => [...plantationKeys.all, 'list', fieldId] as const,
 };
+
+export const irrigationKeys = {
+  all: ['irrigations'] as const,
+  list: (fieldId: string) => [...irrigationKeys.all, 'list', fieldId] as const,
+};

@@ -20,13 +20,12 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
-import { getAuthToken } from '@/features/auth/lib/auth-token-store';
 import { useCreatePlantation } from '@/features/farmers/farmer-profile/seed-and-fields-tab/api/use-create-plantation';
 import { useUpdatePlantation } from '@/features/farmers/farmer-profile/seed-and-fields-tab/api/use-update-plantation';
 import type { Plantation } from '@/features/farmers/farmer-profile/seed-and-fields-tab/plantation-types';
 import { useSeedSizes } from '@/features/master/api/use-seed-sizes';
 import { useVarieties } from '@/features/master/api/use-varieties';
-import { uploadFiles } from '@/lib/uploadthing';
+import { ActivityImageUploadError, uploadActivityImages } from '@/lib/upload-activity-images';
 
 const MAX_PLANTATION_PHOTOS = 8;
 const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
@@ -219,32 +218,29 @@ function AddPlantationForm({
       let uploadedUrls: string[] = [];
 
       if (newPhotos.length > 0) {
-        const token = getAuthToken();
-        if (!token) {
-          toast.error('You must be signed in to add photos.', { position: 'bottom-right' });
-          return;
-        }
-
         setUploading(true);
         try {
-          const uploaded = await uploadFiles('plantationImage', {
-            files: newPhotos.flatMap((photo) => (photo.file ? [photo.file] : [])),
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          uploadedUrls = uploaded.map((file) => file.ufsUrl).filter((url) => url.length > 0);
-          if (uploadedUrls.length !== newPhotos.length) {
-            toast.error(
-              editing
-                ? 'Could not upload every photo. The plantation was not updated.'
-                : 'Could not upload every photo. The plantation was not created.',
-              { position: 'bottom-right' },
-            );
-            return;
-          }
+          uploadedUrls = await uploadActivityImages(
+            'plantationImage',
+            newPhotos.flatMap((photo) => (photo.file ? [photo.file] : [])),
+          );
         } catch (error) {
-          toast.error(error instanceof Error ? error.message : 'Failed to upload photos.', {
-            position: 'bottom-right',
-          });
+          const signedOut =
+            error instanceof ActivityImageUploadError && error.reason === 'signed-out';
+          const incomplete =
+            error instanceof ActivityImageUploadError && error.reason === 'incomplete';
+          toast.error(
+            signedOut
+              ? 'You must be signed in to add photos.'
+              : incomplete
+                ? editing
+                  ? 'Could not upload every photo. The plantation was not updated.'
+                  : 'Could not upload every photo. The plantation was not created.'
+                : error instanceof Error
+                  ? error.message
+                  : 'Failed to upload photos.',
+            { position: 'bottom-right' },
+          );
           return;
         } finally {
           setUploading(false);
