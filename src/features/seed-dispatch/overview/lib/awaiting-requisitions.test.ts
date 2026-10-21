@@ -99,7 +99,7 @@ function dispatchFor(deliveryId: string, bags: number, status = 'IN_TRANSIT'): S
         sizeLines: [{ bagQuantity: bags, size: { seedBagsPerAcre: null } }],
       },
     ],
-  } as SeedDispatch;
+  } as unknown as SeedDispatch;
 }
 
 describe('buildAwaitingLots', () => {
