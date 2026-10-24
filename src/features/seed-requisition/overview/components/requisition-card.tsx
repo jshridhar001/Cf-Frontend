@@ -7,6 +7,7 @@ import {
   MapPin,
   MessageSquare,
   Package,
+  Ruler,
   Sprout,
   SquarePenIcon,
   Trash2Icon,
@@ -104,6 +105,7 @@ export function RequisitionCard({
   const familyLabel = getRequisitionFamilyLabel(requisition.farmer);
   const placeLabel = getRequisitionPlaceLabel(requisition.farmer);
   const varietyName = requisition.variety?.name ?? 'Unknown variety';
+  const expectedSizeName = requisition.expectedSize?.name?.trim() ?? '';
   const status = statusFromDeliveries(requisition.requestedDeliveries);
 
   return (
@@ -124,6 +126,7 @@ export function RequisitionCard({
       <CardContent className="flex flex-col gap-1.5 px-4">
         <RequisitionRow icon={Users} value={familyLabel} muted={familyLabel === 'Independent'} />
         <RequisitionRow icon={Sprout} value={varietyName} />
+        {expectedSizeName ? <RequisitionRow icon={Ruler} value={expectedSizeName} /> : null}
         <RequisitionRow icon={MapPin} value={placeLabel} />
         <RequisitionRow icon={LandPlot} value={formatRequestedQuantity(requisition)} />
         {requisition.requisitionDate ? (

@@ -72,6 +72,7 @@ function requisition(deliveries: SeedRequisitionDelivery[], id = 'req-1'): SeedR
     id,
     farmerId: 'farmer-1',
     varietyId: 'variety-1',
+    expectedSizeId: null,
     status: 'APPROVED',
     requestedBags: null,
     requestedAcres: null,
@@ -87,6 +88,7 @@ function requisition(deliveries: SeedRequisitionDelivery[], id = 'req-1'): SeedR
     updatedAt: '2026-10-01T00:00:00.000Z',
     farmer: { name: 'Aman Singh', accountNumber: '1042' },
     variety: { name: 'Kufri Jyoti' },
+    expectedSize: null,
   };
 }
 

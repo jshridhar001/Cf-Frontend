@@ -13,6 +13,7 @@ function toProfileSeedRequisition(farmer: Farmer, row: FarmerSeedRequisition): S
     id: row.id,
     farmerId: row.farmerId,
     varietyId: row.varietyId,
+    expectedSizeId: row.expectedSizeId ?? null,
     status: row.status,
     requestedBags: row.requestedBags,
     requestedAcres: row.requestedAcres,
@@ -78,6 +79,9 @@ function toProfileSeedRequisition(farmer: Farmer, row: FarmerSeedRequisition): S
       village: farmer.village,
     },
     variety: row.variety ? { id: row.variety.id, name: row.variety.name } : null,
+    expectedSize: row.expectedSize
+      ? { id: row.expectedSize.id, name: row.expectedSize.name }
+      : null,
   };
 }
 

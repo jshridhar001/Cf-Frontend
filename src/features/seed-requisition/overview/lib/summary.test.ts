@@ -9,6 +9,7 @@ function requisition(
     id: 'req-1',
     farmerId: 'farmer-1',
     varietyId: 'variety-1',
+    expectedSizeId: null,
     status: 'PENDING',
     fulfilledBags: 0,
     fulfilledAcres: '0',
@@ -21,6 +22,7 @@ function requisition(
     updatedAt: '2026-10-01T00:00:00.000Z',
     farmer: null,
     variety: null,
+    expectedSize: null,
     ...partial,
   };
 }

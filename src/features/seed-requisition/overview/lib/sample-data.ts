@@ -57,6 +57,8 @@ export const SAMPLE_SEED_REQUISITIONS: SeedRequisition[] = [
       area: { village: { name: 'BAHERI' }, district: { name: 'Bareilly' } },
     },
     variety: { name: 'Himalini' },
+    expectedSizeId: null,
+    expectedSize: null,
   },
   {
     id: 'REQUISITION_ID_2',
@@ -96,6 +98,8 @@ export const SAMPLE_SEED_REQUISITIONS: SeedRequisition[] = [
       area: { village: { name: 'BAZPUR' }, district: { name: 'Udham Singh Nagar' } },
     },
     variety: { name: 'Kufri Jyoti' },
+    expectedSizeId: null,
+    expectedSize: null,
   },
   {
     id: 'REQUISITION_ID_3',
@@ -135,6 +139,8 @@ export const SAMPLE_SEED_REQUISITIONS: SeedRequisition[] = [
       area: { village: { name: 'BANDA' }, district: { name: 'Shahjahanpur' } },
     },
     variety: { name: 'Kufri Chandramukhi' },
+    expectedSizeId: null,
+    expectedSize: null,
   },
   {
     id: 'REQUISITION_ID_4',
@@ -174,6 +180,8 @@ export const SAMPLE_SEED_REQUISITIONS: SeedRequisition[] = [
       area: { village: { name: 'BILASPUR' }, district: { name: 'Rampur' } },
     },
     variety: { name: 'Himalini' },
+    expectedSizeId: null,
+    expectedSize: null,
   },
   {
     id: 'REQUISITION_ID_5',
@@ -213,6 +221,8 @@ export const SAMPLE_SEED_REQUISITIONS: SeedRequisition[] = [
       area: { village: { name: 'KASHIPUR' }, district: { name: 'Udham Singh Nagar' } },
     },
     variety: { name: 'Kufri Bahar' },
+    expectedSizeId: null,
+    expectedSize: null,
   },
   {
     id: 'REQUISITION_ID_6',
@@ -245,6 +255,8 @@ export const SAMPLE_SEED_REQUISITIONS: SeedRequisition[] = [
       area: { village: { name: 'BAHERI' }, district: { name: 'Bareilly' } },
     },
     variety: { name: 'Kufri Jyoti' },
+    expectedSizeId: null,
+    expectedSize: null,
   },
   {
     id: 'REQUISITION_ID_7',
@@ -284,5 +296,7 @@ export const SAMPLE_SEED_REQUISITIONS: SeedRequisition[] = [
       area: { village: { name: 'BAZPUR' }, district: { name: 'Udham Singh Nagar' } },
     },
     variety: { name: 'Kufri Bahar' },
+    expectedSizeId: null,
+    expectedSize: null,
   },
 ];

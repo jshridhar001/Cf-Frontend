@@ -264,6 +264,16 @@ function withRequestedDeliveriesColumn(columnOrder: string[]): string[] {
   return next;
 }
 
+function withExpectedSizeColumn(columnOrder: string[]): string[] {
+  if (columnOrder.length === 0 || columnOrder.includes('expectedSize')) return columnOrder;
+  const next = [...columnOrder];
+  const varietyIndex = next.indexOf('variety');
+  const bagsIndex = next.indexOf('bags');
+  const insertAt = varietyIndex >= 0 ? varietyIndex + 1 : bagsIndex >= 0 ? bagsIndex : next.length;
+  next.splice(insertAt, 0, 'expectedSize');
+  return next;
+}
+
 function withFamilyColumn(columnOrder: string[]): string[] {
   if (columnOrder.length === 0 || columnOrder.includes('family')) return columnOrder;
   const next = [...columnOrder];
@@ -279,10 +289,12 @@ export function getColumnPreferences(): ColumnPreferences {
     columnVisibility: customized
       ? visibilityFromHiddenIds(migrateRequestedDeliveryColumnIds(hiddenColumnIds))
       : builtInColumnVisibility(),
-    columnOrder: withRequestedDeliveriesColumn(
-      withFamilyColumn(
-        withRemarksColumn(
-          withContractUrlColumns(withContractDateColumn(withAddressColumns(columnOrder))),
+    columnOrder: withExpectedSizeColumn(
+      withRequestedDeliveriesColumn(
+        withFamilyColumn(
+          withRemarksColumn(
+            withContractUrlColumns(withContractDateColumn(withAddressColumns(columnOrder))),
+          ),
         ),
       ),
     ),

@@ -60,10 +60,16 @@ export type FarmerSeedRequisitionVariety = {
   updatedAt?: string;
 };
 
+export type FarmerSeedRequisitionExpectedSize = {
+  id: string;
+  name: string;
+};
+
 export type FarmerSeedRequisition = {
   id: string;
   farmerId: string;
   varietyId: string;
+  expectedSizeId: string | null;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   requestedBags: number | null;
   requestedAcres: string | null;
@@ -86,6 +92,7 @@ export type FarmerSeedRequisition = {
   createdAt: string;
   updatedAt: string;
   variety: FarmerSeedRequisitionVariety | null;
+  expectedSize: FarmerSeedRequisitionExpectedSize | null;
 };
 
 export type ApiFarmer = {

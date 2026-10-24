@@ -106,6 +106,7 @@ export function RequisitionSampleProvider({ children }: { children: ReactNode })
               id: `REQUISITION_${crypto.randomUUID()}`,
               farmerId: variables.farmerId,
               varietyId: variables.varietyId,
+              expectedSizeId: null,
               status: 'PENDING',
               requestedBags: variables.requestedBags ?? null,
               requestedAcres: variables.requestedAcres ?? null,
@@ -129,6 +130,7 @@ export function RequisitionSampleProvider({ children }: { children: ReactNode })
                 ? { name: farmer.name, accountNumber: farmer.accountNumber ?? '' }
                 : null,
               variety: variety ? { name: variety.name } : null,
+              expectedSize: null,
             };
             setItems((current) => [created, ...current]);
           },

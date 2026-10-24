@@ -14,6 +14,7 @@ function requisition(
   return {
     farmerId: 'farmer-1',
     varietyId: 'variety-1',
+    expectedSizeId: null,
     status: 'PENDING',
     requestedBags: null,
     requestedAcres: null,
@@ -32,6 +33,7 @@ function requisition(
       station: { name: 'Rampur' },
     },
     variety: { name: 'Kufri Jyoti' },
+    expectedSize: null,
     ...overrides,
   };
 }

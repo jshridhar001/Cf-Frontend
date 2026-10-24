@@ -1,6 +1,6 @@
 import { useForm } from '@tanstack/react-form';
 import { PlusIcon, Trash2Icon } from 'lucide-react';
-import { useEffect } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
 import * as z from 'zod';
 import { SearchableOptionCombobox } from '@/components/searchable-option-combobox';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,9 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useFarmers } from '@/features/farmers/overview/api/use-farmers';
+import { useSeedSizes } from '@/features/master/api/use-seed-sizes';
 import { useVarieties } from '@/features/master/api/use-varieties';
+import type { SeedSize } from '@/features/master/types';
 import { useCreateSeedRequisition } from '@/features/seed-requisition/overview/api/use-create-seed-requisition';
 import { useUpdateSeedRequisition } from '@/features/seed-requisition/overview/api/use-update-seed-requisition';
 import {
@@ -31,6 +33,7 @@ import {
   toRequisitionDateParam,
 } from '@/features/seed-requisition/overview/types';
 
+const NONE_EXPECTED_SIZE = '__none__';
 const ACRES_MAX_DECIMALS = 2;
 const QUANTITY_TYPES = ['bags', 'acres'] as const;
 
@@ -79,6 +82,7 @@ function createFormSchema(allowZero: boolean) {
     .object({
       farmerId: z.string().min(1, 'Select a farmer.'),
       varietyId: z.string().min(1, 'Select a variety.'),
+      expectedSizeId: z.string(),
       quantityType: z.enum(QUANTITY_TYPES),
       requestedBags: z.string(),
       requestedAcres: z.string(),
@@ -158,9 +162,7 @@ function createFormSchema(allowZero: boolean) {
 
 type FormDeliveryLine = DeliveryScheduleLine & { key: string };
 
-function deliveryLinesFromRequisition(
-  requisition?: SeedRequisition | null,
-): FormDeliveryLine[] {
+function deliveryLinesFromRequisition(requisition?: SeedRequisition | null): FormDeliveryLine[] {
   return (requisition?.requestedDeliveries ?? []).map((line) => ({
     key: line.id ?? crypto.randomUUID(),
     deliveryDate: toDateInputValue(line.deliveryDate),
@@ -171,6 +173,29 @@ function deliveryLinesFromRequisition(
           ? String(Number(line.acres))
           : '',
   }));
+}
+
+function ExpectedSizeChoices({
+  varietyId,
+  children,
+}: {
+  varietyId: string;
+  children: (seedSizes: SeedSize[], ready: boolean) => ReactNode;
+}) {
+  const enabled = varietyId.length > 0;
+  const { data, isPending } = useSeedSizes(varietyId, { enabled });
+  return children(enabled ? (data ?? []) : [], !enabled || !isPending);
+}
+
+function ClearStaleExpectedSize({ stale, onClear }: { stale: boolean; onClear: () => void }) {
+  const onClearRef = useRef(onClear);
+  onClearRef.current = onClear;
+
+  useEffect(() => {
+    if (stale) onClearRef.current();
+  }, [stale]);
+
+  return null;
 }
 
 function remainingScheduleLabel(
@@ -235,6 +260,7 @@ export function RequisitionForm({
     defaultValues: {
       farmerId: requisition?.farmerId ?? lockedFarmerId ?? '',
       varietyId: requisition?.varietyId ?? '',
+      expectedSizeId: requisition?.expectedSizeId ?? '',
       quantityType:
         !requisition ||
         (requisition.requestedAcres != null && requisition.requestedAcres !== '') ||
@@ -266,10 +292,17 @@ export function RequisitionForm({
             ? { bags: Number(line.quantity) }
             : { acres: parseRequestedAcres(line.quantity) }),
         }));
+      const expectedSizeId = value.expectedSizeId.trim();
+      const expectedSizePayload = isEdit
+        ? { expectedSizeId: expectedSizeId || null }
+        : expectedSizeId
+          ? { expectedSizeId }
+          : {};
       const body: CreateSeedRequisitionBody = {
         farmerId: value.farmerId,
         varietyId: value.varietyId,
         contractDate: toRequisitionDateParam(value.contractDate),
+        ...expectedSizePayload,
         ...(requisitionDate ? { requisitionDate: toRequisitionDateParam(requisitionDate) } : {}),
         ...(isEdit || requestedDeliveries.length > 0 ? { requestedDeliveries } : {}),
         ...(remarks ? { remarks } : {}),
@@ -371,6 +404,54 @@ export function RequisitionForm({
             );
           }}
         </form.Field>
+
+        <form.Subscribe selector={(state) => state.values.varietyId}>
+          {(varietyId) => (
+            <ExpectedSizeChoices varietyId={varietyId}>
+              {(seedSizes, ready) => (
+                <form.Field name="expectedSizeId">
+                  {(field) => {
+                    const selectedId = field.state.value;
+                    const stale =
+                      selectedId.length > 0 &&
+                      (!varietyId || (ready && !seedSizes.some((size) => size.id === selectedId)));
+                    return (
+                      <Field>
+                        <ClearStaleExpectedSize
+                          stale={stale}
+                          onClear={() => field.handleChange('')}
+                        />
+                        <FieldLabel htmlFor={field.name}>Expected size (optional)</FieldLabel>
+                        <SearchableOptionCombobox
+                          id={field.name}
+                          name={field.name}
+                          value={selectedId}
+                          onValueChange={(next) =>
+                            field.handleChange(next === NONE_EXPECTED_SIZE ? '' : next)
+                          }
+                          onBlur={field.handleBlur}
+                          isInvalid={false}
+                          placeholder={varietyId ? 'Select seed size' : 'Select a variety first'}
+                          emptyMessage="No seed sizes found"
+                          disabled={isPending || !varietyId || !ready}
+                          options={[
+                            ...(selectedId
+                              ? [{ id: NONE_EXPECTED_SIZE, label: 'No expected size' }]
+                              : []),
+                            ...seedSizes.map((size) => ({
+                              id: size.id,
+                              label: size.name,
+                            })),
+                          ]}
+                        />
+                      </Field>
+                    );
+                  }}
+                </form.Field>
+              )}
+            </ExpectedSizeChoices>
+          )}
+        </form.Subscribe>
 
         <form.Field name="quantityType">
           {(quantityField) => (

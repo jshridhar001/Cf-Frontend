@@ -43,6 +43,7 @@ function requisition(partial: {
     id: partial.id,
     farmerId,
     varietyId: partial.varietyId ?? 'var-1',
+    expectedSizeId: null,
     status: partial.status ?? 'PENDING',
     requestedBags: null,
     requestedAcres: partial.requestedAcres === undefined ? '0' : partial.requestedAcres,
@@ -84,6 +85,7 @@ function requisition(partial: {
       id: partial.varietyId ?? 'var-1',
       name: partial.varietyName ?? 'B101',
     },
+    expectedSize: null,
   };
 }
 

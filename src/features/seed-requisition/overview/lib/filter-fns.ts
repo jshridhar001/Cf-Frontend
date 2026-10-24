@@ -114,6 +114,7 @@ function searchHaystack(requisition: SeedRequisition): string {
     requisition.farmer?.accountNumber,
     getRequisitionPlaceLabel(requisition.farmer),
     requisition.variety?.name,
+    requisition.expectedSize?.name,
   ]
     .filter(Boolean)
     .join(' ')

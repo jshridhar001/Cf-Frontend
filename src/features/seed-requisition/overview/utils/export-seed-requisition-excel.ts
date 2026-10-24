@@ -35,6 +35,7 @@ const COLUMN_WIDTHS: Record<string, number> = {
   postOffice: 18,
   village: 18,
   variety: 16,
+  expectedSize: 16,
   bags: 10,
   acres: 10,
   contractDate: 16,

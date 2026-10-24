@@ -115,6 +115,8 @@ function leafCellForColumn(requisition: SeedRequisition, columnId: string): Expo
       return placeCell(requisition.farmer?.village);
     case 'variety':
       return textCell(requisition.variety?.name ?? 'Unknown variety');
+    case 'expectedSize':
+      return textCell(requisition.expectedSize?.name?.trim() || '—');
     case 'bags': {
       if (requisition.requestedBags == null) return emptyCell();
       return numberCell(requisition.requestedBags, 'integer');

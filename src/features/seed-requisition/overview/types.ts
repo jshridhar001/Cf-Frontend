@@ -107,6 +107,11 @@ export type SeedRequisitionVariety = {
   name: string;
 };
 
+export type SeedRequisitionExpectedSize = {
+  id?: string;
+  name: string;
+};
+
 export type SeedRequisitionDelivery = {
   id?: string;
   deliveryDate: string;
@@ -124,6 +129,7 @@ export type SeedRequisition = {
   id: string;
   farmerId: string;
   varietyId: string;
+  expectedSizeId: string | null;
   status: SeedRequisitionStatus;
   requestedBags: number | null;
   requestedAcres: string | null;
@@ -140,6 +146,7 @@ export type SeedRequisition = {
   updatedAt: string;
   farmer: SeedRequisitionFarmer | null;
   variety: SeedRequisitionVariety | null;
+  expectedSize: SeedRequisitionExpectedSize | null;
   createdBy?: SeedRequisitionActor | null;
   dispatchStops?: unknown[];
 };
@@ -194,6 +201,11 @@ export type ApiSeedRequisitionVariety = {
   name: string;
 };
 
+export type ApiSeedRequisitionExpectedSize = {
+  id: string;
+  name: string;
+};
+
 export type ApiSeedRequisitionDelivery = {
   id: string;
   requisitionId: string;
@@ -209,6 +221,7 @@ export type ApiSeedRequisition = {
   id: string;
   farmerId: string;
   varietyId: string;
+  expectedSizeId: string | null;
   status: SeedRequisitionStatus;
   requestedBags: number | null;
   requestedAcres: string | null;
@@ -224,6 +237,7 @@ export type ApiSeedRequisition = {
   updatedAt: string;
   farmer: ApiSeedRequisitionFarmer;
   variety: ApiSeedRequisitionVariety;
+  expectedSize: ApiSeedRequisitionExpectedSize | null;
   deliveries?: ApiSeedRequisitionDelivery[];
 };
 
@@ -240,6 +254,7 @@ export type SeedRequisitionDecisionResponse = {
 export type CreateSeedRequisitionBody = {
   farmerId: string;
   varietyId: string;
+  expectedSizeId?: string | null;
   contractDate: string;
   requestedBags?: number;
   requestedAcres?: number;
@@ -259,6 +274,7 @@ export function toSeedRequisition(row: ApiSeedRequisition): SeedRequisition {
     id: row.id,
     farmerId: row.farmerId,
     varietyId: row.varietyId,
+    expectedSizeId: row.expectedSizeId ?? null,
     status: row.status,
     requestedBags: row.requestedBags,
     requestedAcres: row.requestedAcres,
@@ -321,6 +337,9 @@ export function toSeedRequisition(row: ApiSeedRequisition): SeedRequisition {
       id: row.variety.id,
       name: row.variety.name,
     },
+    expectedSize: row.expectedSize
+      ? { id: row.expectedSize.id, name: row.expectedSize.name }
+      : null,
   };
 }
 

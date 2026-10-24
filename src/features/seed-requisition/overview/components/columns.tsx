@@ -215,6 +215,16 @@ export const columns = columnHelper.columns([
     sortFn: 'text',
     meta: { filterLabel: 'Variety' },
   }),
+  columnHelper.accessor((row) => row.expectedSize?.name?.trim() ?? '', {
+    id: 'expectedSize',
+    header: 'Expected size',
+    sortFn: 'text',
+    meta: { filterLabel: 'Expected size' },
+    cell: ({ getValue }) => {
+      const name = getValue();
+      return name ? <span>{name}</span> : <span className="text-muted-foreground">—</span>;
+    },
+  }),
   columnHelper.accessor((row) => row.requestedBags ?? 0, {
     id: 'bags',
     header: 'Bags',
