@@ -23,6 +23,11 @@ export const rougingKeys = {
   list: (fieldId: string) => [...rougingKeys.all, 'list', fieldId] as const,
 };
 
+export const dehaulmingKeys = {
+  all: ['dehaulmings'] as const,
+  list: (fieldId: string) => [...dehaulmingKeys.all, 'list', fieldId] as const,
+};
+
 export const stripTestGroupKeys = {
   all: ['strip-test-groups'] as const,
   list: (fieldId: string) => [...stripTestGroupKeys.all, 'list', fieldId] as const,

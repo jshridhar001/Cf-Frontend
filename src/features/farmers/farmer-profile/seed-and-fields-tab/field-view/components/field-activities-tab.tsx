@@ -43,18 +43,22 @@ import {
 } from '@/components/ui/table';
 import { useFieldIrrigations } from '@/features/farmers/farmer-profile/seed-and-fields-tab/api/use-field-irrigations';
 import { useFieldPlantations } from '@/features/farmers/farmer-profile/seed-and-fields-tab/api/use-field-plantations';
+import { useFieldDehaulmings } from '@/features/farmers/farmer-profile/seed-and-fields-tab/api/use-field-dehaulmings';
 import { useFieldRougings } from '@/features/farmers/farmer-profile/seed-and-fields-tab/api/use-field-rougings';
 import { useFieldStripTestGroups } from '@/features/farmers/farmer-profile/seed-and-fields-tab/api/use-field-strip-test-groups';
 import { AddIrrigationSheet } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/add-irrigation-sheet';
 import { AddPlantationSheet } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/add-plantation-sheet';
+import { AddDehaulmingSheet } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/add-dehaulming-sheet';
 import { AddRougingSheet } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/add-rouging-sheet';
 import { AddStripTestSheet } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/add-strip-test-sheet';
 import { DeleteIrrigationDialog } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/delete-irrigation-dialog';
 import { DeletePlantationDialog } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/delete-plantation-dialog';
+import { DeleteDehaulmingDialog } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/delete-dehaulming-dialog';
 import { DeleteRougingDialog } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/delete-rouging-dialog';
 import { DeleteStripTestDialog } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/delete-strip-test-dialog';
 import type { Irrigation } from '@/features/farmers/farmer-profile/seed-and-fields-tab/irrigation-types';
 import type { Plantation } from '@/features/farmers/farmer-profile/seed-and-fields-tab/plantation-types';
+import type { Dehaulming } from '@/features/farmers/farmer-profile/seed-and-fields-tab/dehaulming-types';
 import type { Rouging } from '@/features/farmers/farmer-profile/seed-and-fields-tab/rouging-types';
 import {
   type StripTest,
@@ -115,6 +119,24 @@ function stepCountLabel(count: number) {
 
 function photoCountLabel(count: number) {
   return count === 1 ? '1 photo' : `${count} photos`;
+}
+
+function ActivityRemarks({
+  remarks,
+  className,
+}: {
+  remarks: string | null | undefined;
+  className?: string;
+}) {
+  const text = remarks?.trim();
+  if (!text) return null;
+
+  return (
+    <div className={cn('mt-4', className)}>
+      <p className="text-xs text-muted-foreground">Remarks</p>
+      <p className="mt-1 text-sm leading-5 break-words">{text}</p>
+    </div>
+  );
 }
 
 function PlantationImage({
@@ -278,6 +300,7 @@ function PlantationCard({
             <dd className="mt-0.5 text-sm font-medium">{formatAmount(plantation.acresPlanted)}</dd>
           </div>
         </dl>
+        <ActivityRemarks remarks={plantation.remarks} />
         {photosOpen && photos.length > 0 ? (
           <ul id={photosPanelId} className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {photos.map((url, index) => (
@@ -374,7 +397,6 @@ function IrrigationCard({
   const [photosOpen, setPhotosOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const photosPanelId = `irrigation-photos-${irrigation.id}`;
-  const remarks = irrigation.remarks?.trim();
 
   return (
     <li className="relative flex gap-3 sm:gap-4">
@@ -389,8 +411,8 @@ function IrrigationCard({
             <p className="text-[11px] font-medium tracking-wide text-sky-700 uppercase dark:text-sky-300">
               Irrigation · Cycle {irrigation.cycleNumber}
             </p>
-            <h3 className="mt-0.5 line-clamp-2 text-sm font-semibold tracking-tight break-words sm:text-base">
-              {remarks || `Cycle ${irrigation.cycleNumber}`}
+            <h3 className="mt-0.5 text-sm font-semibold tracking-tight sm:text-base">
+              Cycle {irrigation.cycleNumber}
             </h3>
             {photos.length > 0 ? (
               <Badge variant="outline" className="mt-2">
@@ -430,6 +452,7 @@ function IrrigationCard({
             </dd>
           </div>
         </dl>
+        <ActivityRemarks remarks={irrigation.remarks} />
         {photosOpen && photos.length > 0 ? (
           <ul id={photosPanelId} className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {photos.map((url, index) => (
@@ -521,7 +544,6 @@ function RougingCard({
   const [photosOpen, setPhotosOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const photosPanelId = `rouging-photos-${rouging.id}`;
-  const remarks = rouging.remarks?.trim();
 
   return (
     <li className="relative flex gap-3 sm:gap-4">
@@ -536,9 +558,7 @@ function RougingCard({
             <p className="text-[11px] font-medium tracking-wide text-emerald-700 uppercase dark:text-emerald-300">
               Rouging
             </p>
-            <h3 className="mt-0.5 line-clamp-2 text-sm font-semibold tracking-tight break-words sm:text-base">
-              {remarks || 'Rouging'}
-            </h3>
+            <h3 className="mt-0.5 text-sm font-semibold tracking-tight sm:text-base">Rouging</h3>
             {photos.length > 0 ? (
               <Badge variant="outline" className="mt-2">
                 <ImageIcon />
@@ -585,6 +605,7 @@ function RougingCard({
             </dd>
           </div>
         </dl>
+        <ActivityRemarks remarks={rouging.remarks} />
         {photosOpen && photos.length > 0 ? (
           <ul id={photosPanelId} className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {photos.map((url, index) => (
@@ -663,6 +684,145 @@ function RougingCard({
   );
 }
 
+function DehaulmingCard({
+  dehaulming,
+  onEdit,
+  onDelete,
+}: {
+  dehaulming: Dehaulming;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const photos = (dehaulming.mediaUrls ?? []).filter((url) => url.length > 0);
+  const [photosOpen, setPhotosOpen] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  const photosPanelId = `dehaulming-photos-${dehaulming.id}`;
+
+  return (
+    <li className="relative flex gap-3 sm:gap-4">
+      <div className="relative z-10 flex w-8 shrink-0 justify-center sm:w-10">
+        <span className="mt-4 flex size-8 items-center justify-center rounded-full bg-orange-50 text-orange-700 ring-4 ring-background sm:size-9 dark:bg-orange-950 dark:text-orange-300">
+          <Scissors className="size-4" />
+        </span>
+      </div>
+      <article className="min-w-0 flex-1 rounded-xl border bg-card px-3 py-3 sm:px-4 sm:py-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[11px] font-medium tracking-wide text-orange-700 uppercase dark:text-orange-300">
+              Dehaulming
+            </p>
+            <h3 className="mt-0.5 text-sm font-semibold tracking-tight sm:text-base">Dehaulming</h3>
+            {photos.length > 0 ? (
+              <Badge variant="outline" className="mt-2">
+                <ImageIcon />
+                {photoCountLabel(photos.length)}
+              </Badge>
+            ) : null}
+          </div>
+          <time
+            dateTime={dehaulming.startDate}
+            className="shrink-0 pt-0.5 text-xs text-muted-foreground sm:text-sm"
+          >
+            {formatPlantationDate(dehaulming.startDate)}
+          </time>
+        </div>
+        <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3">
+          <div>
+            <dt className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+              Start
+            </dt>
+            <dd className="mt-0.5 text-sm font-medium">
+              {formatPlantationDate(dehaulming.startDate)}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+              End
+            </dt>
+            <dd className="mt-0.5 text-sm font-medium">
+              {formatPlantationDate(dehaulming.endDate)}
+            </dd>
+          </div>
+        </dl>
+        <ActivityRemarks remarks={dehaulming.remarks} />
+        {photosOpen && photos.length > 0 ? (
+          <ul id={photosPanelId} className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {photos.map((url, index) => (
+              <li key={url}>
+                <button
+                  type="button"
+                  className="block w-full overflow-hidden rounded-lg border focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-none"
+                  aria-label={`View dehaulming photo ${index + 1}`}
+                  onClick={() => setViewerIndex(index)}
+                >
+                  <PlantationImage
+                    url={url}
+                    alt={`Dehaulming photo ${index + 1}`}
+                    className="aspect-square w-full object-cover"
+                  />
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+          {photos.length > 0 ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="min-h-11 px-3 sm:min-h-8"
+              aria-expanded={photosOpen}
+              aria-controls={photosPanelId}
+              onClick={() => {
+                setPhotosOpen((open) => !open);
+                setViewerIndex(null);
+              }}
+            >
+              {photosOpen ? 'Hide photos' : 'See photos'}
+              <ChevronDown className={cn('transition-transform', photosOpen && 'rotate-180')} />
+            </Button>
+          ) : (
+            <span />
+          )}
+          <div className="ml-auto flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="min-h-11 px-3 sm:min-h-8"
+              onClick={onEdit}
+            >
+              <Pencil />
+              Edit
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="min-h-11 px-3 text-destructive hover:text-destructive sm:min-h-8"
+              onClick={onDelete}
+            >
+              <Trash2 />
+              Delete
+            </Button>
+          </div>
+        </div>
+        <ActivityPhotoDialog
+          photos={photos}
+          index={viewerIndex}
+          altPrefix="Dehaulming photo"
+          description="Dehaulming photo from this step."
+          onIndexChange={setViewerIndex}
+          onOpenChange={(open) => {
+            if (!open) setViewerIndex(null);
+          }}
+        />
+      </article>
+    </li>
+  );
+}
+
 function sumMeasure(values: Array<number | string>) {
   return values.reduce((total, value) => {
     const amount = Number(value);
@@ -673,7 +833,6 @@ function sumMeasure(values: Array<number | string>) {
 const stripStatClass = 'bg-card px-2.5 py-2 sm:px-3 sm:py-2.5';
 
 function StripSummary({ strip }: { strip: StripTest }) {
-  const remarks = strip.remarks?.trim();
   const stems = strip.stemsPerPlant == null ? '—' : formatMeasure(strip.stemsPerPlant);
   const stats = [
     { label: 'Start', value: formatPlantationDate(strip.startDate) },
@@ -697,12 +856,7 @@ function StripSummary({ strip }: { strip: StripTest }) {
       {strip.tuberRecords.length > 0 ? (
         <TuberRecordsTable records={strip.tuberRecords} />
       ) : null}
-      {remarks ? (
-        <div>
-          <p className="text-xs text-muted-foreground">Remarks</p>
-          <p className="mt-1 text-sm leading-5">{remarks}</p>
-        </div>
-      ) : null}
+      <ActivityRemarks remarks={strip.remarks} className="mt-0" />
     </div>
   );
 }
@@ -993,6 +1147,7 @@ type TimelineStep =
   | { kind: 'plantation'; startDate: string; createdAt: string; plantation: Plantation }
   | { kind: 'irrigation'; startDate: string; createdAt: string; irrigation: Irrigation }
   | { kind: 'rouging'; startDate: string; createdAt: string; rouging: Rouging }
+  | { kind: 'dehaulming'; startDate: string; createdAt: string; dehaulming: Dehaulming }
   | { kind: 'strip-test'; startDate: string; createdAt: string; group: StripTestGroup };
 
 export function FieldActivitiesTab({
@@ -1005,6 +1160,7 @@ export function FieldActivitiesTab({
   const plantationsQuery = useFieldPlantations(fieldId);
   const irrigationsQuery = useFieldIrrigations(fieldId);
   const rougingsQuery = useFieldRougings(fieldId);
+  const dehaulmingsQuery = useFieldDehaulmings(fieldId);
   const stripTestsQuery = useFieldStripTestGroups(fieldId);
   const [plantationOpen, setPlantationOpen] = useState(false);
   const [editing, setEditing] = useState<Plantation | null>(null);
@@ -1015,6 +1171,9 @@ export function FieldActivitiesTab({
   const [rougingOpen, setRougingOpen] = useState(false);
   const [editingRouging, setEditingRouging] = useState<Rouging | null>(null);
   const [deletingRouging, setDeletingRouging] = useState<Rouging | null>(null);
+  const [dehaulmingOpen, setDehaulmingOpen] = useState(false);
+  const [editingDehaulming, setEditingDehaulming] = useState<Dehaulming | null>(null);
+  const [deletingDehaulming, setDeletingDehaulming] = useState<Dehaulming | null>(null);
   const [stripTestOpen, setStripTestOpen] = useState(false);
   const [editingStripTest, setEditingStripTest] = useState<StripTestGroup | null>(null);
   const [deletingStripTest, setDeletingStripTest] = useState<StripTestGroup | null>(null);
@@ -1022,6 +1181,7 @@ export function FieldActivitiesTab({
     plantationsQuery.isPending ||
     irrigationsQuery.isPending ||
     rougingsQuery.isPending ||
+    dehaulmingsQuery.isPending ||
     stripTestsQuery.isPending;
   const steps = useMemo(() => {
     const items: TimelineStep[] = [
@@ -1043,6 +1203,12 @@ export function FieldActivitiesTab({
         createdAt: rouging.createdAt,
         rouging,
       })),
+      ...(dehaulmingsQuery.data ?? []).map((dehaulming) => ({
+        kind: 'dehaulming' as const,
+        startDate: dehaulming.startDate,
+        createdAt: dehaulming.createdAt,
+        dehaulming,
+      })),
       ...(stripTestsQuery.data ?? []).map((group) => ({
         kind: 'strip-test' as const,
         startDate: groupTimelineDate(group),
@@ -1053,17 +1219,25 @@ export function FieldActivitiesTab({
     return items.sort(
       (a, b) => a.startDate.localeCompare(b.startDate) || a.createdAt.localeCompare(b.createdAt),
     );
-  }, [irrigationsQuery.data, plantationsQuery.data, rougingsQuery.data, stripTestsQuery.data]);
+  }, [
+    dehaulmingsQuery.data,
+    irrigationsQuery.data,
+    plantationsQuery.data,
+    rougingsQuery.data,
+    stripTestsQuery.data,
+  ]);
   const queriesSettled =
     !plantationsQuery.isPending &&
     !irrigationsQuery.isPending &&
     !rougingsQuery.isPending &&
+    !dehaulmingsQuery.isPending &&
     !stripTestsQuery.isPending;
   const queriesSucceeded =
     queriesSettled &&
     !plantationsQuery.isError &&
     !irrigationsQuery.isError &&
     !rougingsQuery.isError &&
+    !dehaulmingsQuery.isError &&
     !stripTestsQuery.isError;
 
   return (
@@ -1104,6 +1278,11 @@ export function FieldActivitiesTab({
                     setRougingOpen(true);
                     return;
                   }
+                  if (step.id === 'dehaulming') {
+                    setEditingDehaulming(null);
+                    setDehaulmingOpen(true);
+                    return;
+                  }
                   if (step.id === 'strip-test') {
                     setEditingStripTest(null);
                     setStripTestOpen(true);
@@ -1127,6 +1306,9 @@ export function FieldActivitiesTab({
       ) : null}
       {rougingsQuery.isError ? (
         <p className="text-sm text-muted-foreground">Couldn't load rougings.</p>
+      ) : null}
+      {dehaulmingsQuery.isError ? (
+        <p className="text-sm text-muted-foreground">Couldn't load dehaulmings.</p>
       ) : null}
       {stripTestsQuery.isError ? (
         <p className="text-sm text-muted-foreground">Couldn't load strip tests.</p>
@@ -1178,6 +1360,19 @@ export function FieldActivitiesTab({
                     setRougingOpen(true);
                   }}
                   onDelete={() => setDeletingRouging(step.rouging)}
+                />
+              );
+            }
+            if (step.kind === 'dehaulming') {
+              return (
+                <DehaulmingCard
+                  key={`dehaulming-${step.dehaulming.id}`}
+                  dehaulming={step.dehaulming}
+                  onEdit={() => {
+                    setEditingDehaulming(step.dehaulming);
+                    setDehaulmingOpen(true);
+                  }}
+                  onDelete={() => setDeletingDehaulming(step.dehaulming)}
                 />
               );
             }
@@ -1235,6 +1430,19 @@ export function FieldActivitiesTab({
         open={deletingRouging != null}
         onOpenChange={(open) => {
           if (!open) setDeletingRouging(null);
+        }}
+      />
+      <AddDehaulmingSheet
+        fieldId={fieldId}
+        dehaulming={editingDehaulming}
+        open={dehaulmingOpen}
+        onOpenChange={setDehaulmingOpen}
+      />
+      <DeleteDehaulmingDialog
+        dehaulming={deletingDehaulming}
+        open={deletingDehaulming != null}
+        onOpenChange={(open) => {
+          if (!open) setDeletingDehaulming(null);
         }}
       />
       <AddStripTestSheet
