@@ -6,7 +6,8 @@ export type ActivityImageSlug =
   | 'irrigationImage'
   | 'rougingImage'
   | 'stripTestImage'
-  | 'dehaulmingImage';
+  | 'dehaulmingImage'
+  | 'fieldVisitImage';
 
 type UploadedActivityFile = {
   ufsUrl?: string | null;

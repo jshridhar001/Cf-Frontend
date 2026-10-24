@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useField } from '@/features/farmers/farmer-profile/seed-and-fields-tab/api/use-field';
 import { FieldPlotMap } from '@/features/farmers/farmer-profile/seed-and-fields-tab/components/field-plot-map';
 import { FieldActivitiesTab } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/field-activities-tab';
+import { FieldVisitsTab } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/field-visits-tab';
 import { FieldMapDetailsCard } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/field-map-details-card';
 import { getFieldSurvey } from '@/features/farmers/farmer-profile/seed-and-fields-tab/lib/field-survey';
 
@@ -57,7 +58,9 @@ export function FieldViewPage({ farmerId, fieldId }: { farmerId: string; fieldId
             <TabsContent value="activities">
               <FieldActivitiesTab fieldId={field.id} fieldAcres={field.acres} />
             </TabsContent>
-            <TabsContent value="visits" />
+            <TabsContent value="visits">
+              <FieldVisitsTab fieldId={field.id} />
+            </TabsContent>
           </Tabs>
         </>
       ) : null}
