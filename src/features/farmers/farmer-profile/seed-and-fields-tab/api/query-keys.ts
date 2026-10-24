@@ -17,3 +17,13 @@ export const irrigationKeys = {
   all: ['irrigations'] as const,
   list: (fieldId: string) => [...irrigationKeys.all, 'list', fieldId] as const,
 };
+
+export const rougingKeys = {
+  all: ['rougings'] as const,
+  list: (fieldId: string) => [...rougingKeys.all, 'list', fieldId] as const,
+};
+
+export const stripTestGroupKeys = {
+  all: ['strip-test-groups'] as const,
+  list: (fieldId: string) => [...stripTestGroupKeys.all, 'list', fieldId] as const,
+};

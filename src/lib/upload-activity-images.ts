@@ -1,7 +1,11 @@
 import { getAuthToken } from '@/features/auth/lib/auth-token-store';
 import { uploadFiles } from '@/lib/uploadthing';
 
-export type ActivityImageSlug = 'plantationImage' | 'irrigationImage';
+export type ActivityImageSlug =
+  | 'plantationImage'
+  | 'irrigationImage'
+  | 'rougingImage'
+  | 'stripTestImage';
 
 type UploadedActivityFile = {
   ufsUrl?: string | null;
