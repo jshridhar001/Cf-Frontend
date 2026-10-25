@@ -21,6 +21,7 @@ import { Route as AuthenticatedFarmersRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedMasterRouteImport } from './routes/_authenticated/master'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
+import { Route as AuthenticatedTaskManagerRouteImport } from './routes/_authenticated/task-manager'
 import { Route as AuthenticatedTransferStockRouteImport } from './routes/_authenticated/transfer-stock'
 import { Route as AuthenticatedAccessControlPermissionsRouteImport } from './routes/_authenticated/access-control.permissions'
 import { Route as AuthenticatedAccessControlSessionsRouteImport } from './routes/_authenticated/access-control.sessions'
@@ -57,6 +58,7 @@ import { Route as AuthenticatedFarmersIdRequisitionsRouteImport } from './routes
 import { Route as AuthenticatedMasterFacilitiesIdRouteImport } from './routes/_authenticated/master.facilities_.$id'
 import { Route as AuthenticatedSeedRequisitionIdIndexRouteImport } from './routes/_authenticated/seed-requisition.$id.index'
 import { Route as AuthenticatedSeedRequisitionIdContractRouteImport } from './routes/_authenticated/seed-requisition.$id.contract'
+import { Route as AuthenticatedTaskManagerOfficersOfficerIdRouteImport } from './routes/_authenticated/task-manager_.officers.$officerId'
 import { Route as AuthenticatedFarmersIdFieldsIndexRouteImport } from './routes/_authenticated/farmers.$id.fields.index'
 import { Route as AuthenticatedFarmersIdFieldsFieldIdRouteImport } from './routes/_authenticated/farmers.$id.fields.$fieldId'
 
@@ -119,6 +121,12 @@ const AuthenticatedNotificationsRoute =
   AuthenticatedNotificationsRouteImport.update({
     id: '/notifications',
     path: '/notifications',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedTaskManagerRoute =
+  AuthenticatedTaskManagerRouteImport.update({
+    id: '/task-manager',
+    path: '/task-manager',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedTransferStockRoute =
@@ -336,6 +344,12 @@ const AuthenticatedSeedRequisitionIdContractRoute =
     path: '/contract',
     getParentRoute: () => AuthenticatedSeedRequisitionIdRoute,
   } as any)
+const AuthenticatedTaskManagerOfficersOfficerIdRoute =
+  AuthenticatedTaskManagerOfficersOfficerIdRouteImport.update({
+    id: '/task-manager_/officers/$officerId',
+    path: '/task-manager/officers/$officerId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedFarmersIdFieldsIndexRoute =
   AuthenticatedFarmersIdFieldsIndexRouteImport.update({
     id: '/fields/',
@@ -361,6 +375,7 @@ export interface FileRoutesByFullPath {
   '/master': typeof AuthenticatedMasterRouteWithChildren
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
+  '/task-manager': typeof AuthenticatedTaskManagerRoute
   '/transfer-stock': typeof AuthenticatedTransferStockRouteWithChildren
   '/access-control/permissions': typeof AuthenticatedAccessControlPermissionsRoute
   '/access-control/sessions': typeof AuthenticatedAccessControlSessionsRoute
@@ -395,6 +410,7 @@ export interface FileRoutesByFullPath {
   '/farmers/$id/requisitions': typeof AuthenticatedFarmersIdRequisitionsRoute
   '/master/facilities/$id': typeof AuthenticatedMasterFacilitiesIdRoute
   '/seed-requisition/$id/contract': typeof AuthenticatedSeedRequisitionIdContractRoute
+  '/task-manager/officers/$officerId': typeof AuthenticatedTaskManagerOfficersOfficerIdRoute
   '/farmers/$id/': typeof AuthenticatedFarmersIdIndexRoute
   '/seed-requisition/$id/': typeof AuthenticatedSeedRequisitionIdIndexRoute
   '/farmers/$id/fields/$fieldId': typeof AuthenticatedFarmersIdFieldsFieldIdRoute
@@ -412,6 +428,7 @@ export interface FileRoutesByTo {
   '/master': typeof AuthenticatedMasterRouteWithChildren
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
+  '/task-manager': typeof AuthenticatedTaskManagerRoute
   '/access-control/permissions': typeof AuthenticatedAccessControlPermissionsRoute
   '/access-control/sessions': typeof AuthenticatedAccessControlSessionsRoute
   '/access-control/users': typeof AuthenticatedAccessControlUsersRoute
@@ -443,6 +460,7 @@ export interface FileRoutesByTo {
   '/farmers/$id/requisitions': typeof AuthenticatedFarmersIdRequisitionsRoute
   '/master/facilities/$id': typeof AuthenticatedMasterFacilitiesIdRoute
   '/seed-requisition/$id/contract': typeof AuthenticatedSeedRequisitionIdContractRoute
+  '/task-manager/officers/$officerId': typeof AuthenticatedTaskManagerOfficersOfficerIdRoute
   '/farmers/$id': typeof AuthenticatedFarmersIdIndexRoute
   '/seed-requisition/$id': typeof AuthenticatedSeedRequisitionIdIndexRoute
   '/farmers/$id/fields/$fieldId': typeof AuthenticatedFarmersIdFieldsFieldIdRoute
@@ -462,6 +480,7 @@ export interface FileRoutesById {
   '/_authenticated/master': typeof AuthenticatedMasterRouteWithChildren
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
+  '/_authenticated/task-manager': typeof AuthenticatedTaskManagerRoute
   '/_authenticated/transfer-stock': typeof AuthenticatedTransferStockRouteWithChildren
   '/_authenticated/access-control/permissions': typeof AuthenticatedAccessControlPermissionsRoute
   '/_authenticated/access-control/sessions': typeof AuthenticatedAccessControlSessionsRoute
@@ -496,6 +515,7 @@ export interface FileRoutesById {
   '/_authenticated/farmers/$id/requisitions': typeof AuthenticatedFarmersIdRequisitionsRoute
   '/_authenticated/master/facilities_/$id': typeof AuthenticatedMasterFacilitiesIdRoute
   '/_authenticated/seed-requisition/$id/contract': typeof AuthenticatedSeedRequisitionIdContractRoute
+  '/_authenticated/task-manager_/officers/$officerId': typeof AuthenticatedTaskManagerOfficersOfficerIdRoute
   '/_authenticated/farmers/$id/': typeof AuthenticatedFarmersIdIndexRoute
   '/_authenticated/seed-requisition/$id/': typeof AuthenticatedSeedRequisitionIdIndexRoute
   '/_authenticated/farmers/$id/fields/$fieldId': typeof AuthenticatedFarmersIdFieldsFieldIdRoute
@@ -515,6 +535,7 @@ export interface FileRouteTypes {
     | '/master'
     | '/messages'
     | '/notifications'
+    | '/task-manager'
     | '/transfer-stock'
     | '/access-control/permissions'
     | '/access-control/sessions'
@@ -549,6 +570,7 @@ export interface FileRouteTypes {
     | '/farmers/$id/requisitions'
     | '/master/facilities/$id'
     | '/seed-requisition/$id/contract'
+    | '/task-manager/officers/$officerId'
     | '/farmers/$id/'
     | '/seed-requisition/$id/'
     | '/farmers/$id/fields/$fieldId'
@@ -566,6 +588,7 @@ export interface FileRouteTypes {
     | '/master'
     | '/messages'
     | '/notifications'
+    | '/task-manager'
     | '/access-control/permissions'
     | '/access-control/sessions'
     | '/access-control/users'
@@ -597,6 +620,7 @@ export interface FileRouteTypes {
     | '/farmers/$id/requisitions'
     | '/master/facilities/$id'
     | '/seed-requisition/$id/contract'
+    | '/task-manager/officers/$officerId'
     | '/farmers/$id'
     | '/seed-requisition/$id'
     | '/farmers/$id/fields/$fieldId'
@@ -615,6 +639,7 @@ export interface FileRouteTypes {
     | '/_authenticated/master'
     | '/_authenticated/messages'
     | '/_authenticated/notifications'
+    | '/_authenticated/task-manager'
     | '/_authenticated/transfer-stock'
     | '/_authenticated/access-control/permissions'
     | '/_authenticated/access-control/sessions'
@@ -649,6 +674,7 @@ export interface FileRouteTypes {
     | '/_authenticated/farmers/$id/requisitions'
     | '/_authenticated/master/facilities_/$id'
     | '/_authenticated/seed-requisition/$id/contract'
+    | '/_authenticated/task-manager_/officers/$officerId'
     | '/_authenticated/farmers/$id/'
     | '/_authenticated/seed-requisition/$id/'
     | '/_authenticated/farmers/$id/fields/$fieldId'
@@ -747,6 +773,13 @@ declare module '@tanstack/react-router' {
       path: '/notifications'
       fullPath: '/notifications'
       preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/task-manager': {
+      id: '/_authenticated/task-manager'
+      path: '/task-manager'
+      fullPath: '/task-manager'
+      preLoaderRoute: typeof AuthenticatedTaskManagerRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/transfer-stock': {
@@ -1001,6 +1034,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSeedRequisitionIdContractRouteImport
       parentRoute: typeof AuthenticatedSeedRequisitionIdRoute
     }
+    '/_authenticated/task-manager_/officers/$officerId': {
+      id: '/_authenticated/task-manager_/officers/$officerId'
+      path: '/task-manager/officers/$officerId'
+      fullPath: '/task-manager/officers/$officerId'
+      preLoaderRoute: typeof AuthenticatedTaskManagerOfficersOfficerIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/farmers/$id/fields/': {
       id: '/_authenticated/farmers/$id/fields/'
       path: '/fields'
@@ -1153,6 +1193,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedMasterRoute: typeof AuthenticatedMasterRouteWithChildren
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
+  AuthenticatedTaskManagerRoute: typeof AuthenticatedTaskManagerRoute
   AuthenticatedTransferStockRoute: typeof AuthenticatedTransferStockRouteWithChildren
   AuthenticatedSeedDispatchesIdRoute: typeof AuthenticatedSeedDispatchesIdRoute
   AuthenticatedSeedDispatchesAnalyticsRoute: typeof AuthenticatedSeedDispatchesAnalyticsRoute
@@ -1165,6 +1206,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedSeedRequisitionAnalyticsRoute: typeof AuthenticatedSeedRequisitionAnalyticsRoute
   AuthenticatedSeedRequisitionOverviewRoute: typeof AuthenticatedSeedRequisitionOverviewRoute
   AuthenticatedSeedRequisitionSettingsRoute: typeof AuthenticatedSeedRequisitionSettingsRoute
+  AuthenticatedTaskManagerOfficersOfficerIdRoute: typeof AuthenticatedTaskManagerOfficersOfficerIdRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -1175,6 +1217,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedMasterRoute: AuthenticatedMasterRouteWithChildren,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
+  AuthenticatedTaskManagerRoute: AuthenticatedTaskManagerRoute,
   AuthenticatedTransferStockRoute: AuthenticatedTransferStockRouteWithChildren,
   AuthenticatedSeedDispatchesIdRoute: AuthenticatedSeedDispatchesIdRoute,
   AuthenticatedSeedDispatchesAnalyticsRoute:
@@ -1197,6 +1240,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
     AuthenticatedSeedRequisitionOverviewRoute,
   AuthenticatedSeedRequisitionSettingsRoute:
     AuthenticatedSeedRequisitionSettingsRoute,
+  AuthenticatedTaskManagerOfficersOfficerIdRoute:
+    AuthenticatedTaskManagerOfficersOfficerIdRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

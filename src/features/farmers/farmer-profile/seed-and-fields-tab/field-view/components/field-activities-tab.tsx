@@ -41,25 +41,30 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useFieldDehaulmings } from '@/features/farmers/farmer-profile/seed-and-fields-tab/api/use-field-dehaulmings';
 import { useFieldIrrigations } from '@/features/farmers/farmer-profile/seed-and-fields-tab/api/use-field-irrigations';
 import { useFieldPlantations } from '@/features/farmers/farmer-profile/seed-and-fields-tab/api/use-field-plantations';
-import { useFieldDehaulmings } from '@/features/farmers/farmer-profile/seed-and-fields-tab/api/use-field-dehaulmings';
 import { useFieldRougings } from '@/features/farmers/farmer-profile/seed-and-fields-tab/api/use-field-rougings';
 import { useFieldStripTestGroups } from '@/features/farmers/farmer-profile/seed-and-fields-tab/api/use-field-strip-test-groups';
+import type { Dehaulming } from '@/features/farmers/farmer-profile/seed-and-fields-tab/dehaulming-types';
+import { AddDehaulmingSheet } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/add-dehaulming-sheet';
 import { AddIrrigationSheet } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/add-irrigation-sheet';
 import { AddPlantationSheet } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/add-plantation-sheet';
-import { AddDehaulmingSheet } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/add-dehaulming-sheet';
 import { AddRougingSheet } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/add-rouging-sheet';
 import { AddStripTestSheet } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/add-strip-test-sheet';
+import { DeleteDehaulmingDialog } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/delete-dehaulming-dialog';
 import { DeleteIrrigationDialog } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/delete-irrigation-dialog';
 import { DeletePlantationDialog } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/delete-plantation-dialog';
-import { DeleteDehaulmingDialog } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/delete-dehaulming-dialog';
 import { DeleteRougingDialog } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/delete-rouging-dialog';
 import { DeleteStripTestDialog } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/delete-strip-test-dialog';
+import { StripSizeMixChart } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/strip-size-mix-chart';
 import type { Irrigation } from '@/features/farmers/farmer-profile/seed-and-fields-tab/irrigation-types';
 import type { Plantation } from '@/features/farmers/farmer-profile/seed-and-fields-tab/plantation-types';
-import type { Dehaulming } from '@/features/farmers/farmer-profile/seed-and-fields-tab/dehaulming-types';
 import type { Rouging } from '@/features/farmers/farmer-profile/seed-and-fields-tab/rouging-types';
+import {
+  stripAreaSquareMeters,
+  summarizeStripTests,
+} from '@/features/farmers/farmer-profile/seed-and-fields-tab/strip-test-summary';
 import {
   type StripTest,
   type StripTestGroup,
@@ -99,6 +104,11 @@ function formatMeasure(value: number | string | null | undefined) {
   const amount = Number(value);
   if (!Number.isFinite(amount)) return String(value);
   return amount.toFixed(3).replace(/\.?0+$/, '');
+}
+
+function formatWeightShare(weight: number, total: number) {
+  if (!(total > 0) || !Number.isFinite(weight)) return '—';
+  return `${((weight / total) * 100).toFixed(1).replace(/\.0$/, '')}%`;
 }
 
 function groupTimelineDate(group: StripTestGroup) {
@@ -824,7 +834,7 @@ function DehaulmingCard({
 }
 
 function sumMeasure(values: Array<number | string>) {
-  return values.reduce((total, value) => {
+  return values.reduce<number>((total, value) => {
     const amount = Number(value);
     return Number.isFinite(amount) ? total + amount : total;
   }, 0);
@@ -837,15 +847,19 @@ function StripSummary({ strip }: { strip: StripTest }) {
   const stats = [
     { label: 'Start', value: formatPlantationDate(strip.startDate) },
     { label: 'End', value: formatPlantationDate(strip.endDate) },
-    { label: 'Length', value: formatMeasure(strip.stripLength) },
-    { label: 'Width', value: formatMeasure(strip.stripWidth) },
+    { label: 'Length (m)', value: formatMeasure(strip.stripLength) },
+    { label: 'Width (m)', value: formatMeasure(strip.stripWidth) },
+    {
+      label: 'Area (m²)',
+      value: formatMeasure(stripAreaSquareMeters(strip.stripLength, strip.stripWidth)),
+    },
     { label: 'Plants', value: formatMeasure(strip.numberOfPlants) },
     { label: 'Stems per plant', value: stems },
   ];
 
   return (
     <div className="flex flex-col gap-4">
-      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border bg-border sm:grid-cols-3 lg:grid-cols-6">
+      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border bg-border sm:grid-cols-3 lg:grid-cols-4">
         {stats.map((stat) => (
           <div key={stat.label} className={stripStatClass}>
             <dt className="text-xs text-muted-foreground">{stat.label}</dt>
@@ -853,9 +867,7 @@ function StripSummary({ strip }: { strip: StripTest }) {
           </div>
         ))}
       </dl>
-      {strip.tuberRecords.length > 0 ? (
-        <TuberRecordsTable records={strip.tuberRecords} />
-      ) : null}
+      {strip.tuberRecords.length > 0 ? <TuberRecordsTable records={strip.tuberRecords} /> : null}
       <ActivityRemarks remarks={strip.remarks} className="mt-0" />
     </div>
   );
@@ -871,14 +883,17 @@ function TuberRecordsTable({ records }: { records: StripTestTuberRecord[] }) {
       <Table aria-label="Tuber records" className="table-fixed">
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className="h-auto w-[46%] px-2.5 py-2 text-xs font-medium whitespace-normal text-muted-foreground sm:px-3">
+            <TableHead className="h-auto w-[34%] px-2.5 py-2 text-xs font-medium whitespace-normal text-muted-foreground sm:px-3">
               Tuber size
             </TableHead>
-            <TableHead className="h-auto w-[24%] px-2.5 py-2 text-right text-xs font-medium whitespace-normal text-muted-foreground sm:px-3">
+            <TableHead className="h-auto w-[20%] px-2.5 py-2 text-right text-xs font-medium whitespace-normal text-muted-foreground sm:px-3">
               Quantity
             </TableHead>
-            <TableHead className="h-auto w-[30%] px-2.5 py-2 text-right text-xs font-medium whitespace-normal text-muted-foreground sm:px-3">
+            <TableHead className="h-auto w-[24%] px-2.5 py-2 text-right text-xs font-medium whitespace-normal text-muted-foreground sm:px-3">
               Weight (kg)
+            </TableHead>
+            <TableHead className="h-auto w-[22%] px-2.5 py-2 text-right text-xs font-medium whitespace-normal text-muted-foreground sm:px-3">
+              Weight %
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -894,6 +909,9 @@ function TuberRecordsTable({ records }: { records: StripTestTuberRecord[] }) {
               <TableCell className="px-2.5 py-2 text-right text-sm tabular-nums sm:px-3">
                 {formatMeasure(record.weightKg)}
               </TableCell>
+              <TableCell className="px-2.5 py-2 text-right text-sm tabular-nums sm:px-3">
+                {formatWeightShare(Number(record.weightKg), totalWeight)}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -906,6 +924,9 @@ function TuberRecordsTable({ records }: { records: StripTestTuberRecord[] }) {
               </TableCell>
               <TableCell className="px-2.5 py-2 text-right text-sm tabular-nums sm:px-3">
                 {formatMeasure(totalWeight)}
+              </TableCell>
+              <TableCell className="px-2.5 py-2 text-right text-sm tabular-nums sm:px-3">
+                {formatWeightShare(totalWeight, totalWeight)}
               </TableCell>
             </TableRow>
           </TableFooter>
@@ -931,20 +952,24 @@ function StripGroupOverview({ group }: { group: StripTestGroup }) {
     first.endDate,
   );
   const types = [...new Set(strips.map((strip) => stripTestTypeLabel(strip.type)))];
-  const records = strips.flatMap((strip) => strip.tuberRecords);
+  const summary = summarizeStripTests(strips, group.field.acres);
   const stats = [
+    { label: 'Strip area', value: `${formatMeasure(summary.areaM2)} m²` },
+    { label: 'Size segments', value: formatMeasure(summary.sizeSegmentCount) },
+    { label: 'Tubers', value: formatMeasure(summary.totalTubers) },
+    { label: 'Weight', value: `${formatMeasure(summary.totalWeightKg)} kg` },
+  ];
+  const yieldStats = [
     {
-      label: 'Plants',
-      value: formatMeasure(sumMeasure(strips.map((strip) => strip.numberOfPlants))),
+      label: 'Bags per acre',
+      value: summary.bagsPerAcre == null ? '—' : `${formatMeasure(summary.bagsPerAcre)} bags`,
     },
-    { label: 'Tuber records', value: String(records.length) },
     {
-      label: 'Quantity',
-      value: formatMeasure(sumMeasure(records.map((record) => record.quantity))),
-    },
-    {
-      label: 'Weight (kg)',
-      value: formatMeasure(sumMeasure(records.map((record) => record.weightKg))),
+      label: 'Expected output',
+      value:
+        summary.expectedBags == null || summary.expectedKg == null
+          ? '—'
+          : `${formatMeasure(summary.expectedBags)} bags · ${formatMeasure(summary.expectedKg)} kg`,
     },
   ];
 
@@ -958,6 +983,15 @@ function StripGroupOverview({ group }: { group: StripTestGroup }) {
           <div key={stat.label} className={stripStatClass}>
             <dt className="text-xs text-muted-foreground">{stat.label}</dt>
             <dd className="mt-0.5 text-sm font-medium tabular-nums">{stat.value}</dd>
+          </div>
+        ))}
+      </dl>
+      <StripSizeMixChart sizes={summary.sizes} />
+      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border bg-border">
+        {yieldStats.map((stat) => (
+          <div key={stat.label} className={`${stripStatClass} min-w-0`}>
+            <dt className="text-xs text-muted-foreground">{stat.label}</dt>
+            <dd className="mt-0.5 text-sm font-medium break-words tabular-nums">{stat.value}</dd>
           </div>
         ))}
       </dl>

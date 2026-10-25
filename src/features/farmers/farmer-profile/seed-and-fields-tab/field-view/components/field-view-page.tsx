@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router';
+import { useCanGoBack, useNavigate, useRouter } from '@tanstack/react-router';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -6,11 +6,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useField } from '@/features/farmers/farmer-profile/seed-and-fields-tab/api/use-field';
 import { FieldPlotMap } from '@/features/farmers/farmer-profile/seed-and-fields-tab/components/field-plot-map';
 import { FieldActivitiesTab } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/field-activities-tab';
-import { FieldVisitsTab } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/field-visits-tab';
 import { FieldMapDetailsCard } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/field-map-details-card';
+import { FieldVisitsTab } from '@/features/farmers/farmer-profile/seed-and-fields-tab/field-view/components/field-visits-tab';
 import { getFieldSurvey } from '@/features/farmers/farmer-profile/seed-and-fields-tab/lib/field-survey';
 
 export function FieldViewPage({ farmerId, fieldId }: { farmerId: string; fieldId: string }) {
+  const router = useRouter();
+  const navigate = useNavigate();
+  const canGoBack = useCanGoBack();
   const { data: field, isPending, isError } = useField(fieldId);
   const survey = field?.geoLocation ? getFieldSurvey(field.geoLocation) : null;
   const missing = !isPending && (isError || !field);
@@ -18,15 +21,20 @@ export function FieldViewPage({ farmerId, fieldId }: { farmerId: string; fieldId
   return (
     <div className="flex min-w-0 flex-col gap-4">
       <Button
+        type="button"
         variant="ghost"
         size="sm"
         className="-ml-2 w-fit text-muted-foreground hover:text-foreground"
-        asChild
+        onClick={() => {
+          if (canGoBack) {
+            router.history.back();
+            return;
+          }
+          void navigate({ to: '/farmers/$id/fields', params: { id: farmerId } });
+        }}
       >
-        <Link to="/farmers/$id/fields" params={{ id: farmerId }}>
-          <ArrowLeft className="size-4" />
-          Back to fields
-        </Link>
+        <ArrowLeft className="size-4" />
+        Back
       </Button>
       {isPending ? <Skeleton className="h-[70vh] min-h-80 w-full rounded-xl" /> : null}
       {missing ? (

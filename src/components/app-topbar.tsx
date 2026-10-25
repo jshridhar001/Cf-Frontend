@@ -32,6 +32,7 @@ const routeTitles: Record<string, string> = {
   '/farmers/contract': 'Farmers',
   '/messages': 'Messages',
   '/notifications': 'Notifications',
+  '/task-manager': 'Task Manager',
   '/seed-requisition/overview': 'Seed Requisition',
   '/seed-requisition/analytics': 'Seed Requisition',
   '/seed-requisition/settings': 'Seed Requisition',
@@ -154,13 +155,15 @@ export function AppTopbar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const pageTitle =
     routeTitles[pathname] ??
-    (pathname.startsWith('/farmers/')
-      ? 'Farmers'
-      : pathname.startsWith('/seed-requisition/')
-        ? 'Seed Requisition'
-        : pathname.startsWith('/transfer-stock')
-          ? 'Transfer Stock'
-          : 'Dashboard');
+    (pathname.startsWith('/task-manager')
+      ? 'Task Manager'
+      : pathname.startsWith('/farmers/')
+        ? 'Farmers'
+        : pathname.startsWith('/seed-requisition/')
+          ? 'Seed Requisition'
+          : pathname.startsWith('/transfer-stock')
+            ? 'Transfer Stock'
+            : 'Dashboard');
 
   return (
     <header className={cn('flex h-14 shrink-0 items-center border-b bg-background px-4')}>

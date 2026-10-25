@@ -1,0 +1,43 @@
+.officer-timeline .wx-gantt,
+.officer-timeline .wx-layout,
+.officer-timeline .wx-willow-theme {
+  height: 100%;
+}
+
+.officer-timeline .wx-bar.wx-summary {
+  overflow: visible;
+  background-color: transparent;
+  border-style: none;
+  box-shadow: none;
+}
+
+.officer-timeline .wx-bar.wx-summary > div {
+  width: 100%;
+  height: 100%;
+}
+
+[data-slot="tooltip-content"].gantt-bar-tip > svg {
+  fill: var(--popover);
+  background-color: var(--popover);
+}
+
+.officer-timeline .wx-toggle-icon,
+.officer-timeline .wx-toggle-placeholder {
+  display: none;
+}
+
+.officer-timeline .wx-marker {
+  background: var(--primary);
+}
+
+.officer-timeline .wx-marker .wx-content {
+  position: absolute;
+  top: 2px;
+  left: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--primary);
+  white-space: nowrap;
+  transform: scaleX(-1);
+}

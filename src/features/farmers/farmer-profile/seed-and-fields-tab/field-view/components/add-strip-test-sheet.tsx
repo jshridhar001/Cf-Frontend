@@ -732,7 +732,7 @@ function AddStripTestForm({
                             const isInvalid = fieldIsInvalid(field.state.meta, attempted);
                             return (
                               <Field data-invalid={isInvalid}>
-                                <FieldLabel htmlFor={field.name}>Length</FieldLabel>
+                                <FieldLabel htmlFor={field.name}>Length (m)</FieldLabel>
                                 <Input
                                   id={field.name}
                                   name={field.name}
@@ -756,7 +756,7 @@ function AddStripTestForm({
                             const isInvalid = fieldIsInvalid(field.state.meta, attempted);
                             return (
                               <Field data-invalid={isInvalid}>
-                                <FieldLabel htmlFor={field.name}>Width</FieldLabel>
+                                <FieldLabel htmlFor={field.name}>Width (m)</FieldLabel>
                                 <Input
                                   id={field.name}
                                   name={field.name}

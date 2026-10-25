@@ -7,6 +7,7 @@ import {
   ClipboardList,
   Database,
   LayoutDashboard,
+  ListChecks,
   MessageSquare,
   Shield,
   Truck,
@@ -42,6 +43,7 @@ type AppPath =
   | '/farmers/report'
   | '/messages'
   | '/notifications'
+  | '/task-manager'
   | '/seed-requisition/overview'
   | '/seed-requisition/analytics'
   | '/seed-requisition/settings'
@@ -71,6 +73,11 @@ const platformNavItems: NavItem[] = [
     title: 'Dashboard',
     url: '/dashboard',
     icon: LayoutDashboard,
+  },
+  {
+    title: 'Task Manager',
+    url: '/task-manager',
+    icon: ListChecks,
   },
   {
     title: 'Farmers',
@@ -225,10 +232,21 @@ function NavMain() {
               );
             }
 
+            if (!item.url) {
+              return (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton type="button" tooltip={item.title}>
+                    <Icon />
+                    <span>{item.title}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            }
+
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
-                  <Link to={item.url ?? '/dashboard'}>
+                  <Link to={item.url}>
                     <Icon />
                     <span>{item.title}</span>
                   </Link>

@@ -1,7 +1,7 @@
 import type { LngLat } from '@/features/farmers/farmer-profile/seed-and-fields-tab/lib/geo-types';
 
 const EARTH_RADIUS_M = 6_371_008.8;
-const SQUARE_METERS_PER_ACRE = 4_046.86;
+export const SQUARE_METERS_PER_ACRE = 4_046.86;
 
 function toRadians(degrees: number) {
   return (degrees * Math.PI) / 180;
