@@ -62,6 +62,7 @@ type FarmersLayout = 'cards' | 'table';
 type FarmersListViewProps = {
   onlyWithSeedRequisitions?: boolean;
   enableTableLayout?: boolean;
+  showMissingRequisitionFilter?: boolean;
 };
 
 function isFarmersLayout(value: string): value is FarmersLayout {
@@ -90,6 +91,7 @@ function FarmersListSkeleton() {
 export function FarmersListView({
   onlyWithSeedRequisitions = false,
   enableTableLayout = false,
+  showMissingRequisitionFilter = false,
 }: FarmersListViewProps) {
   const queryClient = useQueryClient();
   const { data: farmers, isPending, isError, error, isFetching } = useFarmers();
@@ -100,14 +102,27 @@ export function FarmersListView({
   const [editingFarmer, setEditingFarmer] = useState<Farmer | null>(null);
   const [deletingFarmer, setDeletingFarmer] = useState<Farmer | null>(null);
   const [deleteAllOpen, setDeleteAllOpen] = useState(false);
+  const [onlyMissingRequisitions, setOnlyMissingRequisitions] = useState(false);
 
   const farmerRecords = farmers ?? [];
 
+  const missingRequisitionCount = useMemo(
+    () => farmerRecords.filter((farmer) => !farmerHasSeedRequisitions(farmer)).length,
+    [farmerRecords],
+  );
+
   const farmerList = useMemo(() => {
-    return onlyWithSeedRequisitions
-      ? farmerRecords.filter(farmerHasSeedRequisitions)
-      : farmerRecords;
-  }, [farmerRecords, onlyWithSeedRequisitions]);
+    if (onlyWithSeedRequisitions) return farmerRecords.filter(farmerHasSeedRequisitions);
+    if (showMissingRequisitionFilter && onlyMissingRequisitions) {
+      return farmerRecords.filter((farmer) => !farmerHasSeedRequisitions(farmer));
+    }
+    return farmerRecords;
+  }, [
+    farmerRecords,
+    onlyMissingRequisitions,
+    onlyWithSeedRequisitions,
+    showMissingRequisitionFilter,
+  ]);
 
   const allFarmersCount = farmerRecords.length;
   const canDeleteAll = allFarmersCount > 0;
@@ -144,6 +159,7 @@ export function FarmersListView({
   const refreshList = () => {
     setSearch('');
     setSort(DEFAULT_SORT);
+    setOnlyMissingRequisitions(false);
     table.setGlobalFilter(emptyGlobalFilter());
     table.resetSorting();
     table.resetColumnFilters();
@@ -184,16 +200,20 @@ export function FarmersListView({
           <EmptyTitle>
             {hasSearch
               ? 'No matching farmers'
-              : onlyWithSeedRequisitions
-                ? 'No farmers with seed requisitions yet'
-                : 'No farmers yet'}
+              : onlyMissingRequisitions
+                ? 'No farmers without a seed requisition'
+                : onlyWithSeedRequisitions
+                  ? 'No farmers with seed requisitions yet'
+                  : 'No farmers yet'}
           </EmptyTitle>
           <EmptyDescription>
             {hasSearch
               ? 'Try a different name or clear the search.'
-              : onlyWithSeedRequisitions
-                ? 'Farmers appear here once they have at least one seed requisition.'
-                : 'Add a farmer to populate this list.'}
+              : onlyMissingRequisitions
+                ? 'Every farmer has at least one seed requisition.'
+                : onlyWithSeedRequisitions
+                  ? 'Farmers appear here once they have at least one seed requisition.'
+                  : 'Add a farmer to populate this list.'}
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -216,8 +236,27 @@ export function FarmersListView({
       </div>
     ));
 
+  const missingRequisitionLabel = `${missingRequisitionCount} ${
+    missingRequisitionCount === 1 ? 'farmer has' : 'farmers have'
+  } no seed requisition`;
+
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-4 sm:gap-6">
+      {showMissingRequisitionFilter ? (
+        <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted/20 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+          <p className="text-sm leading-none font-medium">{missingRequisitionLabel}</p>
+          <Button
+            type="button"
+            variant={onlyMissingRequisitions ? 'secondary' : 'outline'}
+            className="h-11 w-full sm:h-9 sm:w-auto"
+            aria-pressed={onlyMissingRequisitions}
+            disabled={!onlyMissingRequisitions && missingRequisitionCount === 0}
+            onClick={() => setOnlyMissingRequisitions((current) => !current)}
+          >
+            {onlyMissingRequisitions ? 'Show all farmers' : 'Show these farmers'}
+          </Button>
+        </div>
+      ) : null}
       <Item variant="outline" size="sm">
         <ItemMedia variant="icon">
           <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
