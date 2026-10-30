@@ -21,7 +21,7 @@ export function FarmersReportPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-1">
           <h1 className="font-heading text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-            Seed requisitions
+            Farmer Report
           </h1>
           <p className="max-w-3xl text-sm text-muted-foreground">
             Shows what was asked for, what was sent, and what is left. Acres here also count bag
