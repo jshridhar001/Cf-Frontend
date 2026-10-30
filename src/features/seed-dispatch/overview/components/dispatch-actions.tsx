@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { Ban, EyeIcon, Loader2, MoreHorizontalIcon } from 'lucide-react';
+import { Ban, EyeIcon, Loader2, MoreHorizontalIcon, SquarePenIcon } from 'lucide-react';
 import { useState } from 'react';
 import {
   AlertDialog,
@@ -23,15 +23,18 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useNullifySeedDispatch } from '@/features/seed-dispatch/overview/api/use-nullify-seed-dispatch';
 import { useUpdateSeedDispatchStatus } from '@/features/seed-dispatch/overview/api/use-update-seed-dispatch-status';
+import { EditSeedDispatchDrawer } from '@/features/seed-dispatch/overview/components/edit-seed-dispatch-drawer';
 import type { SeedDispatch } from '@/features/seed-dispatch/overview/types';
 
 export function DispatchActions({ dispatch }: { dispatch: SeedDispatch }) {
   const [isNullDialogOpen, setIsNullDialogOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const nullify = useNullifySeedDispatch();
   const markDelivered = useUpdateSeedDispatchStatus();
   const isPending = nullify.isPending || markDelivered.isPending;
   const canDeliver = dispatch.status === 'IN_TRANSIT';
   const canNullify = dispatch.status !== 'NULL';
+  const canEdit = dispatch.status !== 'NULL';
 
   async function handleMarkDelivered() {
     try {
@@ -81,6 +84,12 @@ export function DispatchActions({ dispatch }: { dispatch: SeedDispatch }) {
               View details
             </Link>
           </DropdownMenuItem>
+          {canEdit ? (
+            <DropdownMenuItem disabled={isPending} onClick={() => setIsEditOpen(true)}>
+              <SquarePenIcon />
+              Edit
+            </DropdownMenuItem>
+          ) : null}
           {canDeliver ? (
             <DropdownMenuItem disabled={isPending} onClick={() => void handleMarkDelivered()}>
               Mark delivered
@@ -98,6 +107,14 @@ export function DispatchActions({ dispatch }: { dispatch: SeedDispatch }) {
           ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {canEdit ? (
+        <EditSeedDispatchDrawer
+          dispatch={dispatch}
+          open={isEditOpen}
+          onOpenChange={setIsEditOpen}
+        />
+      ) : null}
 
       <AlertDialog open={isNullDialogOpen} onOpenChange={setIsNullDialogOpen}>
         <AlertDialogContent>
