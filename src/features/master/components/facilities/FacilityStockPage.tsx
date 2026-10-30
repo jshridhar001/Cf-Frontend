@@ -55,7 +55,7 @@ export function FacilityStockPage({ facilityId }: { facilityId: string }) {
         className="-ml-2 min-h-11 w-fit text-muted-foreground hover:text-foreground md:min-h-8"
         asChild
       >
-        <Link to="/master/facilities">
+        <Link to="/master/facilities" search={{ tab: 'facility' }}>
           <ArrowLeft className="size-4" />
           Go back
         </Link>

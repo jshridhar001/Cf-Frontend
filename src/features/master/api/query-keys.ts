@@ -13,6 +13,7 @@ export const masterKeys = {
     facilityId
       ? ([...masterKeys.all, 'facility-stock', facilityId] as const)
       : ([...masterKeys.all, 'facility-stock'] as const),
+  facilityStockSummary: () => [...masterKeys.all, 'facility-stock-summary'] as const,
   tuberSizes: () => [...masterKeys.all, 'tuber-sizes'] as const,
   addressMasters: (id: AddressMasterId) => [...masterKeys.all, 'addresses', id] as const,
 };

@@ -29,7 +29,10 @@ export function useUpdateFacilityStock() {
     retry: false,
     meta: { suppressGlobalError: true },
     onSuccess: async (stock) => {
-      await queryClient.invalidateQueries({ queryKey: masterKeys.facilityStock() });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: masterKeys.facilityStock() }),
+        queryClient.invalidateQueries({ queryKey: masterKeys.facilityStockSummary() }),
+      ]);
       toast.success('Stock updated successfully', {
         description: `Current quantity is now ${stock.currentQuantity}.`,
         position: 'bottom-right',

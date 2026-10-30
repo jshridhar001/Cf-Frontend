@@ -122,6 +122,40 @@ export type FacilityStockMessageResponse = {
   message: string;
 };
 
+export type FacilityStockSummarySizeRef = {
+  id: string;
+  name: string;
+  varietyId: string;
+  seedBagsPerAcre: number | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type FacilityStockSummaryGeneration = {
+  generation: Generation;
+  initialQuantity: number;
+  currentQuantity: number;
+};
+
+export type FacilityStockSummarySize = {
+  size: FacilityStockSummarySizeRef;
+  initialQuantity: number;
+  currentQuantity: number;
+  generations: FacilityStockSummaryGeneration[];
+};
+
+export type FacilityStockSummaryVariety = {
+  variety: Variety;
+  initialQuantity: number;
+  currentQuantity: number;
+  sizes: FacilityStockSummarySize[];
+};
+
+export type FacilityStockSummaryResponse = {
+  success: boolean;
+  data: FacilityStockSummaryVariety[];
+};
+
 export type TuberSize = {
   id: string;
   name: string;

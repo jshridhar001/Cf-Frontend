@@ -18,7 +18,10 @@ export function useDeleteFacilityStock() {
     retry: false,
     meta: { suppressGlobalError: true },
     onSuccess: async (data) => {
-      await queryClient.invalidateQueries({ queryKey: masterKeys.facilityStock() });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: masterKeys.facilityStock() }),
+        queryClient.invalidateQueries({ queryKey: masterKeys.facilityStockSummary() }),
+      ]);
       toast.success(data.message || 'Facility stock deleted successfully', {
         position: 'bottom-right',
       });

@@ -29,7 +29,6 @@ const routeTitles: Record<string, string> = {
   '/farmers/overview': 'Farmers',
   '/farmers/analytics': 'Farmers',
   '/farmers/report': 'Farmers',
-  '/farmers/contract': 'Farmers',
   '/messages': 'Messages',
   '/notifications': 'Notifications',
   '/task-manager': 'Task Manager',

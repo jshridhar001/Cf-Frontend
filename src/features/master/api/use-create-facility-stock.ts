@@ -27,7 +27,10 @@ export function useCreateFacilityStock() {
     retry: false,
     meta: { suppressGlobalError: true },
     onSuccess: async (stock) => {
-      await queryClient.invalidateQueries({ queryKey: masterKeys.facilityStock() });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: masterKeys.facilityStock() }),
+        queryClient.invalidateQueries({ queryKey: masterKeys.facilityStockSummary() }),
+      ]);
       toast.success('Stock added successfully', {
         description: `${stock.initialQuantity} was added.`,
         position: 'bottom-right',
