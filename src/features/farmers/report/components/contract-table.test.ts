@@ -62,13 +62,16 @@ describe('ContractTable', () => {
     const html = renderToStaticMarkup(createElement(ContractTable, { data: rows }));
 
     expect(html).toContain('Abhi Singh S/O Om Pal Singh');
+    expect(html).toContain('Independent');
+    expect(html).toContain('Ajit Singh Family');
     expect(html).toContain('CF-2026-060');
     expect(html).toContain('Puranpur');
     expect(html).toContain('10 ac');
     expect(html).toContain('None yet');
     expect(html).toContain('40-52');
     expect(html).toContain('38 bags/ac');
-    expect(html).toContain('Complete');
+    expect(html).toContain('0 bags');
+    expect(html).not.toContain('Complete');
     expect(html).toContain('100% dispatched');
     expect(html).toContain('Requested 27 Oct 2026');
     expect(html).toContain('Approved');
@@ -84,6 +87,7 @@ describe('ContractTable', () => {
         requestedAcres: '10.00',
         dispatchedAcres: '5',
         dispatchedBags: 0,
+        remainingAcres: '5',
       },
     ];
 
@@ -104,6 +108,7 @@ describe('ContractTable', () => {
     expect(html).toContain('data-counts="2:');
     expect(html).not.toContain('data-counts="2:2"');
     expect(html).toContain('20 ac');
+    expect(html).toContain('15 ac');
     expect(html).toContain('5 ac');
     expect(html).toContain('25% dispatched');
     expect(html).toContain('Collapse group');

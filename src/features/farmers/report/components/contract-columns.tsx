@@ -4,8 +4,8 @@ import { Progress } from '@/components/ui/progress';
 import {
   dispatchPercent,
   formatDispatchPercent,
-  isComplete,
   isNothingDispatched,
+  parseQuantity,
   type QuantityKind,
   quantityLines,
 } from '@/features/farmers/report/lib/display';
@@ -29,12 +29,13 @@ function statusBadgeClass(status: FarmerReportStatus) {
   return 'border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-400';
 }
 
+function familyLabel(row: FarmerReportRequisition) {
+  return row.farmer.family?.name?.trim() || 'Independent';
+}
+
 function QuantityCell({ row, kind }: { row: FarmerReportRequisition; kind: QuantityKind }) {
   if (kind === 'dispatched' && isNothingDispatched(row)) {
     return <span className="text-muted-foreground">None yet</span>;
-  }
-  if (kind === 'remaining' && isComplete(row)) {
-    return <span className="font-medium text-primary">Complete</span>;
   }
 
   const lines = quantityLines(row, kind);
@@ -59,6 +60,20 @@ export const contractColumns = columnHelper.columns([
       </div>
     ),
     meta: { filterLabel: 'Farmer' },
+    sortFn: 'text',
+  }),
+  columnHelper.accessor(familyLabel, {
+    id: 'family',
+    header: 'Family',
+    cell: ({ getValue }) => {
+      const label = getValue();
+      return label === 'Independent' ? (
+        <span className="text-muted-foreground">{label}</span>
+      ) : (
+        <span className="font-medium">{label}</span>
+      );
+    },
+    meta: { filterLabel: 'Family' },
     sortFn: 'text',
   }),
   columnHelper.accessor((row) => row.farmer.station.name, {
@@ -130,14 +145,14 @@ export const contractColumns = columnHelper.columns([
     enableColumnFilter: false,
     enableGrouping: false,
   }),
-  columnHelper.display({
+  columnHelper.accessor((row) => parseQuantity(row.remainingAcres) ?? 0, {
     id: 'remaining',
     header: 'Remaining',
     cell: ({ row }) => <QuantityCell row={row.original} kind="remaining" />,
     meta: { filterLabel: 'Remaining' },
-    enableSorting: false,
     enableColumnFilter: false,
     enableGrouping: false,
+    sortFn: 'alphanumeric',
   }),
   columnHelper.accessor((row) => dispatchPercent(row), {
     id: 'progress',

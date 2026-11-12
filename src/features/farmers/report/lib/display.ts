@@ -64,11 +64,6 @@ export function isNothingDispatched(row: FarmerReportRequisition): boolean {
   return row.dispatchedBags === 0 && (parseQuantity(row.dispatchedAcres) ?? 0) === 0;
 }
 
-export function isComplete(row: FarmerReportRequisition): boolean {
-  if (row.quantityUnit === 'BAGS') return row.remainingBags === 0;
-  return parseQuantity(row.remainingAcres) === 0;
-}
-
 export function dispatchPercent(row: FarmerReportRequisition): number {
   if (row.quantityUnit === 'ACRES') {
     const requested = parseQuantity(row.requestedAcres);
@@ -88,8 +83,10 @@ export function formatDispatchPercent(row: FarmerReportRequisition): string {
 export type GroupDispatch = {
   requestedAcres: number;
   dispatchedAcres: number;
+  remainingAcres: number;
   requestedBags: number;
   dispatchedBags: number;
+  remainingBags: number;
   usesAcres: boolean;
   percent: number;
 };
@@ -97,16 +94,21 @@ export type GroupDispatch = {
 export function groupDispatch(rows: FarmerReportRequisition[]): GroupDispatch {
   let requestedAcres = 0;
   let dispatchedAcres = 0;
+  let remainingAcres = 0;
   let requestedBags = 0;
   let dispatchedBags = 0;
+  let remainingBags = 0;
 
   for (const row of rows) {
     const requested = parseQuantity(row.requestedAcres);
     if (requested != null) requestedAcres += requested;
     const dispatched = parseQuantity(row.dispatchedAcres);
     if (dispatched != null) dispatchedAcres += dispatched;
+    const remaining = parseQuantity(row.remainingAcres);
+    if (remaining != null) remainingAcres += remaining;
     if (row.requestedBags != null) requestedBags += row.requestedBags;
     dispatchedBags += row.dispatchedBags;
+    if (row.remainingBags != null) remainingBags += row.remainingBags;
   }
 
   const usesAcres = requestedAcres > 0;
@@ -119,8 +121,10 @@ export function groupDispatch(rows: FarmerReportRequisition[]): GroupDispatch {
   return {
     requestedAcres,
     dispatchedAcres,
+    remainingAcres,
     requestedBags,
     dispatchedBags,
+    remainingBags,
     usesAcres,
     percent,
   };
@@ -128,11 +132,21 @@ export function groupDispatch(rows: FarmerReportRequisition[]): GroupDispatch {
 
 export function groupQuantityLines(
   rows: FarmerReportRequisition[],
-  kind: 'requested' | 'dispatched',
+  kind: 'requested' | 'dispatched' | 'remaining',
 ): QuantityLines {
   const totals = groupDispatch(rows);
-  const acres = kind === 'requested' ? totals.requestedAcres : totals.dispatchedAcres;
-  const bags = kind === 'requested' ? totals.requestedBags : totals.dispatchedBags;
+  const acres =
+    kind === 'requested'
+      ? totals.requestedAcres
+      : kind === 'dispatched'
+        ? totals.dispatchedAcres
+        : totals.remainingAcres;
+  const bags =
+    kind === 'requested'
+      ? totals.requestedBags
+      : kind === 'dispatched'
+        ? totals.dispatchedBags
+        : totals.remainingBags;
   const acresLabel = totals.usesAcres || acres > 0 ? `${formatMeasure(acres)} ac` : null;
   const bagsLabel = bags > 0 ? `${formatMeasure(bags)} bags` : null;
   const joiner = kind === 'dispatched' ? 'or' : 'and';

@@ -6,7 +6,6 @@ import {
   formatMeasure,
   groupDispatch,
   groupQuantityLines,
-  isComplete,
   isNothingDispatched,
   quantityLines,
   summarizeContract,
@@ -70,7 +69,7 @@ describe('contract display', () => {
     });
   });
 
-  it('treats zero dispatch as none yet and zero remaining as complete', () => {
+  it('treats zero dispatch as none yet and zero remaining as a quantity', () => {
     const pending = row({
       quantityUnit: 'ACRES',
       requestedAcres: '10.00',
@@ -79,7 +78,6 @@ describe('contract display', () => {
       remainingAcres: '10',
     });
     expect(isNothingDispatched(pending)).toBe(true);
-    expect(isComplete(pending)).toBe(false);
     expect(dispatchPercent(pending)).toBe(0);
 
     const done = row({
@@ -93,7 +91,10 @@ describe('contract display', () => {
       remainingAcres: '0',
     });
     expect(isNothingDispatched(done)).toBe(false);
-    expect(isComplete(done)).toBe(true);
+    expect(quantityLines(done, 'remaining')).toEqual({
+      primary: '0 bags',
+      secondary: '0 ac',
+    });
     expect(formatDispatchPercent(done)).toBe('100% dispatched');
   });
 
@@ -155,6 +156,18 @@ describe('contract display', () => {
       primary: '5 ac',
       secondary: 'or 20 bags',
     });
+    expect(
+      groupQuantityLines(
+        [
+          { ...rows[0], remainingAcres: '8', remainingBags: 80 },
+          { ...rows[1], remainingAcres: '7', remainingBags: 0 },
+        ],
+        'remaining',
+      ),
+    ).toEqual({
+      primary: '15 ac',
+      secondary: 'and 80 bags',
+    });
   });
 
   it('uses bags when a group has no requested acres', () => {
@@ -165,6 +178,7 @@ describe('contract display', () => {
         requestedBags: 10,
         dispatchedBags: 4,
         dispatchedAcres: '0',
+        remainingBags: 6,
       }),
       row({
         quantityUnit: 'BAGS',
@@ -172,6 +186,7 @@ describe('contract display', () => {
         requestedBags: 10,
         dispatchedBags: 6,
         dispatchedAcres: '0',
+        remainingBags: 4,
       }),
     ];
 
@@ -179,5 +194,6 @@ describe('contract display', () => {
     expect(formatGroupDispatchPercent(rows)).toBe('50% dispatched');
     expect(groupQuantityLines(rows, 'requested').primary).toBe('20 bags');
     expect(groupQuantityLines(rows, 'dispatched').primary).toBe('10 bags');
+    expect(groupQuantityLines(rows, 'remaining').primary).toBe('10 bags');
   });
 });

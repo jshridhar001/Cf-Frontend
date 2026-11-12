@@ -39,7 +39,6 @@ import { formatFacetLabel } from '@/features/seed-requisition/overview/component
 import { cn } from '@/lib/utils';
 
 const WRAPPING_COLUMN_IDS = new Set(['farmer', 'contractDate']);
-const GROUP_QUANTITY_COLUMN_IDS = new Set(['requested', 'dispatched']);
 
 type ReportRow = Row<ReportTableFeatures, FarmerReportRequisition>;
 
@@ -50,10 +49,12 @@ function leafRequisitions(row: ReportRow): FarmerReportRequisition[] {
 export function useReportTable(
   data: FarmerReportRequisition[],
   initialGrouping: GroupingState = [],
+  initialColumnVisibility: ColumnVisibilityState = {},
 ) {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'farmer', desc: false }]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibilityState>({});
+  const [columnVisibility, setColumnVisibility] =
+    useState<ColumnVisibilityState>(initialColumnVisibility);
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([]);
   const [grouping, setGrouping] = useState<GroupingState>(initialGrouping);
   const [expanded, setExpanded] = useState<ExpandedState>(initialGrouping.length > 0 ? true : {});
@@ -166,11 +167,12 @@ export function ContractTableView({ table }: { table: ReportTable }) {
 
                 if (row.getIsGrouped()) {
                   const leaves = leafRequisitions(row);
-                  if (GROUP_QUANTITY_COLUMN_IDS.has(cell.column.id)) {
-                    const lines = groupQuantityLines(
-                      leaves,
-                      cell.column.id === 'requested' ? 'requested' : 'dispatched',
-                    );
+                  if (
+                    cell.column.id === 'requested' ||
+                    cell.column.id === 'dispatched' ||
+                    cell.column.id === 'remaining'
+                  ) {
+                    const lines = groupQuantityLines(leaves, cell.column.id);
                     return (
                       <TableCell key={cell.id} className="align-top font-semibold tabular-nums">
                         <div>{lines.primary ?? '—'}</div>
