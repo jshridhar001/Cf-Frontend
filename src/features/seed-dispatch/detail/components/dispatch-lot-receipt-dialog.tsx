@@ -157,7 +157,7 @@ export function DispatchLotReceiptDialog({
                 </Button>
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                SMS is not sent yet — use this code to complete receipt in local development.
+                SMS is not sent yet — use this code to complete receipt.
               </p>
             </div>
           ) : null}
