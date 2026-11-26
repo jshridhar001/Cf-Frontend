@@ -6,18 +6,21 @@ import type { Farmer } from '@/features/farmers/overview/types';
 const tabs = [
   {
     label: 'Seed Requisitions',
+    shortLabel: 'Requisitions',
     value: 'requisitions',
     to: '/farmers/$id/requisitions',
     icon: ClipboardList,
   },
   {
     label: 'Seed Dispatches',
+    shortLabel: 'Dispatches',
     value: 'dispatches',
     to: '/farmers/$id/dispatches',
     icon: Truck,
   },
   {
     label: 'Seed & fields',
+    shortLabel: 'Fields',
     value: 'fields',
     to: '/farmers/$id/fields',
     icon: Sprout,
@@ -57,6 +60,7 @@ export function FarmerProfileTabs({ farmer }: { farmer: Farmer }) {
               className="shrink-0 md:flex-1"
             >
               <Icon className="md:hidden" aria-hidden />
+              <span className="md:hidden">{tab.shortLabel}</span>
               <span className="hidden md:inline">{tab.label}</span>
             </TabsTrigger>
           );

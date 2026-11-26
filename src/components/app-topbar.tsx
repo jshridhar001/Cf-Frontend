@@ -20,6 +20,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLogout } from '@/features/auth/api/use-logout';
 import { useMe } from '@/features/auth/api/use-me';
+import { isFieldOfficerRole } from '@/features/auth/lib/authorization';
 import { env } from '@/lib/env';
 import { cn } from '@/lib/utils';
 
@@ -153,6 +154,7 @@ export function AppTopbar() {
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const pageTitle =
+    (isFieldOfficerRole(user?.role) && pathname.startsWith('/task-manager') ? 'My Tasks' : null) ??
     routeTitles[pathname] ??
     (pathname.startsWith('/task-manager')
       ? 'Task Manager'

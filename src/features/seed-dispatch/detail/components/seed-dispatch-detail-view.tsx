@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router';
+import { useCanGoBack, useNavigate, useRouter } from '@tanstack/react-router';
 import { ArrowLeft, Package, Truck } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-card';
@@ -123,6 +123,9 @@ function averageWeightPerBag(dispatch: SeedDispatch, seedBags: number) {
 }
 
 export function SeedDispatchDetailView({ dispatch }: { dispatch: SeedDispatch }) {
+  const router = useRouter();
+  const navigate = useNavigate();
+  const canGoBack = useCanGoBack();
   const rows = extractionRows(dispatch);
   const seedBags = getTotalBags(dispatch);
   const farmers = getFarmersReceived(dispatch);
@@ -135,15 +138,20 @@ export function SeedDispatchDetailView({ dispatch }: { dispatch: SeedDispatch })
     <div className="flex min-w-0 flex-col gap-4 sm:gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Button
+          type="button"
           variant="ghost"
           size="sm"
           className="-ml-2 w-fit text-muted-foreground hover:text-foreground"
-          asChild
+          onClick={() => {
+            if (canGoBack) {
+              router.history.back();
+              return;
+            }
+            void navigate({ to: '/seed-dispatches/overview' });
+          }}
         >
-          <Link to="/seed-dispatches/overview">
-            <ArrowLeft className="size-4" />
-            Back to overview
-          </Link>
+          <ArrowLeft className="size-4" />
+          {canGoBack ? 'Back' : 'Back to overview'}
         </Button>
 
         <Badge

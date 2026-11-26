@@ -32,7 +32,7 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar';
 import { useMe } from '@/features/auth/api/use-me';
-import { canAccessAdminRoutes } from '@/features/auth/lib/authorization';
+import { canAccessAdminRoutes, isFieldOfficerRole } from '@/features/auth/lib/authorization';
 import { BRAND_LOGO_SRC } from '@/lib/brand';
 import { env } from '@/lib/env';
 
@@ -173,6 +173,7 @@ function NavMain() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { data: me } = useMe();
   const showAdminNav = canAccessAdminRoutes(me?.user.role);
+  const myTasksOfficerId = isFieldOfficerRole(me?.user.role) ? me?.user.id : undefined;
 
   const navItems = platformNavItems.filter((item) => {
     if (!item.url || !ADMIN_NAV_PATHS.has(item.url)) return true;
@@ -238,6 +239,22 @@ function NavMain() {
                   <SidebarMenuButton type="button" tooltip={item.title}>
                     <Icon />
                     <span>{item.title}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            }
+
+            if (item.url === '/task-manager' && myTasksOfficerId) {
+              return (
+                <SidebarMenuItem key="my-tasks">
+                  <SidebarMenuButton asChild isActive={active} tooltip="My Tasks">
+                    <Link
+                      to="/task-manager/officers/$officerId"
+                      params={{ officerId: myTasksOfficerId }}
+                    >
+                      <Icon />
+                      <span>My Tasks</span>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               );

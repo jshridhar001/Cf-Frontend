@@ -1,3 +1,4 @@
+import { useNavigate } from '@tanstack/react-router';
 import { CalendarDays, MapPin, Package, Phone, Truck, Warehouse } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -62,14 +63,49 @@ function statusBadgeClass(status: SeedDispatch['status']) {
   return 'border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-400';
 }
 
-export function DispatchCard({ dispatch }: { dispatch: SeedDispatch }) {
+export function DispatchCard({
+  dispatch,
+  openOnClick = false,
+}: {
+  dispatch: SeedDispatch;
+  openOnClick?: boolean;
+}) {
+  const navigate = useNavigate();
   const facility = getFacilitySummary(dispatch);
   const farmers = getFarmersReceived(dispatch);
   const deliveredOn = getDeliveredOn(dispatch);
   const truck = dispatch.truckNumber?.trim();
 
+  function openDispatch() {
+    void navigate({ to: '/seed-dispatches/$id', params: { id: dispatch.id } });
+  }
+
   return (
-    <Card className="gap-3 py-4">
+    <Card
+      className={cn('gap-3 py-4', openOnClick && 'cursor-pointer')}
+      role={openOnClick ? 'link' : undefined}
+      tabIndex={openOnClick ? 0 : undefined}
+      aria-label={openOnClick ? `Open dispatch to ${dispatch.toLocation}` : undefined}
+      onClick={
+        openOnClick
+          ? (event) => {
+              if (!(event.target instanceof Element)) return;
+              if (event.target.closest('[data-dispatch-actions]')) return;
+              openDispatch();
+            }
+          : undefined
+      }
+      onKeyDown={
+        openOnClick
+          ? (event) => {
+              if (event.target !== event.currentTarget) return;
+              if (event.key !== 'Enter' && event.key !== ' ') return;
+              event.preventDefault();
+              openDispatch();
+            }
+          : undefined
+      }
+    >
       <CardHeader className="px-4">
         <CardTitle className="pr-2 font-heading text-base font-semibold tracking-tight">
           {dispatch.toLocation}
@@ -119,7 +155,9 @@ export function DispatchCard({ dispatch }: { dispatch: SeedDispatch }) {
         <Badge variant="outline" className={statusBadgeClass(dispatch.status)}>
           {formatSeedDispatchStatus(dispatch.status)}
         </Badge>
-        <DispatchActions dispatch={dispatch} />
+        <span data-dispatch-actions>
+          <DispatchActions dispatch={dispatch} />
+        </span>
       </CardFooter>
     </Card>
   );

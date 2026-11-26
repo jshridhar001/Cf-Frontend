@@ -279,9 +279,11 @@ function PlantationCard({
           </div>
           <time
             dateTime={plantation.startDate}
-            className="shrink-0 pt-0.5 text-xs text-muted-foreground sm:text-sm"
+            className="shrink-0 pt-0.5 text-right text-xs text-muted-foreground sm:text-sm"
           >
-            {formatPlantationDate(plantation.startDate)}
+            {plantation.endDate
+              ? stripDateRange(plantation.startDate, plantation.endDate)
+              : formatPlantationDate(plantation.startDate)}
           </time>
         </div>
         <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
@@ -308,6 +310,30 @@ function PlantationCard({
               Acres planted
             </dt>
             <dd className="mt-0.5 text-sm font-medium">{formatAmount(plantation.acresPlanted)}</dd>
+          </div>
+          <div>
+            <dt className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+              Start date
+            </dt>
+            <dd className="mt-0.5 text-sm font-medium">
+              <time dateTime={plantation.startDate}>
+                {formatPlantationDate(plantation.startDate)}
+              </time>
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+              End date
+            </dt>
+            <dd className="mt-0.5 text-sm font-medium">
+              {plantation.endDate ? (
+                <time dateTime={plantation.endDate}>
+                  {formatPlantationDate(plantation.endDate)}
+                </time>
+              ) : (
+                '—'
+              )}
+            </dd>
           </div>
         </dl>
         <ActivityRemarks remarks={plantation.remarks} />

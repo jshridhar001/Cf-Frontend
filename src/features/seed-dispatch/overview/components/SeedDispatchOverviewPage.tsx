@@ -91,8 +91,7 @@ const DELIVERY_LOT_TABS: Array<{
   {
     value: 'fulfilled',
     label: 'Fulfilled Requisitions',
-    description:
-      'Approved deliveries with 0 acres or bags left. These have been fully dispatched.',
+    description: 'Approved deliveries with 0 acres or bags left. These have been fully dispatched.',
   },
 ];
 
@@ -602,7 +601,11 @@ export function SeedDispatchList({
           <TabsContent value="cards">
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {pagedDispatches.map((dispatch) => (
-                <DispatchCard key={dispatch.id} dispatch={dispatch} />
+                <DispatchCard
+                  key={dispatch.id}
+                  dispatch={dispatch}
+                  openOnClick={Boolean(lockedFarmerId)}
+                />
               ))}
             </div>
           </TabsContent>

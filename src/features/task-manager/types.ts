@@ -60,36 +60,3 @@ export type FieldTasksResponse = {
   success: boolean;
   data: FieldTask[];
 };
-
-export type TaskStatusFilter = 'all' | FieldTaskStatus;
-
-export type TaskActivityFilter = 'all' | FieldTaskActivity;
-
-export type TaskGroupBy = 'none' | 'field' | 'farmer' | 'officer' | 'status' | 'activity';
-
-export function isFieldTaskStatus(value: string): value is FieldTaskStatus {
-  return (FIELD_TASK_STATUSES as readonly string[]).includes(value);
-}
-
-export function isFieldTaskActivity(value: string): value is FieldTaskActivity {
-  return (FIELD_TASK_ACTIVITIES as readonly string[]).includes(value);
-}
-
-export function isTaskStatusFilter(value: string): value is TaskStatusFilter {
-  return value === 'all' || isFieldTaskStatus(value);
-}
-
-export function isTaskActivityFilter(value: string): value is TaskActivityFilter {
-  return value === 'all' || isFieldTaskActivity(value);
-}
-
-export function isTaskGroupBy(value: string): value is TaskGroupBy {
-  return (
-    value === 'none' ||
-    value === 'field' ||
-    value === 'farmer' ||
-    value === 'officer' ||
-    value === 'status' ||
-    value === 'activity'
-  );
-}

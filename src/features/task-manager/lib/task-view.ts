@@ -1,12 +1,6 @@
 import { format } from 'date-fns';
 import { formatDateOnlyString, parseDateOnlyString } from '@/components/ui/date-picker';
-import type {
-  FieldTask,
-  FieldTaskActivity,
-  TaskActivityFilter,
-  TaskGroupBy,
-  TaskStatusFilter,
-} from '@/features/task-manager/types';
+import type { FieldTask, FieldTaskActivity } from '@/features/task-manager/types';
 
 export const TASK_PAGE_SIZE = 10;
 
@@ -30,12 +24,6 @@ export type TaskListItem = {
   officerName: string;
   dueLabel: string;
   status: TaskStatusView;
-};
-
-export type TaskGroup = {
-  key: string;
-  label: string | null;
-  items: TaskListItem[];
 };
 
 export function activityLabel(activity: FieldTaskActivity) {
@@ -108,68 +96,10 @@ export function toTaskListItem(
   };
 }
 
-export function taskFilterCount(
-  status: TaskStatusFilter,
-  activity: TaskActivityFilter,
-  groupBy: TaskGroupBy,
-) {
-  return Number(status !== 'all') + Number(activity !== 'all') + Number(groupBy !== 'none');
-}
-
 export function matchesTaskSearch(item: TaskListItem, search: string) {
   const query = search.trim().toLowerCase();
   if (!query) return true;
   return [item.activityLabel, item.fieldName, item.farmerName, item.officerName].some((value) =>
     value.toLowerCase().includes(query),
   );
-}
-
-export function filterTasks(
-  items: TaskListItem[],
-  search: string,
-  status: TaskStatusFilter,
-  activity: TaskActivityFilter,
-) {
-  return items.filter((item) => {
-    if (status !== 'all' && item.task.status !== status) return false;
-    if (activity !== 'all' && item.task.activityType !== activity) return false;
-    return matchesTaskSearch(item, search);
-  });
-}
-
-function groupKey(item: TaskListItem, groupBy: TaskGroupBy) {
-  switch (groupBy) {
-    case 'field':
-      return item.fieldName;
-    case 'farmer':
-      return item.farmerName;
-    case 'officer':
-      return item.officerName;
-    case 'status':
-      return item.status.label;
-    case 'activity':
-      return item.activityLabel;
-    case 'none':
-      return '';
-  }
-}
-
-export function groupTaskPage(items: TaskListItem[], groupBy: TaskGroupBy): TaskGroup[] {
-  if (groupBy === 'none') return [{ key: 'all', label: null, items }];
-
-  const groups: TaskGroup[] = [];
-  const indexByKey = new Map<string, number>();
-
-  for (const item of items) {
-    const label = groupKey(item, groupBy);
-    const existing = indexByKey.get(label);
-    if (existing == null) {
-      indexByKey.set(label, groups.length);
-      groups.push({ key: label, label, items: [item] });
-      continue;
-    }
-    groups[existing]?.items.push(item);
-  }
-
-  return groups;
 }

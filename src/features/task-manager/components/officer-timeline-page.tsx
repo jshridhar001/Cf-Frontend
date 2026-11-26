@@ -5,6 +5,8 @@ import { PageCard, PageCardContent, PageCardHeader } from '@/components/page-car
 import { Button } from '@/components/ui/button';
 import { CardDescription, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useMe } from '@/features/auth/api/use-me';
+import { isFieldOfficerRole } from '@/features/auth/lib/authorization';
 import { useFarmers } from '@/features/farmers/overview/api/use-farmers';
 import { useOfficerFieldTasks } from '@/features/task-manager/api/use-field-tasks';
 import { OfficerFieldTimeline } from '@/features/task-manager/components/officer-field-timeline';
@@ -17,6 +19,8 @@ function countLabel(count: number, singular: string, plural: string) {
 }
 
 export function OfficerTimelinePage({ officerId }: { officerId: string }) {
+  const { data: me } = useMe();
+  const isOwnTasks = isFieldOfficerRole(me?.user.role);
   const tasksQuery = useOfficerFieldTasks(officerId);
   const farmersQuery = useFarmers();
   const schedule = useMemo(() => {
@@ -28,24 +32,28 @@ export function OfficerTimelinePage({ officerId }: { officerId: string }) {
 
   return (
     <div className="flex min-w-0 flex-col gap-4">
-      <Button
-        variant="ghost"
-        size="sm"
-        className="-ml-2 w-fit text-muted-foreground hover:text-foreground"
-        asChild
-      >
-        <Link to="/task-manager">
-          <ArrowLeft className="size-4" />
-          Back to tasks
-        </Link>
-      </Button>
+      {isOwnTasks ? null : (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="-ml-2 w-fit text-muted-foreground hover:text-foreground"
+          asChild
+        >
+          <Link to="/task-manager">
+            <ArrowLeft className="size-4" />
+            Back to tasks
+          </Link>
+        </Button>
+      )}
 
       <PageCard>
         <PageCardHeader>
           <CardTitle>
             {tasksQuery.isPending ? <Skeleton className="h-6 w-40" /> : schedule.officerName}
           </CardTitle>
-          <CardDescription className="hidden sm:block">Season schedule for fields assigned to this officer.</CardDescription>
+          <CardDescription className="hidden sm:block">
+            Season schedule for fields assigned to this officer.
+          </CardDescription>
         </PageCardHeader>
         <PageCardContent className="flex flex-col gap-4">
           {tasksQuery.isPending ? (
