@@ -32,7 +32,12 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar';
 import { useMe } from '@/features/auth/api/use-me';
-import { canAccessAdminRoutes, isFieldOfficerRole } from '@/features/auth/lib/authorization';
+import {
+  canAccessAdminRoutes,
+  canAccessDashboard,
+  homeLocationForRole,
+  isFieldOfficerRole,
+} from '@/features/auth/lib/authorization';
 import { BRAND_LOGO_SRC } from '@/lib/brand';
 import { env } from '@/lib/env';
 
@@ -173,9 +178,11 @@ function NavMain() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { data: me } = useMe();
   const showAdminNav = canAccessAdminRoutes(me?.user.role);
+  const showDashboard = canAccessDashboard(me?.user.role);
   const myTasksOfficerId = isFieldOfficerRole(me?.user.role) ? me?.user.id : undefined;
 
   const navItems = platformNavItems.filter((item) => {
+    if (item.url === '/dashboard') return showDashboard;
     if (!item.url || !ADMIN_NAV_PATHS.has(item.url)) return true;
     return showAdminNav;
   });
@@ -280,6 +287,22 @@ function NavMain() {
 export function AppSidebar() {
   const { data: me } = useMe();
   const userName = me?.user?.name;
+  const home = homeLocationForRole(me?.user.role, me?.user.id);
+  const brand = (
+    <>
+      <img src={BRAND_LOGO_SRC} alt={env.appName} className="size-8 shrink-0 rounded-md" />
+      <div className="grid min-w-0 flex-1 text-left leading-tight">
+        <span className="truncate font-heading text-sm tracking-tight">
+          <span className="font-semibold text-sidebar-foreground">{env.appName}</span>
+        </span>
+        {userName ? (
+          <span className="truncate text-xs text-muted-foreground" title={userName}>
+            {userName}
+          </span>
+        ) : null}
+      </div>
+    </>
+  );
 
   return (
     <Sidebar collapsible="icon" variant="inset">
@@ -287,23 +310,13 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link to="/dashboard">
-                <img
-                  src={BRAND_LOGO_SRC}
-                  alt={env.appName}
-                  className="size-8 shrink-0 rounded-md"
-                />
-                <div className="grid min-w-0 flex-1 text-left leading-tight">
-                  <span className="truncate font-heading text-sm tracking-tight">
-                    <span className="font-semibold text-sidebar-foreground">{env.appName}</span>
-                  </span>
-                  {userName ? (
-                    <span className="truncate text-xs text-muted-foreground" title={userName}>
-                      {userName}
-                    </span>
-                  ) : null}
-                </div>
-              </Link>
+              {home.to === '/task-manager/officers/$officerId' ? (
+                <Link to="/task-manager/officers/$officerId" params={home.params}>
+                  {brand}
+                </Link>
+              ) : (
+                <Link to={home.to}>{brand}</Link>
+              )}
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

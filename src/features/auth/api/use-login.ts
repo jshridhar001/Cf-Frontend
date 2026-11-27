@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { authClient } from '../lib/auth-client';
+import { homeLocationForRole } from '../lib/authorization';
 import type { LoginCredentials } from '../types';
 import { meQueryOptions } from './use-me';
 
@@ -52,25 +53,31 @@ export function useLogin() {
 
       // Login page beforeLoad caches `me: null` within staleTime; force a
       // network refetch so the session is visible before navigating.
-      await queryClient.fetchQuery({
+      const me = await queryClient.fetchQuery({
         ...meQueryOptions(),
         staleTime: 0,
       });
 
-      return result.data;
+      return me;
     },
     retry: false,
     meta: {
       successMessage: 'Signed in successfully.',
       suppressGlobalError: true,
     },
-    onSuccess: async (_data, variables) => {
+    onSuccess: async (me, variables) => {
       if (variables.redirectTo) {
         await navigate({ href: variables.redirectTo, replace: true });
         return;
       }
 
-      await navigate({ to: '/dashboard', replace: true });
+      const home = homeLocationForRole(me?.user.role, me?.user.id);
+      if (home.to === '/task-manager/officers/$officerId') {
+        await navigate({ to: home.to, params: home.params, replace: true });
+        return;
+      }
+
+      await navigate({ to: home.to, replace: true });
     },
     onError: (error) => {
       toast.error(getSignInErrorMessage(error));

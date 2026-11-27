@@ -8,13 +8,14 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { meQueryOptions } from '@/features/auth/api/use-me';
 import { canAccessAdminRoutes } from '@/features/auth/lib/authorization';
+import { throwRedirectHome } from '@/features/auth/lib/home-redirect';
 
 export const Route = createFileRoute('/_authenticated/master')({
   beforeLoad: async ({ context, location }) => {
     const me = await context.queryClient.ensureQueryData(meQueryOptions());
 
     if (!canAccessAdminRoutes(me?.user.role)) {
-      throw redirect({ to: '/dashboard' });
+      throwRedirectHome(me?.user.role, me?.user.id);
     }
 
     if (location.pathname === '/master' || location.pathname === '/master/') {

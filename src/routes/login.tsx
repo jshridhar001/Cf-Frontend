@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { ConnectionLoader } from '@/components/connection-status';
 import { meQueryOptions } from '@/features/auth/api/use-me';
 import { LoginForm } from '@/features/auth/components/login-form';
+import { throwRedirectHome } from '@/features/auth/lib/home-redirect';
 
 const loginSearchSchema = z.object({
   redirect: z.string().optional(),
@@ -22,7 +23,7 @@ export const Route = createFileRoute('/login')({
       throw redirect({ href: search.redirect });
     }
 
-    throw redirect({ to: '/dashboard' });
+    throwRedirectHome(me.user.role, me.user.id);
   },
   component: LoginForm,
 });

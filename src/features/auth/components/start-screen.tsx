@@ -1,6 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { useMe } from '@/features/auth/api/use-me';
+import { homeLocationForRole } from '@/features/auth/lib/authorization';
 import { LegalLinks } from '@/features/legal/components/legal-page';
 import { BRAND_LOGO_SRC } from '@/lib/brand';
 
@@ -9,12 +10,18 @@ export function StartScreen() {
   const { data: me } = useMe();
 
   function handleGetStarted() {
-    if (me) {
-      void navigate({ to: '/dashboard' });
+    if (!me) {
+      void navigate({ to: '/login' });
       return;
     }
 
-    void navigate({ to: '/login' });
+    const home = homeLocationForRole(me.user.role, me.user.id);
+    if (home.to === '/task-manager/officers/$officerId') {
+      void navigate({ to: home.to, params: home.params });
+      return;
+    }
+
+    void navigate({ to: home.to });
   }
 
   return (

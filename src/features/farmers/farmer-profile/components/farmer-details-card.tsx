@@ -10,7 +10,6 @@ import {
   SquarePen,
   Trash2,
   Truck,
-  User,
   Users,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -24,7 +23,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
-import { FarmerConfirmationAction } from '@/features/farmers/farmer-profile/components/farmer-confirmation-action';
 import { DeleteFarmerDialog } from '@/features/farmers/overview/components/delete-farmer-dialog';
 import { FarmerDrawer } from '@/features/farmers/overview/components/farmer-drawer';
 import {
@@ -47,46 +45,9 @@ function displayValue(value: string | null | undefined) {
 
 function DetailField({ label, value }: { label: string; value: string }) {
   return (
-    <div className="space-y-1">
+    <div className="space-y-1.5">
       <dt className="text-xs text-muted-foreground">{label}</dt>
       <dd className="text-sm font-semibold tracking-tight">{value}</dd>
-    </div>
-  );
-}
-
-function FarmerBadges({
-  station,
-  village,
-  familyLabel,
-  accountType,
-}: {
-  station: string;
-  village: string;
-  familyLabel: string;
-  accountType: string;
-}) {
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {station ? (
-        <Badge variant="secondary">
-          <MapPin aria-hidden />
-          {station}
-        </Badge>
-      ) : null}
-      {village ? (
-        <Badge variant="secondary">
-          <MapPinned aria-hidden />
-          {village}
-        </Badge>
-      ) : null}
-      <Badge variant="secondary">
-        <Users aria-hidden />
-        {familyLabel}
-      </Badge>
-      <Badge variant="outline" className="border-primary/25 bg-primary/10 text-primary">
-        <User aria-hidden />
-        {accountType}
-      </Badge>
     </div>
   );
 }
@@ -101,49 +62,36 @@ function FarmerActions({
   onDelete: () => void;
 }) {
   return (
-    <div className="flex shrink-0 flex-wrap items-start justify-end gap-2">
-      <FarmerConfirmationAction farmerId={farmer.id} farmerName={farmer.name} />
-      <div className="flex items-center gap-1">
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          className="min-h-11 min-w-11 md:hidden"
-          aria-label={`Edit ${farmer.name}`}
-          onClick={onEdit}
-        >
-          <SquarePen />
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="hidden md:inline-flex"
-          onClick={onEdit}
-        >
-          <SquarePen data-icon="inline-start" />
-          Edit
-        </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="min-h-11 min-w-11 md:size-8 md:min-h-8 md:min-w-8"
-              aria-label={`More actions for ${farmer.name}`}
-            >
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem variant="destructive" onClick={onDelete}>
-              <Trash2 />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+    <div className="flex shrink-0 items-center justify-start gap-2 md:justify-end">
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="min-h-11 md:min-h-8"
+        onClick={onEdit}
+      >
+        <SquarePen data-icon="inline-start" />
+        Edit
+      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="min-h-11 min-w-11 md:size-8 md:min-h-8 md:min-w-8"
+            aria-label={`More actions for ${farmer.name}`}
+          >
+            <MoreHorizontal />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem variant="destructive" onClick={onDelete}>
+            <Trash2 />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
@@ -160,28 +108,24 @@ function FarmerFacts({
   approved: number;
 }) {
   return (
-    <>
-      <PageCardContent>
-        <dl className="grid gap-4 sm:grid-cols-3">
-          <DetailField label="Aadhaar number" value={displayValue(aadharNumber)} />
-          <DetailField label="PAN number" value={displayValue(panNumber)} />
-          <DetailField label="Contract" value="—" />
-        </dl>
-      </PageCardContent>
-      <PageCardContent>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <StatTile icon={Package} label="Seed bags received" value="0" />
-          <StatTile
-            icon={ClipboardList}
-            label="Seed requisitions"
-            value={String(requisitions)}
-            caption={`${approved} approved`}
-          />
-          <StatTile icon={Truck} label="Seed dispatches" value="0" caption="0 delivered" />
-          <StatTile icon={Sprout} label="Fields planted" value="0" caption="0 acres" />
-        </div>
-      </PageCardContent>
-    </>
+    <PageCardContent className="space-y-6 md:space-y-8">
+      <dl className="grid gap-5 sm:grid-cols-3 sm:gap-10">
+        <DetailField label="Aadhaar number" value={displayValue(aadharNumber)} />
+        <DetailField label="PAN number" value={displayValue(panNumber)} />
+        <DetailField label="Contract" value="—" />
+      </dl>
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatTile icon={Package} label="Seed bags received" value="0" />
+        <StatTile
+          icon={ClipboardList}
+          label="Seed requisitions"
+          value={String(requisitions)}
+          caption={`${approved} approved`}
+        />
+        <StatTile icon={Truck} label="Seed dispatches" value="0" caption="0 delivered" />
+        <StatTile icon={Sprout} label="Fields planted" value="0" caption="0 acres" />
+      </div>
+    </PageCardContent>
   );
 }
 
@@ -197,17 +141,13 @@ function StatTile({
   caption?: string;
 }) {
   return (
-    <div className="flex min-w-0 items-center gap-3 rounded-xl bg-muted/60 px-3 py-3">
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-        <Icon className="size-4" aria-hidden />
+    <div className="min-w-0 rounded-2xl bg-muted/50 px-4 py-4">
+      <div className="flex items-center gap-2 text-muted-foreground">
+        <Icon className="size-4 shrink-0" aria-hidden />
+        <p className="text-sm leading-5">{label}</p>
       </div>
-      <div className="min-w-0">
-        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">{label}</p>
-        <p className="flex flex-wrap items-baseline gap-x-1.5">
-          <span className="text-xl font-semibold tracking-tight tabular-nums">{value}</span>
-          {caption ? <span className="text-xs text-muted-foreground">{caption}</span> : null}
-        </p>
-      </div>
+      <p className="mt-3 text-2xl font-semibold tracking-tight tabular-nums">{value}</p>
+      <p className="mt-1 min-h-4 text-xs text-muted-foreground">{caption}</p>
     </div>
   );
 }
@@ -258,22 +198,32 @@ export function FarmerDetailsCard({ farmer }: { farmer: Farmer }) {
             </div>
           </PageCardHeader>
           <div className={cn(detailsOpen ? 'block' : 'hidden')}>
-            <Separator />
-            <PageCardContent className="space-y-3">
-              <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
-                <span>Account #{farmer.accountNumber}</span>
-                <span aria-hidden>·</span>
-                <span className="inline-flex items-center gap-1">
-                  <Phone className="size-3.5" aria-hidden />
-                  {farmer.mobileNumber}
-                </span>
-              </p>
-              <FarmerBadges
-                station=""
-                village={village}
-                familyLabel={familyLabel}
-                accountType={accountType}
-              />
+            <PageCardContent className="space-y-5 pt-1 pb-5">
+              <div className="space-y-3">
+                <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+                  <span>Account #{farmer.accountNumber}</span>
+                  <span aria-hidden>·</span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Phone className="size-3.5" aria-hidden />
+                    {farmer.mobileNumber}
+                  </span>
+                </p>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                  {village ? (
+                    <span className="inline-flex items-center gap-1.5">
+                      <MapPinned className="size-3.5 shrink-0" aria-hidden />
+                      {village}
+                    </span>
+                  ) : null}
+                  <span className="inline-flex items-center gap-1.5">
+                    <Users className="size-3.5 shrink-0" aria-hidden />
+                    {familyLabel}
+                  </span>
+                  <Badge variant="outline" className="border-primary/25 bg-primary/10 text-primary">
+                    {accountType}
+                  </Badge>
+                </div>
+              </div>
               <FarmerActions
                 farmer={farmer}
                 onEdit={() => setEditOpen(true)}
@@ -281,40 +231,62 @@ export function FarmerDetailsCard({ farmer }: { farmer: Farmer }) {
               />
             </PageCardContent>
             <Separator />
-            <FarmerFacts
-              aadharNumber={farmer.aadharNumber}
-              panNumber={farmer.panNumber}
-              requisitions={requisitions}
-              approved={approved}
-            />
+            <div className="pt-5">
+              <FarmerFacts
+                aadharNumber={farmer.aadharNumber}
+                panNumber={farmer.panNumber}
+                requisitions={requisitions}
+                approved={approved}
+              />
+            </div>
           </div>
         </div>
 
         <div className="hidden md:block">
-          <PageCardHeader className="gap-3">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex min-w-0 items-start gap-3">
-                <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-sm font-semibold text-primary">
+          <PageCardHeader className="pb-6">
+            <div className="flex items-start justify-between gap-8">
+              <div className="flex min-w-0 items-start gap-4">
+                <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-base font-semibold text-primary">
                   {farmerInitials(farmer.name)}
                 </div>
-                <div className="min-w-0 space-y-2">
-                  <h2 className="font-heading text-lg font-semibold tracking-tight text-balance sm:text-xl">
-                    {farmer.name}
-                  </h2>
-                  <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
-                    <span>Account #{farmer.accountNumber}</span>
-                    <span aria-hidden>·</span>
-                    <span className="inline-flex items-center gap-1">
-                      <Phone className="size-3.5" aria-hidden />
-                      {farmer.mobileNumber}
+                <div className="min-w-0 space-y-3 pt-0.5">
+                  <div className="space-y-1">
+                    <h2 className="font-heading text-2xl font-semibold tracking-tight text-balance">
+                      {farmer.name}
+                    </h2>
+                    <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+                      <span>Account #{farmer.accountNumber}</span>
+                      <span aria-hidden>·</span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <Phone className="size-3.5" aria-hidden />
+                        {farmer.mobileNumber}
+                      </span>
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                    {station ? (
+                      <span className="inline-flex items-center gap-1.5">
+                        <MapPin className="size-3.5 shrink-0" aria-hidden />
+                        {station}
+                      </span>
+                    ) : null}
+                    {village ? (
+                      <span className="inline-flex items-center gap-1.5">
+                        <MapPinned className="size-3.5 shrink-0" aria-hidden />
+                        {village}
+                      </span>
+                    ) : null}
+                    <span className="inline-flex items-center gap-1.5">
+                      <Users className="size-3.5 shrink-0" aria-hidden />
+                      {familyLabel}
                     </span>
-                  </p>
-                  <FarmerBadges
-                    station={station}
-                    village={village}
-                    familyLabel={familyLabel}
-                    accountType={accountType}
-                  />
+                    <Badge
+                      variant="outline"
+                      className="border-primary/25 bg-primary/10 text-primary"
+                    >
+                      {accountType}
+                    </Badge>
+                  </div>
                 </div>
               </div>
               <FarmerActions
@@ -325,12 +297,14 @@ export function FarmerDetailsCard({ farmer }: { farmer: Farmer }) {
             </div>
           </PageCardHeader>
           <Separator />
-          <FarmerFacts
-            aadharNumber={farmer.aadharNumber}
-            panNumber={farmer.panNumber}
-            requisitions={requisitions}
-            approved={approved}
-          />
+          <div className="pt-6">
+            <FarmerFacts
+              aadharNumber={farmer.aadharNumber}
+              panNumber={farmer.panNumber}
+              requisitions={requisitions}
+              approved={approved}
+            />
+          </div>
         </div>
       </PageCard>
       <FarmerDrawer farmer={farmer} open={editOpen} onOpenChange={setEditOpen} />
